@@ -1,5 +1,24 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { GameStatePersistenceManager, StorageMechanism } from '../utils/persistence/GameStatePersistence'
+
+/**
+ * 🎮 ENHANCED GAME STORE WITH SECURE PERSISTENCE
+ * 
+ * Now featuring enterprise-grade security with:
+ * - Secure cookie-based persistence that survives browser restarts
+ * - COPPA compliance for educational environments  
+ * - Hybrid storage (localStorage + cookies + memory)
+ * - Automatic data sanitization and validation
+ * - Real-time audit logging and performance monitoring
+ * 
+ * @author Feature Engineer Agent (Enhanced)
+ * @version 2.0.0
+ * @since 2025-01-15
+ */
+
+// Initialize our advanced persistence manager
+const persistenceManager = new GameStatePersistenceManager()
 
 // Types for our gaming state
 interface PlayerStats {
@@ -64,6 +83,14 @@ interface GameState {
   showStats: boolean
   soundEnabled: boolean
   
+  // 🆕 ENHANCED PERSISTENCE FEATURES
+  persistenceHealth: {
+    available: boolean
+    secure: boolean
+    compliant: boolean
+    lastCheck: string
+  }
+  
   // Actions
   addXP: (amount: number) => void
   unlockAchievement: (id: string, title: string, description: string, category?: string) => void
@@ -76,6 +103,12 @@ interface GameState {
   updateStreak: () => void
   setCurrentGame: (gameId: string | null) => void
   toggleSound: () => void
+  
+  // 🆕 ENHANCED PERSISTENCE ACTIONS
+  forceSyncToCookies: () => Promise<boolean>
+  clearAllData: () => Promise<boolean>
+  checkPersistenceHealth: () => Promise<void>
+  getPerformanceMetrics: () => any
 }
 
 const useGameStore = create<GameState>()(
@@ -145,6 +178,14 @@ const useGameStore = create<GameState>()(
         messagesCount: 0,
         lastInteraction: new Date().toISOString(),
         helpTopics: []
+      },
+      
+      // 🆕 PERSISTENCE HEALTH MONITORING
+      persistenceHealth: {
+        available: true,
+        secure: false, // Will be updated on first health check
+        compliant: false, // Will be updated on first health check
+        lastCheck: new Date().toISOString()
       },
       
       currentGame: null,
@@ -301,6 +342,121 @@ const useGameStore = create<GameState>()(
       
       toggleSound: () => {
         set((state) => ({ soundEnabled: !state.soundEnabled }))
+      },
+      
+      // 🆕 ENHANCED PERSISTENCE ACTIONS
+      
+      /**
+       * 🍪 FORCE SYNC TO COOKIES
+       * 
+       * Manually forces current state to be saved to secure cookies
+       */
+      forceSyncToCookies: async () => {
+        try {
+          const state = useGameStore.getState()
+          const result = await persistenceManager.saveGameState(state)
+          
+          // Update persistence health based on results
+          set({
+            persistenceHealth: {
+              available: result.success,
+              secure: result.mechanisms.includes(StorageMechanism.COOKIES),
+              compliant: result.warnings.length === 0,
+              lastCheck: new Date().toISOString()
+            }
+          })
+          
+          return result.success
+        } catch (error) {
+          console.error('Failed to sync to cookies:', error)
+          return false
+        }
+      },
+      
+      /**
+       * 🧹 CLEAR ALL DATA
+       * 
+       * Securely removes all stored game data from all storage mechanisms
+       */
+      clearAllData: async () => {
+        try {
+          const result = await persistenceManager.clearGameState()
+          
+          if (result.success) {
+            // Reset to initial state
+            set({
+              playerStats: {
+                level: 1,
+                totalXP: 0,
+                gamesCompleted: 0,
+                achievementsUnlocked: 0,
+                streakDays: 0,
+                lastVisit: new Date().toISOString(),
+                timeSpent: 0
+              },
+              achievements: [],
+              gameProgress: [],
+              skillProgress: {
+                cryptography: 0,
+                passwordSecurity: 0,
+                phishingDetection: 0,
+                socialEngineering: 0,
+                networkSecurity: 0,
+                incidentResponse: 0
+              },
+              persistenceHealth: {
+                available: true,
+                secure: false,
+                compliant: true,
+                lastCheck: new Date().toISOString()
+              }
+            })
+          }
+          
+          return result.success
+        } catch (error) {
+          console.error('Failed to clear all data:', error)
+          return false
+        }
+      },
+      
+      /**
+       * 🏥 CHECK PERSISTENCE HEALTH
+       * 
+       * Performs comprehensive health check of all storage mechanisms
+       */
+      checkPersistenceHealth: async () => {
+        try {
+          const health = await persistenceManager.healthCheck()
+          
+          set({
+            persistenceHealth: {
+              available: health.available,
+              secure: health.secure,
+              compliant: health.compliant,
+              lastCheck: new Date().toISOString()
+            }
+          })
+        } catch (error) {
+          console.error('Health check failed:', error)
+          set({
+            persistenceHealth: {
+              available: false,
+              secure: false,
+              compliant: false,
+              lastCheck: new Date().toISOString()
+            }
+          })
+        }
+      },
+      
+      /**
+       * 📊 GET PERFORMANCE METRICS
+       * 
+       * Returns detailed performance metrics for the persistence system
+       */
+      getPerformanceMetrics: () => {
+        return persistenceManager.getPerformanceMetrics()
       }
     }),
     {
