@@ -1,7 +1,14 @@
 'use client'
 
 /**
- * Educational Concept Explorer Component
+ * Educational interface ConceptLink {
+  id: string
+  title: string
+  type: 'prerequisite' | 'related' | 'advanced'
+  description: string
+  icon: React.ComponentType
+  difficulty: 'beginner' | 'intermediate' | 'advanced'
+}Explorer Component
  * Content Analyst Implementation for EWU Cyber Games Portal
  * 
  * This component provides "what-if" scenarios and deeper learning opportunities
@@ -17,15 +24,15 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
-  ChevronDown, 
-  ChevronUp, 
-  Lightbulb, 
-  BookOpen, 
-  Brain, 
-  Zap,
-  Lock,
-  Shield,
-  Eye,
+  ChevronDownIcon, 
+  ChevronUpIcon, 
+  LightbulbIcon, 
+  BookOpenIcon, 
+  BrainIcon, 
+  ZapIcon,
+  LockIcon,
+  ShieldIcon,
+  EyeIcon,
   Code,
   Users,
   Globe
@@ -77,7 +84,7 @@ const CYBERSECURITY_CONCEPTS: AtomicConcept[] = [
         title: 'Password Hashing and Storage',
         type: 'advanced',
         description: 'How passwords are securely stored using cryptographic hash functions',
-        icon: Shield,
+        icon: ShieldIcon,
         difficulty: 'advanced'
       },
       {
@@ -85,7 +92,7 @@ const CYBERSECURITY_CONCEPTS: AtomicConcept[] = [
         title: 'Brute Force Attack Mathematics',
         type: 'related',
         description: 'The mathematical principles behind password cracking attempts',
-        icon: Brain,
+        icon: BrainIcon,
         difficulty: 'intermediate'
       }
     ],
@@ -153,7 +160,7 @@ function checkPasswordStrength(password: string) {
         title: 'Digital Citizenship Skills',
         type: 'prerequisite',
         description: 'Basic skills for safe and responsible internet use',
-        icon: Eye,
+        icon: EyeIcon,
         difficulty: 'beginner'
       }
     ],
@@ -223,7 +230,7 @@ export default function ConceptExplorer({ conceptId, className = '' }: ConceptEx
     return (
       <div className={`bg-slate-800 rounded-lg p-6 ${className}`}>
         <div className="text-center">
-          <Brain className="w-12 h-12 text-purple-400 mx-auto mb-4" />
+          <BrainIcon className="w-12 h-12 text-purple-400 mx-auto mb-4" />
           <h3 className="text-xl font-bold text-white mb-2">Concept Explorer</h3>
           <p className="text-slate-300 mb-4">
             Dive deeper into cybersecurity concepts! Select a topic to explore connections and "what-if" scenarios.
@@ -257,7 +264,7 @@ export default function ConceptExplorer({ conceptId, className = '' }: ConceptEx
           onClick={() => setSelectedConcept(null)}
           className="text-slate-400 hover:text-white transition-colors"
         >
-          <BookOpen className="w-6 h-6" />
+          <BookOpenIcon className="w-6 h-6" />
         </button>
       </div>
 
@@ -267,9 +274,9 @@ export default function ConceptExplorer({ conceptId, className = '' }: ConceptEx
           onClick={() => toggleSection('connections')}
           className="flex items-center gap-2 text-lg font-semibold text-cyan-400 mb-3 hover:text-cyan-300 transition-colors"
         >
-          <Zap className="w-5 h-5" />
+          <ZapIcon className="w-5 h-5" />
           Knowledge Connections
-          {expandedSections.has('connections') ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          {expandedSections.has('connections') ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />}
         </button>
         
         <AnimatePresence>
@@ -316,9 +323,9 @@ export default function ConceptExplorer({ conceptId, className = '' }: ConceptEx
           onClick={() => toggleSection('scenarios')}
           className="flex items-center gap-2 text-lg font-semibold text-cyan-400 mb-3 hover:text-cyan-300 transition-colors"
         >
-          <Lightbulb className="w-5 h-5" />
+          <LightbulbIcon className="w-5 h-5" />
           What-If Scenarios
-          {expandedSections.has('scenarios') ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          {expandedSections.has('scenarios') ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />}
         </button>
         
         <AnimatePresence>
@@ -337,9 +344,9 @@ export default function ConceptExplorer({ conceptId, className = '' }: ConceptEx
                     className="w-full text-left"
                   >
                     <h4 className="font-semibold text-purple-400 mb-2 flex items-center gap-2">
-                      <Brain className="w-4 h-4" />
+                      <BrainIcon className="w-4 h-4" />
                       {scenario.question}
-                      {activeScenario === scenario.id ? <ChevronUp className="w-4 h-4 ml-auto" /> : <ChevronDown className="w-4 h-4 ml-auto" />}
+                      {activeScenario === scenario.id ? <ChevronUpIcon className="w-4 h-4 ml-auto" /> : <ChevronDownIcon className="w-4 h-4 ml-auto" />}
                     </h4>
                   </button>
                   
@@ -392,7 +399,7 @@ export default function ConceptExplorer({ conceptId, className = '' }: ConceptEx
           >
             <Code className="w-5 h-5" />
             Live Code Example
-            {expandedSections.has('code') ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            {expandedSections.has('code') ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />}
           </button>
           
           <AnimatePresence>

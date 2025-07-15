@@ -11,25 +11,13 @@ OWASP Top 10 vulnerabilities - this config helps prevent many of them!
 */
 
 const nextConfig: NextConfig = {
-  // 🎯 EDUCATIONAL NOTE: Static export for GitHub Pages deployment
-  // This tells Next.js to generate static HTML files that can be hosted
-  // on any web server without needing a backend. Perfect for open source!
-  output: 'export',
+  // 🎯 EDUCATIONAL NOTE: Development mode configuration
+  // For development, we'll enable all features and checks
+  // For production build, we can switch to static export
   
-  // 🔧 Disable image optimization for static export
-  // GitHub Pages doesn't support Next.js image optimization API
+  // 🔧 Image optimization settings
   images: {
-    unoptimized: true,
-  },
-  
-  // 🚀 Disable linting during build for production deployment
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  
-  // 🔧 Disable TypeScript checking during build  
-  typescript: {
-    ignoreBuildErrors: true,
+    unoptimized: process.env.NODE_ENV === 'production',
   },
   
   // 🛡️ SECURITY HEADERS - This is where the real cybersecurity magic happens!
@@ -117,15 +105,13 @@ const nextConfig: NextConfig = {
   // 🔧 DEVELOPMENT CONFIGURATION
   // These settings help during development and learning
   eslint: {
-    // During builds, we want to continue even with linting errors
-    // so students can see their work in progress
-    ignoreDuringBuilds: false,
+    // During development, show linting errors but don't block builds
+    ignoreDuringBuilds: process.env.NODE_ENV === 'production',
   },
   
   typescript: {
-    // We want to catch TypeScript errors during build
-    // This teaches good coding practices!
-    ignoreBuildErrors: false,
+    // Show TypeScript errors during development
+    ignoreBuildErrors: process.env.NODE_ENV === 'production',
   },
   
   // 🎯 EXPERIMENTAL FEATURES

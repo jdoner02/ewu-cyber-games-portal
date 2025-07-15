@@ -4,13 +4,15 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { 
   Shield, 
-  Trophy,
-  Star,
-  Gift,
+  GamepadIcon, 
+  Trophy, 
+  Brain, 
   Zap, 
+  Star,
   Target,
   Clock,
   Users,
+  Gift,
   TrendingUp
 } from 'lucide-react'
 import Link from 'next/link'
@@ -243,7 +245,7 @@ export default function HomePage() {
                 onClick={() => document.getElementById('games')?.scrollIntoView({ behavior: 'smooth' })}
               >
                 <div className="flex items-center gap-2">
-                  <Shield className="w-5 h-5" />
+                  <GamepadIcon className="w-5 h-5" />
                   Play Now - It's Free!
                 </div>
               </motion.button>
@@ -322,7 +324,7 @@ export default function HomePage() {
             className="text-center mb-12"
           >
             <h2 className="text-4xl font-bold text-white mb-4">
-              <Shield className="inline w-8 h-8 mr-2 text-purple-400" />
+              <GamepadIcon className="inline w-8 h-8 mr-2 text-purple-400" />
               Featured Games
             </h2>
             <p className="text-slate-300 text-lg">Master cybersecurity through fun, addictive gameplay</p>
@@ -420,7 +422,7 @@ export default function HomePage() {
             {[
               { label: 'Level', value: playerStats.level, icon: Trophy, color: 'text-yellow-400' },
               { label: 'Total XP', value: playerStats.totalXP.toLocaleString(), icon: Star, color: 'text-purple-400' },
-              { label: 'Games Completed', value: playerStats.gamesCompleted, icon: Shield, color: 'text-cyan-400' },
+              { label: 'Games Completed', value: playerStats.gamesCompleted, icon: GamepadIcon, color: 'text-cyan-400' },
               { label: 'Day Streak', value: playerStats.streakDays, icon: Zap, color: 'text-green-400' },
             ].map((stat, index) => (
               <motion.div
