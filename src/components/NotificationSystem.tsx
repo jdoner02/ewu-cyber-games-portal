@@ -59,7 +59,7 @@ export default function NotificationSystem({ notifications, onRemove }: Notifica
     
     try {
       // Create simple audio feedback using Web Audio API
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+      const audioContext = new (window.AudioContext || (window as unknown as typeof window & { webkitAudioContext: typeof AudioContext }).webkitAudioContext)()
       const oscillator = audioContext.createOscillator()
       const gainNode = audioContext.createGain()
       
@@ -91,7 +91,7 @@ export default function NotificationSystem({ notifications, onRemove }: Notifica
           }
         }, index * 100)
       })
-    } catch (error) {
+    } catch {
       console.log('Audio not supported or blocked')
     }
   }
@@ -106,7 +106,7 @@ export default function NotificationSystem({ notifications, onRemove }: Notifica
         onRemove(notification.id)
       }, duration)
     })
-  }, [notifications, onRemove])
+  }, [notifications, onRemove, playSound])
 
   return (
     <div className="fixed top-4 right-4 z-50 space-y-2 max-w-sm">

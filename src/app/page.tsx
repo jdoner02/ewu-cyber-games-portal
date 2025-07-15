@@ -107,7 +107,7 @@ export default function HomePage() {
     updateStreak
   } = useGameStore()
   
-  const [dailyChallenges, setDailyChallenges] = useState(DAILY_CHALLENGES)
+  const [dailyChallenges] = useState(DAILY_CHALLENGES)
   const [onlineCount, setOnlineCount] = useState(2847)
   const [showWelcomeBack, setShowWelcomeBack] = useState(false)
 
@@ -244,7 +244,7 @@ export default function HomePage() {
               >
                 <div className="flex items-center gap-2">
                   <Shield className="w-5 h-5" />
-                  Play Now - It's Free!
+                  Play Now - It&apos;s Free!
                 </div>
               </motion.button>
 
@@ -338,7 +338,7 @@ export default function HomePage() {
                 transition={{ delay: index * 0.1 }}
                 className="group"
               >
-                <Link href={`/games/${game.id}` as any}>
+                <Link href={`/games/${game.id}` as `/games/${string}`}>
                   <div className={`bg-gradient-to-br ${game.color} p-1 rounded-xl hover:scale-105 transition-all duration-300 cursor-pointer`}>
                     <div className="bg-slate-900 rounded-lg p-6 h-full">
                       <div className="flex items-start justify-between mb-4">

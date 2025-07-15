@@ -46,7 +46,7 @@ export interface LogEntry {
   
   // 📋 OPTIONAL METADATA: Extra information for investigation
   metadata?: {
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 
