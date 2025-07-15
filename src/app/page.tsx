@@ -173,7 +173,7 @@ export default function HomePage() {
             <Gift className="w-5 h-5" />
             <div>
               <p className="font-bold">Welcome back, Cyber Hero!</p>
-              <p className="text-sm opacity-90">You've earned 50 bonus XP for returning!</p>
+              <p className="text-sm opacity-90">You&apos;ve earned 50 bonus XP for returning!</p>
             </div>
           </div>
         </motion.div>
@@ -254,7 +254,7 @@ export default function HomePage() {
                 whileTap={{ scale: 0.95 }}
                 onClick={() => document.getElementById('daily-challenges')?.scrollIntoView({ behavior: 'smooth' })}
               >
-                Today's Challenges
+                Today&apos;s Challenges
               </motion.button>
             </div>
           </motion.div>
@@ -274,7 +274,7 @@ export default function HomePage() {
               <Clock className="inline w-8 h-8 mr-2 text-yellow-400" />
               Daily Challenges
             </h2>
-            <p className="text-slate-300 text-lg">Complete today's challenges for bonus rewards!</p>
+            <p className="text-slate-300 text-lg">Complete today&apos;s challenges for bonus rewards!</p>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Shield, Lock, Zap, Target } from 'lucide-react'
 
@@ -54,7 +54,7 @@ export default function NotificationSystem({ notifications, onRemove }: Notifica
   const [soundEnabled, setSoundEnabled] = useState(true)
 
   // Play sound effect based on notification type
-  const playSound = (type: string) => {
+  const playSound = useCallback((type: string) => {
     if (!soundEnabled) return
     
     try {
@@ -94,7 +94,7 @@ export default function NotificationSystem({ notifications, onRemove }: Notifica
     } catch {
       console.log('Audio not supported or blocked')
     }
-  }
+  }, [soundEnabled])
 
   useEffect(() => {
     notifications.forEach(notification => {

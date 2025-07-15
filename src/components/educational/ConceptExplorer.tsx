@@ -43,7 +43,7 @@ interface ConceptConnection {
   title: string
   type: 'prerequisite' | 'related' | 'advanced'
   description: string
-  icon: any
+  icon: typeof LockIcon
   difficulty: 'beginner' | 'intermediate' | 'advanced'
 }
 
