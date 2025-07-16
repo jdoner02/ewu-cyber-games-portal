@@ -17,8 +17,27 @@ import { GameStatePersistenceManager, StorageMechanism } from '../utils/persiste
  * @since 2025-01-15
  */
 
-// Initialize our advanced persistence manager
-const persistenceManager = new GameStatePersistenceManager()
+// Lazy initialization of persistence manager to avoid SSR issues
+let persistenceManager: GameStatePersistenceManager | null = null
+
+function getPersistenceManager(): GameStatePersistenceManager {
+  if (typeof window === 'undefined') {
+    // Return a mock during SSR
+    return {
+      saveGameState: async () => ({ success: false, mechanisms: [], warnings: ['SSR mode'], performance: { writeTime: 0, compressionAchieved: 0 } }),
+      loadGameState: async () => null,
+      clearGameState: async () => ({ success: false, clearedMechanisms: [], warnings: ['SSR mode'] }),
+      healthCheck: async () => ({ available: false, secure: false, compliant: false, performance: { readLatency: 0, writeLatency: 0, storageSize: 0, errorRate: 0 }, storage: {} as any }),
+      getPerformanceMetrics: () => ({ storageOperations: 0, averageWriteTime: 0, averageReadTime: 0, cacheHitRate: 0, failoverCount: 0, compressionRatio: 1, lastOptimization: '' })
+    } as any
+  }
+  
+  if (!persistenceManager) {
+    persistenceManager = new GameStatePersistenceManager()
+  }
+  
+  return persistenceManager
+}
 
 // Types for our gaming state
 interface PlayerStats {
@@ -354,7 +373,7 @@ const useGameStore = create<GameState>()(
       forceSyncToCookies: async () => {
         try {
           const state = useGameStore.getState()
-          const result = await persistenceManager.saveGameState(state)
+          const result = await getPersistenceManager().saveGameState(state)
           
           // Update persistence health based on results
           set({
@@ -380,7 +399,7 @@ const useGameStore = create<GameState>()(
        */
       clearAllData: async () => {
         try {
-          const result = await persistenceManager.clearGameState()
+          const result = await getPersistenceManager().clearGameState()
           
           if (result.success) {
             // Reset to initial state
@@ -427,7 +446,7 @@ const useGameStore = create<GameState>()(
        */
       checkPersistenceHealth: async () => {
         try {
-          const health = await persistenceManager.healthCheck()
+          const health = await getPersistenceManager().healthCheck()
           
           set({
             persistenceHealth: {
@@ -456,7 +475,7 @@ const useGameStore = create<GameState>()(
        * Returns detailed performance metrics for the persistence system
        */
       getPerformanceMetrics: () => {
-        return persistenceManager.getPerformanceMetrics()
+        return getPersistenceManager().getPerformanceMetrics()
       }
     }),
     {

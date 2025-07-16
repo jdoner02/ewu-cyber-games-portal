@@ -48,6 +48,7 @@
     "test:e2e": "jest --testPathPattern=tests/e2e"
   },
   "dependencies": {
+    "@next/swc-darwin-arm64": "^15.4.1",
     "@radix-ui/react-dialog": "^1.1.14",
     "@radix-ui/react-tabs": "^1.1.12",
     "@types/crypto-js": "^4.2.2",

@@ -26,6 +26,7 @@ import {
 
 import AICompanion from '@/components/AICompanion'
 import UpdateNotification from '@/components/UpdateNotification'
+import PatchNotes from '@/components/PatchNotes'
 import useGameStore from '@/stores/gameStore'
 
 interface GameData {
@@ -60,6 +61,7 @@ export default function HomePage() {
   const [newGames] = useState(['cyber-knowledge-brain', 'packet-tracer-mmo'])
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [showPersonalizedView, setShowPersonalizedView] = useState(true)
+  const [showPatchNotes, setShowPatchNotes] = useState(false)
 
   // 🎮 Game Data with Cookie Clicker-style tracking
   const allGames: GameData[] = [
@@ -613,7 +615,34 @@ export default function HomePage() {
       </section>
 
       <AICompanion />
-      
+
+      {/* Patch Notes Modal */}
+      <PatchNotes 
+        isOpen={showPatchNotes} 
+        onClose={() => setShowPatchNotes(false)} 
+      />
+
+      {/* Floating Patch Notes Button */}
+      <motion.div
+        className="fixed bottom-4 right-20 z-40"
+        initial={{ opacity: 0, scale: 0 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 2 }}
+      >
+        <motion.button
+          onClick={() => setShowPatchNotes(true)}
+          className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-3 rounded-full shadow-lg border border-purple-400/30 backdrop-blur-sm"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          title="View Patch Notes v1.3.0"
+        >
+          <div className="flex items-center gap-2">
+            <Settings className="w-5 h-5" />
+            <span className="text-xs font-bold">v1.3.0</span>
+          </div>
+        </motion.button>
+      </motion.div>
+
       <UpdateNotification 
         version="1.2.0"
         features={[
