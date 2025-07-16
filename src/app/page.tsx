@@ -76,18 +76,34 @@ export default function HomePage() {
       skillsLearned: ['Password Security', 'Authentication']
     },
     {
-      id: 'cyber-knowledge-brain',
+      id: 'pokemon-cyber-mmo',
       title: 'Pokemon Cyber MMO',
-      description: 'Collect and evolve cybersecurity creatures in this Pokemon-style adventure',
+      description: 'Embark on a Pokemon-style adventure learning Day 1 GenCyber concepts! Meet teammates, explore cyber careers, and master computer basics.',
       icon: '🐉',
-      difficulty: 'All Levels',
-      category: 'RPG',
-      estimatedTime: '30+ min',
+      difficulty: 'Beginner',
+      category: 'MMO',
+      estimatedTime: '45+ min',
       rating: 4.9,
-      plays: gameProgress.find((g: any) => g.gameId === 'cyber-knowledge-brain')?.attempts || 0,
-      lastPlayed: gameProgress.find((g: any) => g.gameId === 'cyber-knowledge-brain')?.timeSpent || null,
+      plays: gameProgress.find((g: any) => g.gameId === 'pokemon-cyber-mmo')?.attempts || 0,
+      lastPlayed: gameProgress.find((g: any) => g.gameId === 'pokemon-cyber-mmo')?.timeSpent || null,
       isNew: true,
       isFeatured: true,
+      gradient: 'from-purple-500 to-indigo-600',
+      skillsLearned: ['Cyber Careers', 'Computer Basics', 'Team Building', 'Cyber Ethics']
+    },
+    {
+      id: 'cyber-knowledge-brain',
+      title: 'Cyber Knowledge Brain',
+      description: 'Collect and evolve cybersecurity creatures in this advanced Pokemon-style adventure',
+      icon: '🧠',
+      difficulty: 'Intermediate',
+      category: 'RPG',
+      estimatedTime: '30+ min',
+      rating: 4.8,
+      plays: gameProgress.find((g: any) => g.gameId === 'cyber-knowledge-brain')?.attempts || 0,
+      lastPlayed: gameProgress.find((g: any) => g.gameId === 'cyber-knowledge-brain')?.timeSpent || null,
+      isNew: false,
+      isFeatured: false,
       gradient: 'from-green-500 to-emerald-600',
       skillsLearned: ['Network Security', 'Threat Detection']
     },
@@ -932,7 +948,7 @@ export default function HomePage() {
       <UpdateNotification 
         version="1.2.0"
         features={[
-          "🐉 Pokemon Cyber MMO - Collect and evolve cybersecurity creatures!",
+          "🐉 Pokemon Cyber MMO - Embark on a GenCyber Day 1 adventure! Learn cyber careers, computer basics, and teamwork!",
           "🦸 CyberCity Heroes - Superhero network defense adventures!",
           "💾 Smart Progress Tracking - Your journey remembers everything!"
         ]}
