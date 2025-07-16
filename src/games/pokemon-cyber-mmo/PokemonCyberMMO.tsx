@@ -5,6 +5,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Shield, Monitor, Settings, Zap, UserCheck, MapPin, Archive, FolderOpen, Calendar } from 'lucide-react';
 import { CyberCareersTutorial, HardwareSoftwareTutorial, EthicsTutorial } from './components/Day1Tutorials';
 import { IPAddressTutorial, PacketTracerTutorial, WiFiSecurityTutorial } from './components/Day2Tutorials';
+import { PythonCodingTutorial, TurtleGraphicsTutorial, PhidgetTutorial } from './components/Day3Tutorials';
+import { VMSetupTutorial, LinuxCommandsTutorial, AIEthicsTutorial, CryptographyTutorial } from './components/Day4Tutorials';
+import { PhishingIdentificationTutorial, OSINTTutorial, RedBlueTeamTutorial } from './components/Day5Tutorials';
 
 // Types for the Day 1 GenCyber Pokemon MMO
 interface CyberPokemon {
@@ -66,7 +69,7 @@ const PokemonCyberMMO: React.FC = () => {
   const [battleMode, setBattleMode] = useState(false);
   const [teamChallengeActive, setTeamChallengeActive] = useState(false);
   const [currentDay, setCurrentDay] = useState(1); // Track GenCyber camp day (1-5)
-  const [unlockedDays, setUnlockedDays] = useState([1]); // Which days are accessible
+  const [unlockedDays, setUnlockedDays] = useState([1, 2, 3, 4, 5]); // Which days are accessible
   const [activeTutorial, setActiveTutorial] = useState<string | null>(null); // Current tutorial
   const [completedTutorials, setCompletedTutorials] = useState<string[]>([]); // Completed tutorials
   
@@ -1150,6 +1153,31 @@ const PokemonCyberMMO: React.FC = () => {
       );
     }
     
+    if (currentDay >= 3) {
+      tutorials.push(
+        { id: 'python-coding', name: 'Python Programming Lab', description: 'Code like a cybersecurity pro!', icon: '🐍' },
+        { id: 'turtle-graphics', name: 'Turtle Graphics Studio', description: 'Create amazing visual programs!', icon: '🐢' },
+        { id: 'phidget-hardware', name: 'Hardware Programming', description: 'Control real devices with code!', icon: '🔌' }
+      );
+    }
+    
+    if (currentDay >= 4) {
+      tutorials.push(
+        { id: 'vm-setup', name: 'Virtual Machine Lab', description: 'Build your cyber lab environment!', icon: '💻' },
+        { id: 'linux-commands', name: 'Linux Command Academy', description: 'Master the terminal!', icon: '🐧' },
+        { id: 'ai-ethics', name: 'AI Ethics Challenge', description: 'Navigate AI moral dilemmas!', icon: '🤖' },
+        { id: 'cryptography', name: 'Cryptography Puzzles', description: 'Crack codes and ciphers!', icon: '🔐' }
+      );
+    }
+    
+    if (currentDay >= 5) {
+      tutorials.push(
+        { id: 'phishing-detection', name: 'Phishing Hunter', description: 'Spot malicious emails!', icon: '🎣' },
+        { id: 'osint-investigation', name: 'OSINT Detective', description: 'Investigate with open sources!', icon: '🔍' },
+        { id: 'red-blue-team', name: 'Red vs Blue Battle', description: 'Epic attack vs defense!', icon: '⚔️' }
+      );
+    }
+    
     return tutorials.filter(t => !completedTutorials.includes(t.id));
   };
 
@@ -1791,6 +1819,76 @@ const PokemonCyberMMO: React.FC = () => {
               <WiFiSecurityTutorial
                 tutorialId="wifi-security"
                 onComplete={(score) => handleTutorialComplete('wifi-security', score)}
+                onClose={() => setActiveTutorial(null)}
+              />
+            )}
+            {activeTutorial === 'python-coding' && (
+              <PythonCodingTutorial
+                tutorialId="python-coding"
+                onComplete={(score) => handleTutorialComplete('python-coding', score)}
+                onClose={() => setActiveTutorial(null)}
+              />
+            )}
+            {activeTutorial === 'turtle-graphics' && (
+              <TurtleGraphicsTutorial
+                tutorialId="turtle-graphics"
+                onComplete={(score) => handleTutorialComplete('turtle-graphics', score)}
+                onClose={() => setActiveTutorial(null)}
+              />
+            )}
+            {activeTutorial === 'phidget-hardware' && (
+              <PhidgetTutorial
+                tutorialId="phidget-hardware"
+                onComplete={(score) => handleTutorialComplete('phidget-hardware', score)}
+                onClose={() => setActiveTutorial(null)}
+              />
+            )}
+            {activeTutorial === 'vm-setup' && (
+              <VMSetupTutorial
+                tutorialId="vm-setup"
+                onComplete={(score) => handleTutorialComplete('vm-setup', score)}
+                onClose={() => setActiveTutorial(null)}
+              />
+            )}
+            {activeTutorial === 'linux-commands' && (
+              <LinuxCommandsTutorial
+                tutorialId="linux-commands"
+                onComplete={(score) => handleTutorialComplete('linux-commands', score)}
+                onClose={() => setActiveTutorial(null)}
+              />
+            )}
+            {activeTutorial === 'ai-ethics' && (
+              <AIEthicsTutorial
+                tutorialId="ai-ethics"
+                onComplete={(score) => handleTutorialComplete('ai-ethics', score)}
+                onClose={() => setActiveTutorial(null)}
+              />
+            )}
+            {activeTutorial === 'cryptography' && (
+              <CryptographyTutorial
+                tutorialId="cryptography"
+                onComplete={(score) => handleTutorialComplete('cryptography', score)}
+                onClose={() => setActiveTutorial(null)}
+              />
+            )}
+            {activeTutorial === 'phishing-detection' && (
+              <PhishingIdentificationTutorial
+                tutorialId="phishing-detection"
+                onComplete={(score) => handleTutorialComplete('phishing-detection', score)}
+                onClose={() => setActiveTutorial(null)}
+              />
+            )}
+            {activeTutorial === 'osint-investigation' && (
+              <OSINTTutorial
+                tutorialId="osint-investigation"
+                onComplete={(score) => handleTutorialComplete('osint-investigation', score)}
+                onClose={() => setActiveTutorial(null)}
+              />
+            )}
+            {activeTutorial === 'red-blue-team' && (
+              <RedBlueTeamTutorial
+                tutorialId="red-blue-team"
+                onComplete={(score) => handleTutorialComplete('red-blue-team', score)}
                 onClose={() => setActiveTutorial(null)}
               />
             )}
