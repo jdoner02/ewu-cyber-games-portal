@@ -7,22 +7,16 @@ import {
   Shield, 
   Zap, 
   Users, 
-  Award, 
-  Brain, 
-  Gamepad, 
-  Star,
   Clock,
   TrendingUp,
-  Trophy,
   Settings,
-  Heart,
   Play,
   Eye,
   Calendar,
   Target,
-  Plus,
   BarChart3
 } from 'lucide-react'
+import { Star, Trophy, Heart } from 'lucide-react'
 
 import AICompanion from '@/components/AICompanion'
 import UpdateNotification from '@/components/UpdateNotification'
@@ -128,6 +122,22 @@ export default function HomePage() {
       isFeatured: false,
       gradient: 'from-purple-500 to-pink-600',
       skillsLearned: ['Incident Response', 'Security Operations']
+    },
+    {
+      id: 'cyber-clicker',
+      title: 'Cyber Clicker',
+      description: 'Build your cyber defense empire one click at a time! Learn cybersecurity fundamentals through addictive clicker gameplay.',
+      icon: '🖱️',
+      difficulty: 'All Levels',
+      category: 'Clicker',
+      estimatedTime: '10+ min',
+      rating: 4.8,
+      plays: gameProgress.find((g: any) => g.gameId === 'cyber-clicker')?.attempts || 0,
+      lastPlayed: gameProgress.find((g: any) => g.gameId === 'cyber-clicker')?.timeSpent || null,
+      isNew: false,
+      isFeatured: true,
+      gradient: 'from-blue-500 to-purple-600',
+      skillsLearned: ['Security Fundamentals', 'Resource Management', 'Incremental Strategy']
     },
     {
       id: 'cybersilk',
