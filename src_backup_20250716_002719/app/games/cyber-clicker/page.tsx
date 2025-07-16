@@ -1,7 +1,7 @@
-import CyberClickerGame from './CyberClickerGame'
+import CyberClickerEmpire from '@/components/games/CyberClickerEmpire'
 
 export default function CyberClickerPage() {
-  return <CyberClickerGame />
+  return <CyberClickerEmpire />
 }
 
 export const metadata = {

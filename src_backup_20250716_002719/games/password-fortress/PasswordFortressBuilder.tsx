@@ -29,9 +29,12 @@ import {
   Lock, 
   Key, 
   Zap, 
+  Star, 
+  Crown,
   AlertTriangle,
   CheckCircle,
-  Target
+  Target,
+  Award
 } from 'lucide-react'
 import { toast } from 'sonner'
 import useGameStore from '@/stores/gameStore'
@@ -79,13 +82,7 @@ interface Achievement {
  */
 export default function PasswordFortressBuilder() {
   // 🎯 Get functions from our global game store
-  const { 
-    addXP, 
-    unlockAchievement, 
-    updateGameProgress, 
-    savePasswordFortressState,
-    gameSpecificStates 
-  } = useGameStore()
+  const { addXP, unlockAchievement, updateGameProgress } = useGameStore()
 
   /**
    * 🧠 GAME STATE (What the game remembers)
@@ -126,7 +123,7 @@ export default function PasswordFortressBuilder() {
       cost: 150,
       owned: 0,
       maxLevel: 5,
-      icon: <Zap className="w-4 h-4" />,
+      icon: <Star className="w-4 h-4" />,
       effect: 'Teaches: Special characters increase password complexity!'
     },
     {
@@ -146,7 +143,7 @@ export default function PasswordFortressBuilder() {
       cost: 200,
       owned: 0,
       maxLevel: 3,
-      icon: <Shield className="w-4 h-4" />,
+      icon: <Crown className="w-4 h-4" />,
       effect: 'Teaches: Mixed case adds more possible combinations!'
     }
   ])
@@ -182,7 +179,7 @@ export default function PasswordFortressBuilder() {
       description: 'Defeated your first hacker attack!',
       requirement: 'Have a password strong enough to stop an attack',
       unlocked: false,
-      icon: <CheckCircle className="w-4 h-4" />,
+      icon: <Crown className="w-4 h-4" />,
       cybersecurityConcept: 'Strong passwords are your first line of defense!'
     },
     {
@@ -191,7 +188,7 @@ export default function PasswordFortressBuilder() {
       description: 'Purchased your first upgrade!',
       requirement: 'Buy any upgrade',
       unlocked: false,
-      icon: <Target className="w-4 h-4" />,
+      icon: <Award className="w-4 h-4" />,
       cybersecurityConcept: 'Automation tools help create better passwords!'
     }
   ])
@@ -501,73 +498,6 @@ export default function PasswordFortressBuilder() {
 
   const strengthInfo = getStrengthDescription(stats.strength)
   const fortressDisplay = getFortressDisplay()
-
-  /**
-   * 💾 LOAD SAVED STATE ON COMPONENT MOUNT
-   * 
-   * This retrieves previously saved game progress when the player returns!
-   */
-  useEffect(() => {
-    const savedState = gameSpecificStates.passwordFortress
-    if (savedState) {
-      setPassword(savedState.password)
-      setStats({
-        length: savedState.password.length,
-        strength: calculatePasswordStrength(savedState.password),
-        securityPoints: savedState.securityPoints,
-        clickCount: savedState.clickCount,
-        fortressLevel: getFortressLevel(calculatePasswordStrength(savedState.password))
-      })
-      
-      // Restore upgrades
-      setUpgrades(prev => prev.map(upgrade => ({
-        ...upgrade,
-        owned: savedState.upgrades[upgrade.id]?.owned || 0,
-        cost: savedState.upgrades[upgrade.id]?.cost || upgrade.cost
-      })))
-      
-      // Restore achievements
-      setAchievements(prev => prev.map(achievement => ({
-        ...achievement,
-        unlocked: savedState.achievements[achievement.id] || false
-      })))
-      
-      toast.success('🎮 Game progress restored!')
-    }
-  }, [gameSpecificStates.passwordFortress, calculatePasswordStrength, getFortressLevel])
-
-  /**
-   * 💾 SAVE STATE WHENEVER IMPORTANT CHANGES OCCUR
-   * 
-   * This automatically saves your progress so you never lose it!
-   */
-  useEffect(() => {
-    // Only save if we have meaningful progress
-    if (password || stats.securityPoints > 0 || stats.clickCount > 0) {
-      const upgradesState: { [key: string]: { owned: number; cost: number } } = {}
-      upgrades.forEach(upgrade => {
-        upgradesState[upgrade.id] = {
-          owned: upgrade.owned,
-          cost: upgrade.cost
-        }
-      })
-      
-      const achievementsState: { [key: string]: boolean } = {}
-      achievements.forEach(achievement => {
-        achievementsState[achievement.id] = achievement.unlocked
-      })
-      
-      savePasswordFortressState({
-        password,
-        securityPoints: stats.securityPoints,
-        clickCount: stats.clickCount,
-        fortressLevel: stats.fortressLevel,
-        upgrades: upgradesState,
-        achievements: achievementsState,
-        lastSaved: new Date().toISOString()
-      })
-    }
-  }, [password, stats, upgrades, achievements, savePasswordFortressState])
 
   /**
    * 🎨 RENDER THE GAME INTERFACE

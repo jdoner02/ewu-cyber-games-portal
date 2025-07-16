@@ -340,10 +340,6 @@ export class SecureCookieManager {
   }
   
   private setCookie(name: string, value: string, maxAge: number): boolean {
-    if (typeof document === 'undefined') {
-      return false // SSR mode - cookies not available
-    }
-    
     try {
       if (value.length > this.maxCookieSize) {
         throw new Error(`Cookie size exceeds limit: ${value.length} > ${this.maxCookieSize}`)
@@ -367,10 +363,6 @@ export class SecureCookieManager {
   }
   
   private getCookie(name: string): string | null {
-    if (typeof document === 'undefined') {
-      return null // SSR mode - cookies not available
-    }
-    
     const nameEQ = name + '='
     const cookies = document.cookie.split(';')
     
@@ -384,10 +376,6 @@ export class SecureCookieManager {
   }
   
   private deleteCookie(name: string): void {
-    if (typeof document === 'undefined') {
-      return // SSR mode - cookies not available
-    }
-    
     document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`
   }
   
@@ -440,10 +428,6 @@ export class SecureCookieManager {
   }
   
   private calculateStorageSize(): number {
-    if (typeof document === 'undefined') {
-      return 0 // SSR mode - cookies not available
-    }
-    
     let totalSize = 0
     const cookies = document.cookie.split(';')
     

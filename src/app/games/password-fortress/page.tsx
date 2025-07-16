@@ -1,7 +1,7 @@
-import PasswordFortress from '@/components/games/PasswordFortress'
+import PasswordFortressGame from './PasswordFortressGame'
 
 export default function PasswordFortressPage() {
-  return <PasswordFortress />
+  return <PasswordFortressGame />
 }
 
 export const metadata = {

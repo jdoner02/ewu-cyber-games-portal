@@ -1,4 +1,4 @@
-import type { Metadata, Viewport } from "next";
+import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
@@ -18,12 +18,8 @@ export const metadata: Metadata = {
   description: "Interactive cybersecurity games for middle school students. Learn encryption, password security, phishing detection, and more through engaging gameplay.",
   keywords: ["cybersecurity", "education", "games", "middle school", "encryption", "passwords", "phishing"],
   authors: [{ name: "Eastern Washington University Cybersecurity Program" }],
+  viewport: "width=device-width, initial-scale=1",
   robots: "index, follow",
-};
-
-export const viewport: Viewport = {
-  width: 'device-width',
-  initialScale: 1,
 };
 
 export default function RootLayout({

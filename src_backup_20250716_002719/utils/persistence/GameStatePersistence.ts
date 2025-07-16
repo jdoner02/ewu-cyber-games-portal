@@ -172,11 +172,7 @@ export class GameStatePersistenceManager {
       lastOptimization: new Date().toISOString()
     }
     
-    // Defer initialization to avoid SSR issues
-    if (typeof window !== 'undefined') {
-      // Use setTimeout to make it async and avoid blocking
-      setTimeout(() => this.initializeStorage(), 0)
-    }
+    this.initializeStorage()
   }
   
   /**

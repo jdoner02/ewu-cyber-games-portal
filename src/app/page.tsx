@@ -1,211 +1,317 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
+import React, { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import Link from 'next/link'
 import { 
   Shield, 
-  Trophy,
-  Star,
-  Gift,
   Zap, 
-  Target,
+  Users, 
+  Award, 
+  Brain, 
+  Gamepad, 
+  Star,
   Clock,
-  Users,
-  TrendingUp
+  TrendingUp,
+  Trophy,
+  Settings,
+  Heart,
+  Play,
+  Eye,
+  Calendar,
+  Target,
+  Plus,
+  BarChart3
 } from 'lucide-react'
-import Link from 'next/link'
-import useGameStore from '@/stores/gameStore'
+
 import AICompanion from '@/components/AICompanion'
+import UpdateNotification from '@/components/UpdateNotification'
+import PatchNotes from '@/components/PatchNotes'
+import useGameStore from '@/stores/gameStore'
 
-// Daily challenges that rotate
-const DAILY_CHALLENGES = [
-  {
-    id: 'password-master',
-    title: '🔐 Password Master',
-    description: 'Create 5 strong passwords in Password Fortress',
-    reward: 100,
-    progress: 0,
-    max: 5,
-    type: 'daily'
-  },
-  {
-    id: 'phishing-detector',
-    title: '🎣 Phishing Hunter', 
-    description: 'Identify 10 phishing attempts correctly',
-    reward: 150,
-    progress: 0,
-    max: 10,
-    type: 'daily'
-  },
-  {
-    id: 'cyber-clicker',
-    title: '⚡ Cyber Clicker Champion',
-    description: 'Earn 1000 security points in Cyber Clicker',
-    reward: 200,
-    progress: 0,
-    max: 1000,
-    type: 'daily'
-  }
-]
-
-// Featured games with engagement stats
-const FEATURED_GAMES = [
-  {
-    id: 'password-fortress',
-    title: 'Password Fortress',
-    description: 'Escape room adventure teaching password security',
-    difficulty: 'Beginner',
-    duration: '10-15 min',
-    players: '12.4k playing',
-    rating: 4.8,
-    image: '/games/password-fortress.png',
-    tags: ['Escape Room', 'Passwords', 'Adventure'],
-    color: 'from-blue-500 to-purple-600'
-  },
-  {
-    id: 'cyber-clicker',
-    title: 'Cyber Clicker Empire',
-    description: 'Build your cybersecurity empire one click at a time!',
-    difficulty: 'Easy',
-    duration: 'Endless',
-    players: '8.7k playing',
-    rating: 4.9,
-    image: '/games/cyber-clicker.png',
-    tags: ['Clicker', 'Idle', 'Strategy'],
-    color: 'from-green-500 to-teal-600',
-    hot: true
-  },
-  {
-    id: 'phishing-detective',
-    title: 'Phishing Detective',
-    description: 'Spot fake emails and protect innocent users!',
-    difficulty: 'Medium',
-    duration: '5-20 min',
-    players: '6.2k playing',
-    rating: 4.7,
-    image: '/games/phishing-detective.png',
-    tags: ['Detective', 'Email', 'Critical Thinking'],
-    color: 'from-orange-500 to-red-600'
-  },
-  {
-    id: 'network-defense',
-    title: 'Network Defense Tower',
-    description: 'Defend your network from waves of cyber attacks!',
-    difficulty: 'Hard',
-    duration: '15-30 min',
-    players: '4.1k playing', 
-    rating: 4.6,
-    image: '/games/network-defense.png',
-    tags: ['Tower Defense', 'Strategy', 'Real-time'],
-    color: 'from-purple-500 to-pink-600'
-  }
-]
+interface GameData {
+  id: string
+  title: string
+  description: string
+  icon: string
+  difficulty: string
+  category: string
+  estimatedTime: string
+  rating: number
+  plays: number
+  lastPlayed: number | null
+  isNew: boolean
+  isFeatured: boolean
+  gradient: string
+  skillsLearned: string[]
+}
 
 export default function HomePage() {
   const { 
     playerStats, 
-    updateStreak
+    achievements, 
+    gameProgress, 
+    updateStreak, 
+    skillProgress,
+    addXP
   } = useGameStore()
   
-  const [dailyChallenges] = useState(DAILY_CHALLENGES)
-  const [onlineCount, setOnlineCount] = useState(2847)
-  const [showWelcomeBack, setShowWelcomeBack] = useState(false)
+  const [favoriteGames, setFavoriteGames] = useState<string[]>([])
+  const [recentGames, setRecentGames] = useState<string[]>([])
+  const [newGames] = useState(['cyber-knowledge-brain', 'packet-tracer-mmo'])
+  const [selectedCategory, setSelectedCategory] = useState('all')
+  const [showPersonalizedView, setShowPersonalizedView] = useState(true)
+  const [showPatchNotes, setShowPatchNotes] = useState(false)
 
+  // 🎮 Game Data with Cookie Clicker-style tracking
+  const allGames: GameData[] = [
+    {
+      id: 'password-fortress',
+      title: 'Password Fortress',
+      description: 'Escape a digital fortress by solving password puzzles',
+      icon: '🏰',
+      difficulty: 'Beginner',
+      category: 'Passwords',
+      estimatedTime: '10-15 min',
+      rating: 4.8,
+      plays: gameProgress.find((g: any) => g.gameId === 'password-fortress')?.attempts || 0,
+      lastPlayed: gameProgress.find((g: any) => g.gameId === 'password-fortress')?.timeSpent || null,
+      isNew: false,
+      isFeatured: true,
+      gradient: 'from-cyan-500 to-blue-600',
+      skillsLearned: ['Password Security', 'Authentication']
+    },
+    {
+      id: 'cyber-knowledge-brain',
+      title: 'Pokemon Cyber MMO',
+      description: 'Collect and evolve cybersecurity creatures in this Pokemon-style adventure',
+      icon: '🐉',
+      difficulty: 'All Levels',
+      category: 'RPG',
+      estimatedTime: '30+ min',
+      rating: 4.9,
+      plays: gameProgress.find((g: any) => g.gameId === 'cyber-knowledge-brain')?.attempts || 0,
+      lastPlayed: gameProgress.find((g: any) => g.gameId === 'cyber-knowledge-brain')?.timeSpent || null,
+      isNew: true,
+      isFeatured: true,
+      gradient: 'from-green-500 to-emerald-600',
+      skillsLearned: ['Network Security', 'Threat Detection']
+    },
+    {
+      id: 'packet-tracer-mmo',
+      title: 'CyberCity Heroes',
+      description: 'Superhero network configuration adventure in a multiplayer world',
+      icon: '🦸',
+      difficulty: 'Intermediate',
+      category: 'Networking',
+      estimatedTime: '25-40 min',
+      rating: 4.9,
+      plays: gameProgress.find((g: any) => g.gameId === 'packet-tracer-mmo')?.attempts || 0,
+      lastPlayed: gameProgress.find((g: any) => g.gameId === 'packet-tracer-mmo')?.timeSpent || null,
+      isNew: true,
+      isFeatured: true,
+      gradient: 'from-orange-500 to-red-600',
+      skillsLearned: ['Network Config', 'Routing', 'Team Collaboration']
+    },
+    {
+      id: 'cyber-defense-simulator',
+      title: 'Cyber Defense Simulator',
+      description: 'Build your cyber defense empire by upgrading security systems',
+      icon: '⚡',
+      difficulty: 'All Levels',
+      category: 'Strategy',
+      estimatedTime: '15+ min',
+      rating: 4.9,
+      plays: gameProgress.find((g: any) => g.gameId === 'cyber-defense-simulator')?.attempts || 0,
+      lastPlayed: gameProgress.find((g: any) => g.gameId === 'cyber-defense-simulator')?.timeSpent || null,
+      isNew: false,
+      isFeatured: false,
+      gradient: 'from-purple-500 to-pink-600',
+      skillsLearned: ['Incident Response', 'Security Operations']
+    },
+    {
+      id: 'cybersilk',
+      title: 'CyberSilk',
+      description: 'Learn network security through interactive art and data visualization',
+      icon: '🎨',
+      difficulty: 'Creative',
+      category: 'Creative',
+      estimatedTime: '20-30 min',
+      rating: 4.9,
+      plays: gameProgress.find((g: any) => g.gameId === 'cybersilk')?.attempts || 0,
+      lastPlayed: gameProgress.find((g: any) => g.gameId === 'cybersilk')?.timeSpent || null,
+      isNew: false,
+      isFeatured: false,
+      gradient: 'from-pink-500 to-purple-600',
+      skillsLearned: ['Data Flow Analysis', 'Network Patterns']
+    }
+  ]
+
+  // 🔄 Cookie Clicker-style persistent interactions
+  const toggleFavorite = (gameId: string) => {
+    setFavoriteGames(prev => {
+      const updated = prev.includes(gameId) 
+        ? prev.filter(id => id !== gameId)
+        : [...prev, gameId]
+      
+      // Save to persistent storage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('ewu_cyber_favorite_games', JSON.stringify(updated))
+      }
+      
+      // Add XP for interaction
+      addXP(5)
+      
+      return updated
+    })
+  }
+
+  const trackGameView = (gameId: string) => {
+    if (typeof window === 'undefined') return
+    
+    // Track views like Cookie Clicker tracks clicks
+    const viewKey = `ewu_cyber_game_views_${gameId}`
+    const currentViews = parseInt(localStorage.getItem(viewKey) || '0')
+    localStorage.setItem(viewKey, (currentViews + 1).toString())
+    
+    // Update recent games
+    setRecentGames(prev => {
+      const updated = [gameId, ...prev.filter(id => id !== gameId)].slice(0, 5)
+      localStorage.setItem('ewu_cyber_recent_games', JSON.stringify(updated))
+      return updated
+    })
+    
+    addXP(2) // Small XP for engagement
+  }
+
+  // 📊 Personalized game recommendations
+  const getPersonalizedGames = () => {
+    const completedGames = gameProgress.filter((g: any) => g.completed).map((g: any) => g.gameId)
+    const skillLevels = Object.entries(skillProgress)
+    
+    return allGames.map(game => ({
+      ...game,
+      personalizedScore: calculatePersonalizationScore(game, completedGames, skillLevels),
+      isFavorite: favoriteGames.includes(game.id),
+      viewCount: typeof window !== 'undefined' ? parseInt(localStorage.getItem(`ewu_cyber_game_views_${game.id}`) || '0') : 0
+    })).sort((a, b) => b.personalizedScore - a.personalizedScore)
+  }
+
+  const calculatePersonalizationScore = (game: GameData, completedGames: string[], skillLevels: any[]) => {
+    let score = 0
+    
+    // Boost new games
+    if (game.isNew) score += 30
+    
+    // Boost favorites heavily
+    if (favoriteGames.includes(game.id)) score += 50
+    
+    // Boost recently played
+    if (recentGames.includes(game.id)) score += 20
+    
+    // Skill-based recommendations
+    const avgSkillLevel = skillLevels.reduce((sum, [_, level]: [string, number]) => sum + level, 0) / skillLevels.length
+    if (game.difficulty === 'Beginner' && avgSkillLevel < 30) score += 25
+    if (game.difficulty === 'Intermediate' && avgSkillLevel >= 30 && avgSkillLevel < 70) score += 25
+    if (game.difficulty === 'Advanced' && avgSkillLevel >= 70) score += 25
+    
+    // Boost unplayed games for variety
+    if (!completedGames.includes(game.id)) score += 15
+    
+    return score
+  }
+
+  // 🔄 Load persisted data on mount
   useEffect(() => {
-    // Update streak on page load
     updateStreak()
     
-    // Check if returning user
-    const lastVisit = localStorage.getItem('lastVisit')
-    if (lastVisit) {
-      const hoursSince = (Date.now() - parseInt(lastVisit)) / (1000 * 60 * 60)
-      if (hoursSince > 4) {
-        setShowWelcomeBack(true)
-        setTimeout(() => setShowWelcomeBack(false), 5000)
+    if (typeof window !== 'undefined') {
+      // Load favorites
+      const savedFavorites = localStorage.getItem('ewu_cyber_favorite_games')
+      if (savedFavorites) {
+        setFavoriteGames(JSON.parse(savedFavorites))
+      }
+      
+      // Load recent games
+      const savedRecent = localStorage.getItem('ewu_cyber_recent_games')
+      if (savedRecent) {
+        setRecentGames(JSON.parse(savedRecent))
       }
     }
-    localStorage.setItem('lastVisit', Date.now().toString())
-
-    // Simulate online user count updates
-    const interval = setInterval(() => {
-      setOnlineCount(prev => prev + Math.floor(Math.random() * 20 - 10))
-    }, 30000)
-
-    return () => clearInterval(interval)
   }, [updateStreak])
 
+  const personalizedGames = getPersonalizedGames()
+  const featuredGames = personalizedGames.filter(game => game.isFeatured)
+  const favoriteGamesList = personalizedGames.filter(game => game.isFavorite)
+  const recentGamesList = personalizedGames.filter(game => recentGames.includes(game.id))
+
   return (
-    <main className="min-h-screen relative overflow-x-hidden">
-      {/* Dynamic background with floating cyber elements */}
-      <div className="fixed inset-0 opacity-10 pointer-events-none">
-        {Array.from({ length: 20 }).map((_, i) => (
-          <motion.div
-            key={i}
-            className={`absolute w-1 h-1 rounded-full ${
-              ['bg-cyan-400', 'bg-purple-400', 'bg-green-400', 'bg-yellow-400'][i % 4]
-            }`}
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              y: [-20, 20, -20],
-              opacity: [0.3, 1, 0.3],
-            }}
-            transition={{
-              duration: 3 + Math.random() * 2,
-              repeat: Infinity,
-              delay: Math.random() * 2,
-            }}
-          />
-        ))}
+    <main className="min-h-screen relative overflow-x-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* Animated background elements */}
+      <div className="fixed inset-0 opacity-20 pointer-events-none">
+        <div className="absolute top-20 left-10 w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
+        <div className="absolute top-40 right-20 w-1 h-1 bg-purple-400 rounded-full animate-ping"></div>
+        <div className="absolute bottom-20 left-1/4 w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
+        <div className="absolute bottom-40 right-1/3 w-1 h-1 bg-yellow-400 rounded-full animate-ping"></div>
+        
+        {/* Floating cyber elements */}
+        <motion.div
+          className="absolute top-1/4 left-1/3 text-cyan-400/30 text-xs font-mono"
+          animate={{ y: [-10, 10, -10] }}
+          transition={{ duration: 4, repeat: Infinity }}
+        >
+          01001000
+        </motion.div>
+        <motion.div
+          className="absolute top-3/4 right-1/4 text-purple-400/30 text-xs font-mono"
+          animate={{ y: [10, -10, 10] }}
+          transition={{ duration: 3, repeat: Infinity }}
+        >
+          SECURE
+        </motion.div>
       </div>
 
-      {/* Welcome Back Notification */}
-      {showWelcomeBack && (
-        <motion.div
-          initial={{ opacity: 0, y: -50 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -50 }}
-          className="fixed top-4 right-4 z-50 bg-gradient-to-r from-purple-500 to-cyan-500 text-white p-4 rounded-lg shadow-lg max-w-sm"
-        >
-          <div className="flex items-center gap-2">
-            <Gift className="w-5 h-5" />
-            <div>
-              <p className="font-bold">Welcome back, Cyber Hero!</p>
-              <p className="text-sm opacity-90">You&apos;ve earned 50 bonus XP for returning!</p>
-            </div>
-          </div>
-        </motion.div>
-      )}
-
-      {/* Hero Section with Stats */}
-      <section className="relative z-10 pt-24 pb-16 px-4">
-        <div className="container mx-auto text-center">
-          {/* Live Stats Bar */}
+      {/* Player Progress Header */}
+      <section className="relative z-10 pt-8 pb-4 px-4">
+        <div className="container mx-auto">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex justify-center items-center gap-6 mb-8 text-sm text-slate-400"
+            className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-cyan-400/30 mb-8"
           >
-            <div className="flex items-center gap-1">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-              <span>{onlineCount.toLocaleString()} players online</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Trophy className="w-4 h-4" />
-              <span>Level {playerStats.level}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Star className="w-4 h-4" />
-              <span>{playerStats.totalXP.toLocaleString()} XP</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Zap className="w-4 h-4" />
-              <span>{playerStats.streakDays} day streak</span>
+            <div className="flex flex-col lg:flex-row items-center justify-between">
+              <div className="flex items-center space-x-6 mb-4 lg:mb-0">
+                <div className="w-16 h-16 bg-gradient-to-br from-cyan-400 to-purple-500 rounded-xl flex items-center justify-center text-2xl font-bold text-white">
+                  {playerStats.level}
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-white">Level {playerStats.level} Cyber Hero</h2>
+                  <p className="text-slate-400">{playerStats.totalXP} XP • {playerStats.gamesCompleted} games completed</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-yellow-400">{playerStats.streakDays}</div>
+                  <div className="text-xs text-slate-400">Day Streak</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-400">{achievements.length}</div>
+                  <div className="text-xs text-slate-400">Achievements</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-purple-400">{Math.floor(playerStats.timeSpent / 60)}</div>
+                  <div className="text-xs text-slate-400">Hours Played</div>
+                </div>
+              </div>
             </div>
           </motion.div>
+        </div>
+      </section>
 
+      {/* Hero Section with Personalized Welcome */}
+      <section className="relative z-10 py-8 px-4">
+        <div className="container mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -213,235 +319,338 @@ export default function HomePage() {
           >
             <div className="mb-8">
               <motion.div
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 backdrop-blur-sm rounded-full px-6 py-3 border border-cyan-400/30"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 backdrop-blur-sm rounded-full px-6 py-3 border border-cyan-400/30 mb-6"
                 animate={{ scale: [1, 1.05, 1] }}
                 transition={{ duration: 2, repeat: Infinity }}
               >
                 <Shield className="w-5 h-5 text-cyan-400" />
-                <span className="text-cyan-300 font-medium">EWU Cybersecurity Program</span>
+                <span className="text-cyan-300 font-medium">Welcome back, Cyber Hero!</span>
               </motion.div>
             </div>
 
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
+            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
               <span className="bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-                Cyber Games
+                Your Cyber Journey
               </span>
               <br />
-              <span className="text-3xl md:text-4xl text-slate-300">Arcade</span>
+              <span className="text-2xl md:text-3xl text-slate-300">Continues Here</span>
             </h1>
 
-            <p className="text-xl md:text-2xl text-slate-300 mb-8 max-w-3xl mx-auto leading-relaxed">
-              Level up your <span className="text-cyan-400 font-semibold">cybersecurity skills</span> through 
-              addictive games that make learning feel like playing!
+            <p className="text-lg md:text-xl text-slate-300 mb-8 max-w-2xl mx-auto leading-relaxed">
+              {playerStats.gamesCompleted === 0 
+                ? "Start your cybersecurity adventure with games that adapt to your learning style!"
+                : `You've mastered ${playerStats.gamesCompleted} games. Ready for your next challenge?`
+              }
             </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-              <motion.button
-                className="bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white font-bold py-4 px-8 rounded-xl text-lg transition-all duration-300 shadow-lg hover:shadow-cyan-500/25"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => document.getElementById('games')?.scrollIntoView({ behavior: 'smooth' })}
-              >
-                <div className="flex items-center gap-2">
-                  <Shield className="w-5 h-5" />
-                  Play Now - It&apos;s Free!
-                </div>
-              </motion.button>
-
-              <motion.button
-                className="border-2 border-cyan-400 text-cyan-400 hover:bg-cyan-400 hover:text-slate-900 font-bold py-4 px-8 rounded-xl text-lg transition-all duration-300"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => document.getElementById('daily-challenges')?.scrollIntoView({ behavior: 'smooth' })}
-              >
-                Today&apos;s Challenges
-              </motion.button>
-            </div>
           </motion.div>
         </div>
       </section>
 
-      {/* Daily Challenges Section */}
-      <section id="daily-challenges" className="py-16 px-4">
+      {/* Category Filter */}
+      <section className="relative z-10 px-4 mb-8">
         <div className="container mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-4xl font-bold text-white mb-4">
-              <Clock className="inline w-8 h-8 mr-2 text-yellow-400" />
-              Daily Challenges
-            </h2>
-            <p className="text-slate-300 text-lg">Complete today&apos;s challenges for bonus rewards!</p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-            {dailyChallenges.map((challenge, index) => (
-              <motion.div
-                key={challenge.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700 hover:border-cyan-400/50 transition-all duration-300"
+          <div className="flex flex-wrap justify-center gap-4 mb-8">
+            {['all', 'favorites', 'new', 'recent', 'completed'].map((category) => (
+              <motion.button
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+                className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
+                  selectedCategory === category
+                    ? 'bg-gradient-to-r from-cyan-500 to-purple-500 text-white'
+                    : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/50'
+                }`}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <div className="flex items-start justify-between mb-4">
-                  <h3 className="text-lg font-bold text-white">{challenge.title}</h3>
-                  <div className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-xs font-bold px-2 py-1 rounded">
-                    +{challenge.reward} XP
-                  </div>
-                </div>
-                <p className="text-slate-300 text-sm mb-4">{challenge.description}</p>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-slate-400">Progress</span>
-                    <span className="text-cyan-400">{challenge.progress}/{challenge.max}</span>
-                  </div>
-                  <div className="w-full bg-slate-700 rounded-full h-2">
-                    <div 
-                      className="bg-gradient-to-r from-cyan-500 to-purple-500 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${(challenge.progress / challenge.max) * 100}%` }}
-                    />
-                  </div>
-                </div>
-              </motion.div>
+                {category === 'all' && <Target className="w-4 h-4 inline mr-2" />}
+                {category === 'favorites' && <Heart className="w-4 h-4 inline mr-2" />}
+                {category === 'new' && <Star className="w-4 h-4 inline mr-2" />}
+                {category === 'recent' && <Clock className="w-4 h-4 inline mr-2" />}
+                {category === 'completed' && <Trophy className="w-4 h-4 inline mr-2" />}
+                {category.charAt(0).toUpperCase() + category.slice(1)}
+                {category === 'favorites' && favoriteGamesList.length > 0 && (
+                  <span className="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-1">
+                    {favoriteGamesList.length}
+                  </span>
+                )}
+                {category === 'new' && newGames.length > 0 && (
+                  <span className="ml-2 bg-green-500 text-white text-xs rounded-full px-2 py-1">
+                    {newGames.length}
+                  </span>
+                )}
+              </motion.button>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Featured Games Grid */}
-      <section id="games" className="py-16 px-4">
+      {/* Games Grid - Dynamic based on selected category */}
+      <section className="relative z-10 py-8 px-4">
         <div className="container mx-auto">
           <motion.div
+            className="text-center mb-8"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
           >
-            <h2 className="text-4xl font-bold text-white mb-4">
-              <Shield className="inline w-8 h-8 mr-2 text-purple-400" />
-              Featured Games
+            <h2 className="text-3xl font-bold text-white mb-4">
+              {selectedCategory === 'all' && "Recommended For You"}
+              {selectedCategory === 'favorites' && `Your Favorite Games ${favoriteGamesList.length > 0 ? `(${favoriteGamesList.length})` : ''}`}
+              {selectedCategory === 'new' && "New Adventures Await"}
+              {selectedCategory === 'recent' && "Continue Your Journey"}
+              {selectedCategory === 'completed' && "Your Achievements"}
             </h2>
-            <p className="text-slate-300 text-lg">Master cybersecurity through fun, addictive gameplay</p>
+            <p className="text-lg text-slate-300 max-w-2xl mx-auto">
+              {selectedCategory === 'all' && "Games picked just for you based on your progress and interests"}
+              {selectedCategory === 'favorites' && "Your most beloved cybersecurity adventures"}
+              {selectedCategory === 'new' && "Fresh challenges to expand your skills"}
+              {selectedCategory === 'recent' && "Pick up where you left off"}
+              {selectedCategory === 'completed' && "Celebrate your cybersecurity victories"}
+            </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-            {FEATURED_GAMES.map((game, index) => (
-              <motion.div
-                key={game.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="group"
-              >
-                <Link href={`/games/${game.id}` as `/games/${string}`}>
-                  <div className={`bg-gradient-to-br ${game.color} p-1 rounded-xl hover:scale-105 transition-all duration-300 cursor-pointer`}>
-                    <div className="bg-slate-900 rounded-lg p-6 h-full">
-                      <div className="flex items-start justify-between mb-4">
-                        <div>
-                          <div className="flex items-center gap-2 mb-2">
-                            <h3 className="text-xl font-bold text-white group-hover:text-cyan-400 transition-colors">
-                              {game.title}
-                            </h3>
-                            {game.hot && (
-                              <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded animate-pulse">
-                                HOT
-                              </span>
-                            )}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {(() => {
+              let gamesToShow = personalizedGames
+              
+              if (selectedCategory === 'favorites') {
+                gamesToShow = favoriteGamesList
+              } else if (selectedCategory === 'new') {
+                gamesToShow = personalizedGames.filter(game => game.isNew)
+              } else if (selectedCategory === 'recent') {
+                gamesToShow = recentGamesList
+              } else if (selectedCategory === 'completed') {
+                gamesToShow = personalizedGames.filter(game => 
+                  gameProgress.some((g: any) => g.gameId === game.id && g.completed)
+                )
+              }
+
+              if (gamesToShow.length === 0) {
+                return (
+                  <div className="col-span-full text-center py-12">
+                    <div className="text-6xl mb-4">🎮</div>
+                    <h3 className="text-2xl font-bold text-white mb-2">
+                      {selectedCategory === 'favorites' && "No favorites yet!"}
+                      {selectedCategory === 'recent' && "No recent games"}
+                      {selectedCategory === 'completed' && "No completed games yet"}
+                    </h3>
+                    <p className="text-slate-400 mb-6">
+                      {selectedCategory === 'favorites' && "Heart your favorite games to see them here"}
+                      {selectedCategory === 'recent' && "Start playing to see your recent games"}
+                      {selectedCategory === 'completed' && "Complete games to unlock achievements"}
+                    </p>
+                    <motion.button
+                      onClick={() => setSelectedCategory('all')}
+                      className="bg-gradient-to-r from-cyan-500 to-purple-500 text-white px-6 py-3 rounded-xl font-bold"
+                      whileHover={{ scale: 1.05 }}
+                    >
+                      Explore All Games
+                    </motion.button>
+                  </div>
+                )
+              }
+
+              return gamesToShow.map((game, index) => (
+                <motion.div
+                  key={game.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  className="group"
+                >
+                  <Link 
+                    href={`/games/${game.id}`}
+                    onClick={() => trackGameView(game.id)}
+                  >
+                    <motion.div
+                      className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl overflow-hidden border border-cyan-400/30 hover:border-cyan-400/60 transition-all duration-300 cursor-pointer"
+                      whileHover={{ scale: 1.02, y: -5 }}
+                    >
+                      <div className={`h-48 bg-gradient-to-br ${game.gradient} relative overflow-hidden`}>
+                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-all duration-300"></div>
+                        
+                        {/* Game Icon */}
+                        <div className="absolute top-4 left-4 text-4xl">
+                          {game.icon}
+                        </div>
+                        
+                        {/* Favorite Button */}
+                        <motion.button
+                          onClick={(e) => {
+                            e.preventDefault()
+                            toggleFavorite(game.id)
+                          }}
+                          className={`absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
+                            game.isFavorite 
+                              ? 'bg-red-500 text-white' 
+                              : 'bg-black/30 text-white/70 hover:bg-black/50'
+                          }`}
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                        >
+                          <Heart className={`w-5 h-5 ${game.isFavorite ? 'fill-current' : ''}`} />
+                        </motion.button>
+                        
+                        {/* New Badge */}
+                        {game.isNew && (
+                          <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                            NEW!
                           </div>
-                          <p className="text-slate-300 text-sm mb-3">{game.description}</p>
+                        )}
+                        
+                        {/* Game Category */}
+                        <div className="absolute bottom-4 right-4 text-white/80 text-sm font-mono uppercase">
+                          {game.category}
                         </div>
                       </div>
-
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {game.tags.map(tag => (
-                          <span key={tag} className="bg-slate-800 text-cyan-400 text-xs px-2 py-1 rounded">
-                            {tag}
+                      
+                      <div className="p-6">
+                        <h3 className="text-xl font-bold text-white mb-2">{game.title}</h3>
+                        <p className="text-slate-400 text-sm mb-4 line-clamp-2">{game.description}</p>
+                        
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center space-x-4">
+                            <span className="text-cyan-400 text-sm font-medium flex items-center">
+                              <Star className="w-4 h-4 mr-1 fill-current" />
+                              {game.rating}
+                            </span>
+                            <span className="text-purple-400 text-sm">{game.difficulty}</span>
+                          </div>
+                          <span className="text-slate-500 text-sm">{game.estimatedTime}</span>
+                        </div>
+                        
+                        {/* Progress and Stats */}
+                        <div className="flex items-center justify-between text-xs text-slate-500">
+                          <span className="flex items-center">
+                            <Play className="w-3 h-3 mr-1" />
+                            {game.plays} plays
                           </span>
-                        ))}
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4 text-sm text-slate-400 mb-4">
-                        <div className="flex items-center gap-1">
-                          <Target className="w-4 h-4" />
-                          <span>{game.difficulty}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-4 h-4" />
-                          <span>{game.duration}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Users className="w-4 h-4" />
-                          <span>{game.players}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Star className="w-4 h-4 text-yellow-400" />
-                          <span>{game.rating}</span>
+                          <span className="flex items-center">
+                            <Eye className="w-3 h-3 mr-1" />
+                            {game.viewCount} views
+                          </span>
+                          {gameProgress.some((g: any) => g.gameId === game.id && g.completed) && (
+                            <span className="flex items-center text-green-400">
+                              <Trophy className="w-3 h-3 mr-1" />
+                              Completed
+                            </span>
+                          )}
                         </div>
                       </div>
-
-                      <motion.button
-                        className="w-full bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                      >
-                        Play Now
-                      </motion.button>
-                    </div>
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
+                    </motion.div>
+                  </Link>
+                </motion.div>
+              ))
+            })()}
           </div>
         </div>
       </section>
 
-      {/* Progress Overview */}
-      <section className="py-16 px-4">
+      {/* How It Works Section - Simplified */}
+      <section className="relative z-10 py-16 px-4">
         <div className="container mx-auto">
           <motion.div
+            className="text-center mb-12"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
           >
-            <h2 className="text-4xl font-bold text-white mb-4">
-              <TrendingUp className="inline w-8 h-8 mr-2 text-green-400" />
-              Your Cyber Journey
-            </h2>
-            <p className="text-slate-300 text-lg">Track your progress and unlock new challenges</p>
+            <h2 className="text-4xl font-bold text-white mb-4">How It Works</h2>
+            <p className="text-xl text-slate-300 max-w-2xl mx-auto">
+              Learn cybersecurity through games that remember your progress and adapt to your skill level
+            </p>
           </motion.div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
-            {[
-              { label: 'Level', value: playerStats.level, icon: Trophy, color: 'text-yellow-400' },
-              { label: 'Total XP', value: playerStats.totalXP.toLocaleString(), icon: Star, color: 'text-purple-400' },
-              { label: 'Games Completed', value: playerStats.gamesCompleted, icon: Shield, color: 'text-cyan-400' },
-              { label: 'Day Streak', value: playerStats.streakDays, icon: Zap, color: 'text-green-400' },
-            ].map((stat, index) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 text-center border border-slate-700"
-              >
-                <stat.icon className={`w-8 h-8 mx-auto mb-2 ${stat.color}`} />
-                <div className="text-2xl font-bold text-white mb-1">{stat.value}</div>
-                <div className="text-slate-400 text-sm">{stat.label}</div>
-              </motion.div>
-            ))}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <motion.div
+              className="text-center"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+            >
+              <div className="w-16 h-16 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Play className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">Play & Learn</h3>
+              <p className="text-slate-400">
+                Jump into any game and start learning. Your progress saves automatically across sessions.
+              </p>
+            </motion.div>
+
+            <motion.div
+              className="text-center"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+            >
+              <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <TrendingUp className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">Track Progress</h3>
+              <p className="text-slate-400">
+                Watch your skills grow with detailed progress tracking and personalized recommendations.
+              </p>
+            </motion.div>
+
+            <motion.div
+              className="text-center"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+            >
+              <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Trophy className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">Earn Achievements</h3>
+              <p className="text-slate-400">
+                Unlock achievements, maintain streaks, and become a cybersecurity expert.
+              </p>
+            </motion.div>
           </div>
         </div>
       </section>
 
-      {/* AI Companion */}
       <AICompanion />
+
+      {/* Patch Notes Modal */}
+      <PatchNotes 
+        isOpen={showPatchNotes} 
+        onClose={() => setShowPatchNotes(false)} 
+      />
+
+      {/* Floating Patch Notes Button */}
+      <motion.div
+        className="fixed bottom-4 right-20 z-40"
+        initial={{ opacity: 0, scale: 0 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 2 }}
+      >
+        <motion.button
+          onClick={() => setShowPatchNotes(true)}
+          className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-3 rounded-full shadow-lg border border-purple-400/30 backdrop-blur-sm"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          title="View Patch Notes v1.3.0"
+        >
+          <div className="flex items-center gap-2">
+            <Settings className="w-5 h-5" />
+            <span className="text-xs font-bold">v1.3.0</span>
+          </div>
+        </motion.button>
+      </motion.div>
+
+      <UpdateNotification 
+        version="1.2.0"
+        features={[
+          "🐉 Pokemon Cyber MMO - Collect and evolve cybersecurity creatures!",
+          "🦸 CyberCity Heroes - Superhero network defense adventures!",
+          "💾 Smart Progress Tracking - Your journey remembers everything!"
+        ]}
+      />
     </main>
   )
 }
