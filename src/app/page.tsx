@@ -748,6 +748,91 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Learning Pathways Section */}
+      <section className="relative z-10 py-16 px-4">
+        <div className="container mx-auto">
+          <motion.div
+            className="text-center mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent mb-4">
+              📚 Structured Learning Pathways
+            </h2>
+            <p className="text-xl text-slate-300 max-w-3xl mx-auto mb-8">
+              Master cybersecurity through carefully designed learning journeys that adapt to your skill level and career goals.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+            <motion.div
+              className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-8 border border-green-400/30 hover:border-green-400/60 transition-all duration-300"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+            >
+              <div className="text-4xl mb-4">🌱</div>
+              <h3 className="text-xl font-bold text-white mb-3">Beginner Explorer</h3>
+              <p className="text-slate-400 mb-4">Start with password security, phishing detection, and digital hygiene fundamentals.</p>
+              <div className="text-green-400 text-sm font-medium">2-4 weeks • 4 modules</div>
+            </motion.div>
+
+            <motion.div
+              className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-8 border border-blue-400/30 hover:border-blue-400/60 transition-all duration-300"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+            >
+              <div className="text-4xl mb-4">🔍</div>
+              <h3 className="text-xl font-bold text-white mb-3">Digital Detective</h3>
+              <p className="text-slate-400 mb-4">Develop analytical thinking and advanced threat recognition capabilities.</p>
+              <div className="text-blue-400 text-sm font-medium">4-8 weeks • 4 modules</div>
+            </motion.div>
+
+            <motion.div
+              className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-8 border border-purple-400/30 hover:border-purple-400/60 transition-all duration-300"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+            >
+              <div className="text-4xl mb-4">🚀</div>
+              <h3 className="text-xl font-bold text-white mb-3">Cyber Guardian</h3>
+              <p className="text-slate-400 mb-4">Master advanced concepts and develop cybersecurity leadership skills.</p>
+              <div className="text-purple-400 text-sm font-medium">Ongoing • 4 modules</div>
+            </motion.div>
+          </div>
+
+          <motion.div
+            className="text-center"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.4 }}
+          >
+            <Link href="/learning">
+              <motion.div
+                className="inline-block bg-gradient-to-r from-cyan-500 to-purple-500 rounded-xl p-6 border border-cyan-400/30 hover:border-cyan-400/60 transition-all duration-300 cursor-pointer"
+                whileHover={{ scale: 1.05 }}
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                    <Trophy className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="text-left">
+                    <h3 className="text-xl font-bold text-white mb-1">📚 Start Your Learning Journey</h3>
+                    <p className="text-cyan-100">Choose your path and master cybersecurity step by step</p>
+                  </div>
+                </div>
+              </motion.div>
+            </Link>
+          </motion.div>
+        </div>
+      </section>
+
       {/* How It Works Section - Simplified */}
       <section className="relative z-10 py-16 px-4">
         <div className="container mx-auto">
