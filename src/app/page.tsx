@@ -16,7 +16,7 @@ import {
   Target,
   BarChart3
 } from 'lucide-react'
-import { Star, Trophy, Heart } from 'lucide-react'
+import { Star, Trophy, Heart, Search, CheckCircle } from 'lucide-react'
 
 import AICompanion from '@/components/AICompanion'
 import UpdateNotification from '@/components/UpdateNotification'
@@ -554,6 +554,149 @@ export default function HomePage() {
               ))
             })()}
           </div>
+        </div>
+      </section>
+
+      {/* Professional Security Tools Section */}
+      <section className="relative z-10 py-16 px-4">
+        <div className="container mx-auto">
+          <motion.div
+            className="text-center mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent mb-4">
+              🛡️ Professional Security Tools Lab
+            </h2>
+            <p className="text-xl text-slate-300 max-w-3xl mx-auto mb-6">
+              Experience real cybersecurity tools used by professionals worldwide. Learn through hands-on interaction with industry-standard security systems.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {/* Vulnerability Assessment Scanner */}
+            <Link href="/security/vulnerability-assessment">
+              <motion.div
+                className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl overflow-hidden border border-red-400/30 hover:border-red-400/60 transition-all duration-300 cursor-pointer group"
+                whileHover={{ scale: 1.02, y: -5 }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.1 }}
+              >
+                <div className="p-6">
+                  <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-pink-500 rounded-lg flex items-center justify-center mb-4">
+                    <Search className="w-6 h-6 text-white" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-2">Vulnerability Scanner</h3>
+                  <p className="text-slate-400 mb-4">
+                    Discover security weaknesses like professional penetration testers. Learn CVSS scoring and real vulnerability analysis.
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <span className="bg-red-900/30 text-red-300 px-3 py-1 rounded-full text-sm">Security Pro</span>
+                    <div className="flex items-center space-x-1">
+                      <span className="text-yellow-400">★★★★★</span>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </Link>
+
+            {/* Security Monitoring Dashboard */}
+            <Link href="/security">
+              <motion.div
+                className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl overflow-hidden border border-blue-400/30 hover:border-blue-400/60 transition-all duration-300 cursor-pointer group"
+                whileHover={{ scale: 1.02, y: -5 }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2 }}
+              >
+                <div className="p-6">
+                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center mb-4">
+                    <Eye className="w-6 h-6 text-white" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-2">SOC Dashboard</h3>
+                  <p className="text-slate-400 mb-4">
+                    Experience a real Security Operations Center. Monitor threats, analyze logs, and coordinate incident response.
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <span className="bg-blue-900/30 text-blue-300 px-3 py-1 rounded-full text-sm">Real-time</span>
+                    <div className="flex items-center space-x-1">
+                      <span className="text-yellow-400">★★★★★</span>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </Link>
+
+            {/* STRIDE Threat Modeling */}
+            <Link href="/security/threat-modeling">
+              <motion.div
+                className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl overflow-hidden border border-purple-400/30 hover:border-purple-400/60 transition-all duration-300 cursor-pointer group"
+                whileHover={{ scale: 1.02, y: -5 }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.3 }}
+              >
+                <div className="p-6">
+                  <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center mb-4">
+                    <Shield className="w-6 h-6 text-white" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-2">STRIDE Threat Modeler</h3>
+                  <p className="text-slate-400 mb-4">
+                    Think like a security architect. Analyze systems for threats using Microsoft's STRIDE methodology.
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <span className="bg-purple-900/30 text-purple-300 px-3 py-1 rounded-full text-sm">Advanced</span>
+                    <div className="flex items-center space-x-1">
+                      <span className="text-yellow-400">★★★★★</span>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </Link>
+          </div>
+
+          {/* Achievement Center Link */}
+          <motion.div
+            className="text-center"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.4 }}
+          >
+            <Link href="/achievements">
+              <motion.div
+                className="inline-block bg-gradient-to-r from-cyan-500 to-purple-500 rounded-xl p-6 border border-cyan-400/30 hover:border-cyan-400/60 transition-all duration-300 cursor-pointer"
+                whileHover={{ scale: 1.05 }}
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                    <CheckCircle className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="text-left">
+                    <h3 className="text-xl font-bold text-white mb-1">🏆 Achievement Center</h3>
+                    <p className="text-cyan-100">Track your progress and unlock achievements as you master cybersecurity skills</p>
+                  </div>
+                </div>
+              </motion.div>
+            </Link>
+          </motion.div>
+
+          <motion.div
+            className="text-center mt-8"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.5 }}
+          >
+            <p className="text-slate-400 max-w-2xl mx-auto text-sm">
+              💡 <strong>Educator Note:</strong> These tools demonstrate real cybersecurity workflows used by professionals at companies like Microsoft, Amazon, and government agencies. Students gain hands-on experience with industry-standard security practices.
+            </p>
+          </motion.div>
         </div>
       </section>
 
