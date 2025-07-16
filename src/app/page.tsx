@@ -52,7 +52,7 @@ export default function HomePage() {
   
   const [favoriteGames, setFavoriteGames] = useState<string[]>([])
   const [recentGames, setRecentGames] = useState<string[]>([])
-  const [newGames] = useState(['cyber-knowledge-brain', 'packet-tracer-mmo'])
+  const [newGames] = useState(['cyber-knowledge-brain', 'packet-tracer-mmo', 'phishing-detective', 'network-defense', 'encryption-escape'])
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [showPersonalizedView, setShowPersonalizedView] = useState(true)
   const [showPatchNotes, setShowPatchNotes] = useState(false)
@@ -154,6 +154,54 @@ export default function HomePage() {
       isFeatured: false,
       gradient: 'from-pink-500 to-purple-600',
       skillsLearned: ['Data Flow Analysis', 'Network Patterns']
+    },
+    {
+      id: 'phishing-detective',
+      title: 'Phishing Detective Agency',
+      description: 'Master the art of spotting fake emails and social engineering attacks',
+      icon: '🕵️',
+      difficulty: 'Intermediate',
+      category: 'Investigation',
+      estimatedTime: '15-25 min',
+      rating: 4.9,
+      plays: gameProgress.find((g: any) => g.gameId === 'phishing-detective')?.attempts || 0,
+      lastPlayed: gameProgress.find((g: any) => g.gameId === 'phishing-detective')?.timeSpent || null,
+      isNew: true,
+      isFeatured: true,
+      gradient: 'from-red-500 to-orange-600',
+      skillsLearned: ['Phishing Detection', 'Social Engineering', 'Email Security']
+    },
+    {
+      id: 'network-defense',
+      title: 'Network Defense Tower',
+      description: 'Build the ultimate cyber fortress using strategic defense systems',
+      icon: '🏰',
+      difficulty: 'Advanced',
+      category: 'Strategy',
+      estimatedTime: '25-40 min',
+      rating: 4.8,
+      plays: gameProgress.find((g: any) => g.gameId === 'network-defense')?.attempts || 0,
+      lastPlayed: gameProgress.find((g: any) => g.gameId === 'network-defense')?.timeSpent || null,
+      isNew: true,
+      isFeatured: true,
+      gradient: 'from-green-500 to-teal-600',
+      skillsLearned: ['Network Security', 'Firewall Management', 'Threat Analysis']
+    },
+    {
+      id: 'encryption-escape',
+      title: 'Encryption Escape Room',
+      description: 'Escape digital puzzles by mastering cryptography and cipher techniques',
+      icon: '🔐',
+      difficulty: 'Intermediate',
+      category: 'Puzzles',
+      estimatedTime: '20-35 min',
+      rating: 4.9,
+      plays: gameProgress.find((g: any) => g.gameId === 'encryption-escape')?.attempts || 0,
+      lastPlayed: gameProgress.find((g: any) => g.gameId === 'encryption-escape')?.timeSpent || null,
+      isNew: true,
+      isFeatured: true,
+      gradient: 'from-yellow-500 to-amber-600',
+      skillsLearned: ['Cryptography', 'Data Protection', 'Mathematical Security']
     }
   ]
 
