@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Shield, Zap, Cpu, Network, Lock, Unlock, AlertTriangle, CheckCircle } from 'lucide-react'
+import { Shield, Zap, Server, Wifi, Lock, Unlock, AlertTriangle, CheckCircle } from 'lucide-react'
 
 interface ClickUpgrade {
   id: string
@@ -57,7 +57,7 @@ export default function CyberClickerGame() {
       cost: 1000,
       multiplier: 5,
       owned: 0,
-      icon: Cpu,
+      icon: Server,
       description: 'AI-powered security system (+5x click power)'
     },
     {
@@ -66,7 +66,7 @@ export default function CyberClickerGame() {
       cost: 5000,
       multiplier: 10,
       owned: 0,
-      icon: Network,
+      icon: Wifi,
       description: 'Quantum-encrypted protection (+10x click power)'
     }
   ])

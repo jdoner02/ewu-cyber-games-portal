@@ -26,15 +26,15 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
-  MessageSquare, 
+  Search, 
   Shield, 
-  Brain, 
-  BookOpen,
+  Settings, 
+  FileText,
   AlertTriangle,
   CheckCircle,
-  Bot,
-  User,
-  Lightbulb,
+  Settings as Bot,
+  Users as User,
+  Zap as Lightbulb,
   Target,
   Lock
 } from 'lucide-react'
