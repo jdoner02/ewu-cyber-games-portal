@@ -2,12 +2,15 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Shield, Monitor, Settings, Zap, UserCheck, MapPin, Archive, FolderOpen, Calendar } from 'lucide-react';
+import { Users, Shield, Monitor, Settings, Zap, UserCheck, MapPin, Calendar } from 'lucide-react';
 import { CyberCareersTutorial, HardwareSoftwareTutorial, EthicsTutorial } from './components/Day1Tutorials';
+import Day1EnhancedTutorials from './components/Day1EnhancedTutorials';
 import { IPAddressTutorial, PacketTracerTutorial, WiFiSecurityTutorial } from './components/Day2Tutorials';
 import { PythonCodingTutorial, TurtleGraphicsTutorial, PhidgetTutorial } from './components/Day3Tutorials';
 import { VMSetupTutorial, LinuxCommandsTutorial, AIEthicsTutorial, CryptographyTutorial } from './components/Day4Tutorials';
+import Day4EnhancedTutorials from './components/Day4EnhancedTutorials';
 import { PhishingIdentificationTutorial, OSINTTutorial, RedBlueTeamTutorial } from './components/Day5Tutorials';
+import Day5EnhancedTutorials from './components/Day5EnhancedTutorials';
 
 // Types for the Day 1 GenCyber Pokemon MMO
 interface CyberPokemon {
@@ -1141,7 +1144,8 @@ const PokemonCyberMMO: React.FC = () => {
       tutorials.push(
         { id: 'cyber-careers', name: 'Cyber Careers Explorer', description: 'Discover your cybersecurity path!', icon: '🎯' },
         { id: 'hardware-software', name: 'Hardware vs Software', description: 'Learn the difference!', icon: '🔧' },
-        { id: 'ethics', name: 'Cyber Ethics Challenge', description: 'Be an ethical hacker!', icon: '⚖️' }
+        { id: 'ethics', name: 'Cyber Ethics Challenge', description: 'Be an ethical hacker!', icon: '⚖️' },
+        { id: 'day1-enhanced', name: 'Enhanced Team Training', description: 'Social features, Windows security & file systems!', icon: '🚀' }
       );
     }
     
@@ -1166,7 +1170,8 @@ const PokemonCyberMMO: React.FC = () => {
         { id: 'vm-setup', name: 'Virtual Machine Lab', description: 'Build your cyber lab environment!', icon: '💻' },
         { id: 'linux-commands', name: 'Linux Command Academy', description: 'Master the terminal!', icon: '🐧' },
         { id: 'ai-ethics', name: 'AI Ethics Challenge', description: 'Navigate AI moral dilemmas!', icon: '🤖' },
-        { id: 'cryptography', name: 'Cryptography Puzzles', description: 'Crack codes and ciphers!', icon: '🔐' }
+        { id: 'cryptography', name: 'Cryptography Puzzles', description: 'Crack codes and ciphers!', icon: '🔐' },
+        { id: 'day4-enhanced', name: 'Advanced Security Labs', description: 'MFA, binary/hex games & steganography!', icon: '🛡️' }
       );
     }
     
@@ -1174,7 +1179,8 @@ const PokemonCyberMMO: React.FC = () => {
       tutorials.push(
         { id: 'phishing-detection', name: 'Phishing Hunter', description: 'Spot malicious emails!', icon: '🎣' },
         { id: 'osint-investigation', name: 'OSINT Detective', description: 'Investigate with open sources!', icon: '🔍' },
-        { id: 'red-blue-team', name: 'Red vs Blue Battle', description: 'Epic attack vs defense!', icon: '⚔️' }
+        { id: 'red-blue-team', name: 'Red vs Blue Battle', description: 'Epic attack vs defense!', icon: '⚔️' },
+        { id: 'day5-enhanced', name: 'Advanced Investigation Labs', description: 'File recovery, metadata analysis & escape room!', icon: '🕵️' }
       );
     }
     
@@ -1221,7 +1227,7 @@ const PokemonCyberMMO: React.FC = () => {
               <span className="text-white">Learn computer hardware vs software</span>
             </div>
             <div className="flex items-center space-x-3">
-              <FolderOpen className="text-yellow-400" size={24} />
+              <Monitor className="text-yellow-400" size={24} />
               <span className="text-white">Master file structures and command line</span>
             </div>
             <div className="flex items-center space-x-3">
@@ -1801,6 +1807,9 @@ const PokemonCyberMMO: React.FC = () => {
                 onClose={() => setActiveTutorial(null)}
               />
             )}
+            {activeTutorial === 'day1-enhanced' && (
+              <Day1EnhancedTutorials />
+            )}
             {activeTutorial === 'ip-addressing' && (
               <IPAddressTutorial
                 tutorialId="ip-addressing"
@@ -1871,6 +1880,9 @@ const PokemonCyberMMO: React.FC = () => {
                 onClose={() => setActiveTutorial(null)}
               />
             )}
+            {activeTutorial === 'day4-enhanced' && (
+              <Day4EnhancedTutorials />
+            )}
             {activeTutorial === 'phishing-detection' && (
               <PhishingIdentificationTutorial
                 tutorialId="phishing-detection"
@@ -1891,6 +1903,9 @@ const PokemonCyberMMO: React.FC = () => {
                 onComplete={(score) => handleTutorialComplete('red-blue-team', score)}
                 onClose={() => setActiveTutorial(null)}
               />
+            )}
+            {activeTutorial === 'day5-enhanced' && (
+              <Day5EnhancedTutorials />
             )}
           </motion.div>
         </motion.div>
