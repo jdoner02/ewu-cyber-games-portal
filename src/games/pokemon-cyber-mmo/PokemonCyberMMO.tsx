@@ -6,9 +6,11 @@ import { Users, Shield, Monitor, Settings, Zap, UserCheck, MapPin, Calendar } fr
 import { CyberCareersTutorial, HardwareSoftwareTutorial, EthicsTutorial } from './components/Day1Tutorials';
 import Day1EnhancedTutorials from './components/Day1EnhancedTutorials';
 import { IPAddressTutorial, PacketTracerTutorial, WiFiSecurityTutorial } from './components/Day2Tutorials';
+import Day2EnhancedTutorials from './components/Day2EnhancedTutorials';
 import { PythonCodingTutorial, TurtleGraphicsTutorial, PhidgetTutorial } from './components/Day3Tutorials';
 import { VMSetupTutorial, LinuxCommandsTutorial, AIEthicsTutorial, CryptographyTutorial } from './components/Day4Tutorials';
 import Day4EnhancedTutorials from './components/Day4EnhancedTutorials';
+import Day4AdditionalEnhancedTutorials from './components/Day4AdditionalEnhancedTutorials';
 import { PhishingIdentificationTutorial, OSINTTutorial, RedBlueTeamTutorial } from './components/Day5Tutorials';
 import Day5EnhancedTutorials from './components/Day5EnhancedTutorials';
 
@@ -1153,7 +1155,8 @@ const PokemonCyberMMO: React.FC = () => {
       tutorials.push(
         { id: 'ip-addressing', name: 'IP Address Lab', description: 'Master network addressing!', icon: '🌐' },
         { id: 'packet-tracer', name: 'Packet Tracer Sim', description: 'Build your network!', icon: '📡' },
-        { id: 'wifi-security', name: 'WiFi Security Setup', description: 'Secure your wireless!', icon: '📶' }
+        { id: 'wifi-security', name: 'WiFi Security Setup', description: 'Secure your wireless!', icon: '📶' },
+        { id: 'day2-enhanced', name: 'Advanced Networking Labs', description: 'Wireshark, Remote Desktop & DHCP mastery!', icon: '🔧' }
       );
     }
     
@@ -1171,7 +1174,8 @@ const PokemonCyberMMO: React.FC = () => {
         { id: 'linux-commands', name: 'Linux Command Academy', description: 'Master the terminal!', icon: '🐧' },
         { id: 'ai-ethics', name: 'AI Ethics Challenge', description: 'Navigate AI moral dilemmas!', icon: '🤖' },
         { id: 'cryptography', name: 'Cryptography Puzzles', description: 'Crack codes and ciphers!', icon: '🔐' },
-        { id: 'day4-enhanced', name: 'Advanced Security Labs', description: 'MFA, binary/hex games & steganography!', icon: '🛡️' }
+        { id: 'day4-enhanced', name: 'Advanced Security Labs', description: 'MFA, binary/hex games & steganography!', icon: '🛡️' },
+        { id: 'day4-additional', name: 'Elite AI & Crypto Labs', description: 'Teachable Machine, CyberChef & TFTP mastery!', icon: '🚀' }
       );
     }
     
@@ -1831,6 +1835,9 @@ const PokemonCyberMMO: React.FC = () => {
                 onClose={() => setActiveTutorial(null)}
               />
             )}
+            {activeTutorial === 'day2-enhanced' && (
+              <Day2EnhancedTutorials onClose={() => setActiveTutorial(null)} />
+            )}
             {activeTutorial === 'python-coding' && (
               <PythonCodingTutorial
                 tutorialId="python-coding"
@@ -1882,6 +1889,9 @@ const PokemonCyberMMO: React.FC = () => {
             )}
             {activeTutorial === 'day4-enhanced' && (
               <Day4EnhancedTutorials />
+            )}
+            {activeTutorial === 'day4-additional' && (
+              <Day4AdditionalEnhancedTutorials onClose={() => setActiveTutorial(null)} />
             )}
             {activeTutorial === 'phishing-detection' && (
               <PhishingIdentificationTutorial
