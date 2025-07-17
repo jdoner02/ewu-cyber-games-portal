@@ -82,6 +82,27 @@ export class PrivacyFilter {
    * We keep learning analytics but remove anything that could identify students.
    */
   public sanitizeGameEvent(event: GameEvent): GameEvent {
+    // 🛡️ NULL SAFETY: Handle invalid events gracefully
+    if (!event) {
+      return {
+        anonymousUserId: 'anonymous_invalid',
+        sessionId: 'session_invalid',
+        gameName: 'unknown',
+        gameVersion: '0.0.0',
+        action: 'game_started',
+        level: 0,
+        score: 0,
+        timeSpent: 0,
+        difficultyRating: undefined,
+        hintsUsed: 0,
+        mistakesCount: 0,
+        progressPercentage: 0,
+        securityConcepts: [],
+        vulnerabilitiesFound: [],
+        securityToolsUsed: []
+      };
+    }
+
     const sanitized: GameEvent = {
       ...event,
       
@@ -110,17 +131,21 @@ export class PrivacyFilter {
       vulnerabilitiesFound: event.vulnerabilitiesFound,
       securityToolsUsed: event.securityToolsUsed,
     };
+
+    // 🔒 ADDITIONAL PII REMOVAL
+    // Remove any personally identifiable information that might have slipped through
+    const cleanedSanitized = this.removePIIFromObject(sanitized);
     
     // 🧪 EDUCATIONAL LOG: Show what we filtered (in development)
     if (process.env.NODE_ENV === 'development') {
       console.log('🎮 [PRIVACY] Game event sanitized:', {
-        original_user_id: event.anonymousUserId.slice(0, 8) + '...',
-        sanitized_user_id: sanitized.anonymousUserId.slice(0, 8) + '...',
+        original_user_id: event.anonymousUserId ? event.anonymousUserId.slice(0, 8) + '...' : 'null',
+        sanitized_user_id: cleanedSanitized.anonymousUserId.slice(0, 8) + '...',
         educational_data_preserved: true
       });
     }
     
-    return sanitized;
+    return cleanedSanitized;
   }
   
   /**
@@ -250,10 +275,15 @@ export class PrivacyFilter {
    * without revealing who the user actually is.
    */
   private anonymizeUserId(userId: string): string {
+    // 🛡️ NULL SAFETY: Handle undefined/null user IDs
+    if (!userId) {
+      return 'anonymous_unknown';
+    }
+    
     // 🎯 EDUCATIONAL TECHNIQUE: Consistent hashing
     // Same input always produces same output, but original can't be recovered
     const hash = this.createHash(userId + 'user_salt');
-    return `anon_user_${hash.substring(0, 12)}`;
+    return `anonymous_${hash.substring(0, 12)}`;
   }
   
   /**
@@ -485,6 +515,44 @@ export class PrivacyFilter {
     }
   }
   
+  /**
+   * 🔒 REMOVE PII FROM ANY OBJECT
+   * 
+   * Recursively removes personally identifiable information from any object.
+   * Essential for educational data protection!
+   */
+  private removePIIFromObject(obj: any): any {
+    if (!obj || typeof obj !== 'object') {
+      return obj;
+    }
+
+    const piiFields = [
+      'studentName', 'name', 'fullName', 'firstName', 'lastName',
+      'email', 'emailAddress', 'phone', 'phoneNumber',
+      'address', 'streetAddress', 'zipCode', 'socialSecurityNumber',
+      'ssn', 'birthDate', 'dateOfBirth', 'age', 'realUserId',
+      'parentEmail', 'parentName', 'teacherEmail', 'schoolName'
+    ];
+
+    const cleaned = { ...obj };
+    
+    // Remove any PII fields
+    piiFields.forEach(field => {
+      if (field in cleaned) {
+        delete cleaned[field];
+      }
+    });
+
+    // Recursively clean nested objects
+    Object.keys(cleaned).forEach(key => {
+      if (typeof cleaned[key] === 'object' && cleaned[key] !== null) {
+        cleaned[key] = this.removePIIFromObject(cleaned[key]);
+      }
+    });
+
+    return cleaned;
+  }
+
   /**
    * 📊 GET PRIVACY STATISTICS
    * 
