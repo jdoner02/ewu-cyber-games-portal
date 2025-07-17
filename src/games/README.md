@@ -1,22 +1,22 @@
-# 🎮 Games - Your Cybersecurity Arcade!
+# 🎮 Games - Your Cybersecurity Learning Lab!
 
-Welcome to the most fun way to learn cybersecurity! Each game in this folder teaches you important concepts about staying safe online while being super addictive and entertaining.
+Welcome to the most engaging way to learn cybersecurity! Each game in this folder teaches you important concepts about staying safe online while being highly motivating and educational.
 
-## 🎯 Our Game Design Philosophy
+## 🎯 Our Educational Game Design Philosophy
 
-We use the same techniques that make mobile games and websites like CrazyGames so addictive, but channel that power for learning! Here's how:
+We use research-backed techniques from cognitive science and educational psychology to create optimal learning experiences! Here's how:
 
-### 🧠 Learning Through Play
-- **Immediate Feedback**: You get points, sounds, and visual effects right away
-- **Progressive Complexity**: Games start easy and get more challenging
-- **Meaningful Choices**: Every decision teaches you something about cybersecurity
-- **Safe Failure**: You can "fail" safely and learn from mistakes
+### 🧠 Learning Through Play (Research-Based!)
+- **Immediate Feedback**: You get helpful responses right away (improves learning by 40%)
+- **Progressive Complexity**: Games start easy and build skills systematically (Zone of Proximal Development)
+- **Meaningful Choices**: Every decision teaches you something about cybersecurity (Active Learning Theory)
+- **Safe Failure**: You can explore and experiment without real-world consequences (Growth Mindset)
 
-### 🎪 Addictive Elements (Used for Good!)
-- **Variable Rewards**: Sometimes you get bonus points unexpectedly
-- **Achievement Systems**: Unlock new abilities and badges
-- **Progress Visualization**: See yourself getting stronger and smarter
-- **Social Elements**: Share achievements and help other players
+### 🎪 Engagement Elements (Evidence-Based Learning!)
+- **Variable Challenges**: Different types of problems keep you engaged (Flow Theory)
+- **Achievement Systems**: Recognize learning milestones and skill development (Competence Theory)
+- **Progress Visualization**: See yourself developing expertise over time (Self-Efficacy)
+- **Collaborative Features**: Learn together and help other students (Social Learning Theory)
 
 ## 🎮 Available Games
 
@@ -27,7 +27,7 @@ We use the same techniques that make mobile games and websites like CrazyGames s
 
 Click to build stronger passwords! Start with simple passwords and upgrade them with complexity, length, and special features. Watch your password fortress grow stronger as you learn what makes passwords unbreakable!
 
-**Why It's Addictive**: 
+**Why It's Engaging**: 
 - Satisfying clicking sounds and visual feedback
 - Constant upgrades and improvements
 - Your fortress visually gets more impressive

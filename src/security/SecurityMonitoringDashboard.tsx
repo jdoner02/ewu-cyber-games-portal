@@ -259,28 +259,28 @@ const generateRealisticSecurityEvent = (): SecurityEvent => {
       'Lateral movement detected between campus subnets'
     ],
     data_exfiltration: [
-      'Large volume of student records accessed and downloaded',
-      'Sensitive research data uploaded to external cloud service',
-      'Database queries retrieving unusual amounts of personal information',
-      'Email with confidential attachments sent to external address'
+      'Unusual amount of educational data accessed from campus system',
+      'Research project files uploaded to unauthorized cloud service',
+      'Database queries accessing more educational records than typical',
+      'Email containing educational attachments sent to external address'
     ],
     privilege_escalation: [
-      'Student account gained administrative privileges',
-      'Service account used for unauthorized system access',
-      'Buffer overflow exploit attempted against campus server',
-      'SQL injection used to bypass access controls'
+      'Educational account gained elevated administrative privileges',
+      'Service account used for unauthorized educational system access',
+      'Security vulnerability attempted against educational server',
+      'Unauthorized access attempted to educational access controls'
     ],
     brute_force_attack: [
-      'Automated password guessing attack against student accounts',
-      'Dictionary attack detected on faculty login portal',
-      'SSH brute force attempts on campus servers',
-      'API endpoints being tested with common credentials'
+      'Automated login attempts detected against educational accounts',
+      'Dictionary attack detected on educational login portal',
+      'Multiple login attempts on campus servers',
+      'API endpoints being tested with common educational credentials'
     ],
     phishing_attempt: [
-      'Suspicious email requesting student login credentials',
-      'Fake Microsoft Office 365 login page reported',
-      'Spear phishing targeting faculty with malicious attachments',
-      'SMS phishing messages sent to campus community'
+      'Suspicious email requesting educational login credentials',
+      'Fake educational platform login page reported',
+      'Social engineering targeting faculty with malicious attachments',
+      'Suspicious messages sent to campus educational community'
     ],
     policy_violation: [
       'Student accessed prohibited website from campus network',
@@ -295,10 +295,10 @@ const generateRealisticSecurityEvent = (): SecurityEvent => {
       'Web application vulnerable to SQL injection attacked'
     ],
     insider_threat: [
-      'Faculty member accessing student records outside normal duties',
-      'IT administrator downloading unusual amounts of data',
-      'Employee attempting to access terminated colleague\'s files',
-      'Contractor using elevated privileges for unauthorized activities'
+      'Faculty member accessing educational records outside normal duties',
+      'IT administrator downloading unusual amounts of system data',
+      'Employee attempting to access former colleague\'s educational files',
+      'Contractor using elevated privileges for unauthorized educational activities'
     ],
     ddos_attack: [
       'Campus website overwhelmed by coordinated traffic flood',
@@ -307,10 +307,10 @@ const generateRealisticSecurityEvent = (): SecurityEvent => {
       'Network infrastructure saturated by malicious traffic'
     ],
     data_leak: [
-      'Student information accidentally posted to public website',
-      'Email containing grades sent to wrong recipient list',
-      'Research data found in publicly accessible cloud storage',
-      'Database backup discovered on unsecured external drive'
+      'Educational content accidentally posted to public website',
+      'Email containing class materials sent to wrong recipient list',
+      'Course materials found in publicly accessible cloud storage',
+      'Educational database backup discovered on unsecured external drive'
     ]
   }
 

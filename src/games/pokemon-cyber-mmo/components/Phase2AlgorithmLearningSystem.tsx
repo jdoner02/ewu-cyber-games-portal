@@ -246,7 +246,7 @@ const Phase2AlgorithmLearningSystem: React.FC = () => {
         <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
           <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
             🧠 Learning Science Behind Phase 2
-            <Lightbulb className="text-yellow-400" />
+            <Target className="text-yellow-400" />
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-blue-600/20 p-4 rounded-lg">
@@ -279,7 +279,7 @@ const Phase2AlgorithmLearningSystem: React.FC = () => {
           <div className="mt-8 bg-gradient-to-r from-purple-600/20 to-pink-600/20 backdrop-blur-sm rounded-xl p-6 border border-purple-400/30">
             <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
               🔮 Coming in Phase 3: Advanced Features
-              <Trophy className="text-yellow-400" />
+              <CheckCircle className="text-yellow-400" />
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">

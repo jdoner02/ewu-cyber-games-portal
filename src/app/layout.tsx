@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { Toaster } from "react-hot-toast";
+import PlatformUpdateNotification from "@/components/PlatformUpdateNotification";
 import "./globals.css";
 
 const inter = Inter({
@@ -37,6 +38,7 @@ export default function RootLayout({
         className={`${inter.variable} ${jetbrainsMono.variable} antialiased bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 min-h-screen`}
       >
         {children}
+        <PlatformUpdateNotification />
         <Toaster 
           position="top-right"
           toastOptions={{
@@ -48,6 +50,7 @@ export default function RootLayout({
             }
           }}
         />
+        <PlatformUpdateNotification />
       </body>
     </html>
   );

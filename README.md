@@ -5,17 +5,25 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7.2-blue)](https://www.typescriptlang.org/)
 [![Educational](https://img.shields.io/badge/Educational-Middle%20School-brightgreen)](https://github.com/jdoner02/ewu-cyber-games-portal)
 
-An interactive cybersecurity education platform designed for gifted middle school students. This portal combines gamification with hands-on learning to teach fundamental cybersecurity concepts through engaging activities and real-world scenarios.
+An interactive cybersecurity education platform designed for gifted middle school students (ages 10-14). This portal combines gamification with hands-on learning to teach fundamental cybersecurity concepts through engaging activities and real-world scenarios.
 
-## 🎯 Educational Goals
+## 🎯 Educational Mission
 
-- **Password Security**: Learn password strength assessment and best practices
-- **Phishing Detection**: Develop skills to identify and avoid phishing attempts  
-- **Security Awareness**: Understand fundamental cybersecurity principles
-- **Critical Thinking**: Apply security concepts through interactive scenarios
-- **Safe Computing**: Practice secure digital habits and decision-making
+**For Students:** Build confidence in cybersecurity concepts while developing critical thinking, problem-solving, and computational thinking skills that will serve you throughout your STEM journey.
 
-## 🕵️ Wait... Can I Really Look at the Code?
+**For Educators:** Research-backed educational technology that aligns with NSA GenCyber Framework, AP Cybersecurity standards, and promotes active learning in cybersecurity education.
+
+## 🔍 Hey Students - You Can Explore This Code!
+
+**Yes, really!** This entire codebase is designed for you to investigate, understand, and learn from. Every file includes educational comments explaining not just *how* it works, but *why* it was built this way.
+
+### 🗺️ Start Your Code Exploration Journey:
+1. **📖 [Student Explorer Guide](docs/STUDENT-EXPLORER-GUIDE.md)** - Your roadmap to understanding this codebase
+2. **🧠 [Learning Science Behind the Code](docs/LEARNING-SCIENCE.md)** - Discover the research that shaped every feature
+3. **🎮 [Games Folder](src/games/)** - See how educational games are really built
+4. **🧩 [Components Folder](src/components/)** - Learn about modular programming and system design
+
+**Remember:** Every cybersecurity professional started as a curious student. Your questions and explorations are building the foundation for your future career!
 
 ## 🎮 Interactive Features
 

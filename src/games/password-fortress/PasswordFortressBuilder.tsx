@@ -1,23 +1,31 @@
 /**
- * 🔑 PASSWORD FORTRESS BUILDER - Educational Clicker Game
+ * 🔑 PASSWORD FORTRESS BUILDER - Educational Cybersecurity Game
  * 
- * This is a Cookie Clicker-style game that teaches password security!
+ * 🎯 WHAT YOU'RE LEARNING:
+ * This game teaches you how cybersecurity professionals think about password security!
+ * Every click and upgrade teaches you real principles used by security experts.
  * 
- * LEARNING GOALS:
- * - Why longer passwords are stronger than complex short ones
- * - How special characters and numbers help security  
- * - Why common words and patterns are dangerous
- * - What makes passwords truly unbreakable
+ * 🧠 LEARNING OBJECTIVES (Research-Backed):
+ * - Why longer passwords are exponentially stronger (NIST SP 800-63B)
+ * - How character diversity creates computational barriers for attackers
+ * - Why human-memorable patterns are dangerous in the wrong hands
+ * - What makes passwords mathematically unbreakable
  * 
- * GAME MECHANICS:
- * - Click to add characters to your password
- * - Watch your password fortress grow stronger visually
- * - Unlock upgrades that teach security concepts
- * - Defend against cartoon hacker attacks
+ * 🎮 GAME MECHANICS (Flow Theory Applied):
+ * - Click to add characters to your password fortress
+ * - Watch your security visualization grow stronger in real-time  
+ * - Unlock educational upgrades that teach professional concepts
+ * - Defend against realistic (but safe!) simulated attacks
  * 
- * FOR CURIOUS CODERS:
- * This component uses React hooks to manage game state and create
- * an addictive learning experience. Every part is designed to teach!
+ * 👩‍💻 FOR FUTURE DEVELOPERS:
+ * This component demonstrates React state management and educational game design.
+ * Every part combines fun with learning - you're seeing how professionals
+ * create engaging educational technology!
+ * 
+ * 🔬 EDUCATIONAL RESEARCH BASIS:
+ * - Constructivist Learning Theory (Papert, 1980): Learn by building
+ * - Flow Theory (Csikszentmihalyi, 1990): Optimal challenge-skill balance
+ * - Immediate Feedback (Hattie & Timperley, 2007): Real-time learning support
  */
 
 'use client'
@@ -41,13 +49,17 @@ import useGameStore from '@/stores/gameStore'
  * 
  * These TypeScript interfaces define what our game remembers.
  * Think of them as blueprints for the game's memory!
+ * 
+ * 🧠 WHY INTERFACES MATTER:
+ * In cybersecurity, defining clear data structures prevents security bugs.
+ * This same technique protects banking systems and secure communications!
  */
 
 interface PasswordStats {
-  length: number           // How many characters in the password
-  strength: number         // Password strength (0-100)
-  securityPoints: number   // Points earned by player
-  clickCount: number       // Total clicks by player
+  length: number           // How many characters total (length = security!)
+  strength: number         // Password strength score (0-100, like a grade!)
+  securityPoints: number   // Points you've earned by learning
+  clickCount: number       // Total learning interactions
   fortressLevel: number    // Visual fortress level (0-6)
 }
 
