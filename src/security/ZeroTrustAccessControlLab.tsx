@@ -552,46 +552,114 @@ export default function ZeroTrustAccessControlLab() {
    * This creates the visual interface that students interact with!
    */
   return (
-    <div className="max-w-7xl mx-auto p-6 bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen">
+    <main className="max-w-7xl mx-auto p-6 bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen">
       
+      {/* 🔒 Educational Safety Notice */}
+      <div className="mb-4 p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded">
+        <p className="text-sm text-yellow-800">
+          🛡️ <strong>Never share personal information</strong> • This is a learning simulation • Always ask a teacher if unsure
+        </p>
+      </div>
+
       {/* 🎯 Header Section */}
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="text-center mb-8"
       >
-        <h1 className="text-4xl font-bold text-gray-800 mb-2">
+        <div className="flex justify-center mb-4">
+          <img 
+            src="/images/zero-trust-logo.png" 
+            alt="Zero Trust Security Logo" 
+            data-testid="zero-trust-logo"
+            className="w-16 h-16"
+            onError={(e) => {
+              // Fallback to emoji if image not found
+              e.currentTarget.style.display = 'none';
+            }}
+          />
+          <div className="text-6xl">🔐</div>
+        </div>
+        
+        <h1 className="text-4xl font-bold text-gray-900 mb-2">
           🔐 Zero Trust Access Control Lab
         </h1>
         <p className="text-xl text-gray-600 mb-6">
           Experience the "Never Trust, Always Verify" security revolution!
         </p>
 
-        {/* 📊 Tab Navigation */}
-        <div className="flex justify-center space-x-4 flex-wrap">
-          {[
-            { id: 'dashboard', label: '📊 Control Center', icon: BarChart3 },
-            { id: 'policies', label: '🛡️ Security Rules', icon: Shield },
-            { id: 'simulator', label: '🎮 Risk Simulator', icon: Activity },
-            { id: 'learning', label: '🎓 Learn More', icon: Users }
-          ].map(tab => (
-            <motion.button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
-                activeTab === tab.id
-                  ? 'bg-blue-500 text-white shadow-lg'
-                  : 'bg-white text-gray-600 hover:bg-gray-100'
-              }`}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <tab.icon className="w-5 h-5 inline mr-2" />
-              {tab.label}
-            </motion.button>
-          ))}
+        {/* Hey future cybersecurity pros! Educational introduction */}
+        <div className="mb-6 p-4 bg-blue-50 rounded-lg max-w-4xl mx-auto">
+          <h2 className="text-lg font-semibold text-blue-800 mb-2">
+            Hey future cybersecurity pros! 🚀
+          </h2>
+          <p className="text-blue-700 text-left">
+            <strong>Zero Trust is like having the world's most careful security guard who checks EVERYONE'S ID</strong>, 
+            even if they've been in the building for years. Traditional security was like a castle with 
+            high walls - once you got inside, you could go anywhere. Zero Trust is like having checkpoints 
+            everywhere, just like airport security everywhere!
+          </p>
         </div>
+
+        {/* 📊 Tab Navigation */}
+        <nav role="navigation" aria-label="Zero Trust Lab Navigation">
+          <div role="tablist" className="flex justify-center space-x-4 flex-wrap">
+            {[
+              { id: 'concepts', label: 'Concepts', icon: BarChart3 },
+              { id: 'riskassessment', label: 'Risk Assessment', icon: Shield },
+              { id: 'accesscontrol', label: 'Access Control', icon: Activity },
+              { id: 'learning', label: '🎓 Learn More', icon: Users }
+            ].map(tab => (
+              <motion.button
+                key={tab.id}
+                role="tab"
+                aria-selected={activeTab === tab.id}
+                aria-controls={`${tab.id}-panel`}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
+                  activeTab === tab.id
+                    ? 'bg-blue-500 text-white shadow-lg'
+                    : 'bg-white text-gray-600 hover:bg-gray-100'
+                }`}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <tab.icon className="w-5 h-5 inline mr-2" />
+                {tab.label}
+              </motion.button>
+            ))}
+          </div>
+        </nav>
       </motion.div>
+
+      {/* Educational Content - Core Zero Trust Principles */}
+      <div className="mb-8 grid md:grid-cols-3 gap-4">
+        <div className="bg-white p-4 rounded-lg shadow">
+          <h3 className="font-bold text-gray-900 mb-2">🔍 Verify explicitly</h3>
+          <p className="text-gray-700" data-testid="concept-description">Check every user, device, and application</p>
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow">
+          <h3 className="font-bold text-gray-900 mb-2">🔒 Least privilege access</h3>
+          <p className="text-gray-700" data-testid="concept-description">Give minimum permissions needed</p>
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow">
+          <h3 className="font-bold text-gray-900 mb-2">🚨 Assume breach</h3>
+          <p className="text-gray-700" data-testid="concept-description">Act like attackers are already inside</p>
+        </div>
+      </div>
+
+      {/* Teacher Tools Section */}
+      <div className="mb-6 flex justify-center space-x-4 flex-wrap">
+        <button className="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600">
+          👩‍🏫 Teacher Dashboard
+        </button>
+        <button className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">
+          📊 Student Progress
+        </button>
+        <button className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
+          🔄 Reset Session
+        </button>
+      </div>
 
       {!currentUser ? (
         /* 🚀 Getting Started Screen */
@@ -632,13 +700,13 @@ export default function ZeroTrustAccessControlLab() {
         </motion.div>
       ) : (
         <AnimatePresence mode="wait">
-          {activeTab === 'dashboard' && <DashboardView user={currentUser} accessRequests={accessRequests} isMonitoring={isMonitoring} setIsMonitoring={setIsMonitoring} simulateRequest={simulateAccessRequest} />}
-          {activeTab === 'policies' && <PoliciesView policies={policies} setPolicies={setPolicies} />}
-          {activeTab === 'simulator' && <SimulatorView user={currentUser} riskLevel={riskLevel} setRiskLevel={setRiskLevel} onSimulate={simulateAccessRequest} />}
+          {activeTab === 'concepts' && <ConceptsView />}
+          {activeTab === 'riskassessment' && <RiskAssessmentView user={currentUser} riskLevel={riskLevel} setRiskLevel={setRiskLevel} onSimulate={simulateAccessRequest} />}
+          {activeTab === 'accesscontrol' && <AccessControlView user={currentUser} />}
           {activeTab === 'learning' && <LearningView />}
         </AnimatePresence>
       )}
-    </div>
+    </main>
   )
 }
 

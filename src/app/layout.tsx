@@ -50,7 +50,6 @@ export default function RootLayout({
             }
           }}
         />
-        <PlatformUpdateNotification />
       </body>
     </html>
   );

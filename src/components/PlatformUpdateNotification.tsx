@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Bell, 
@@ -67,8 +67,21 @@ const platformUpdates: UpdateFeature[] = [
 ];
 
 export default function PlatformUpdateNotification() {
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
+
+  // Check localStorage for dismissal status on mount
+  useEffect(() => {
+    const dismissed = localStorage.getItem('platform-update-v2.1.0-dismissed');
+    if (!dismissed) {
+      setIsVisible(true);
+    }
+  }, []);
+
+  const handleDismiss = () => {
+    setIsVisible(false);
+    localStorage.setItem('platform-update-v2.1.0-dismissed', 'true');
+  };
 
   if (!isVisible) return null;
 
@@ -93,7 +106,7 @@ export default function PlatformUpdateNotification() {
               </div>
             </div>
             <button
-              onClick={() => setIsVisible(false)}
+              onClick={handleDismiss}
               className="text-gray-400 hover:text-gray-600 transition-colors"
             >
               <AlertTriangle className="w-5 h-5" />
@@ -126,7 +139,7 @@ export default function PlatformUpdateNotification() {
               {showDetails ? 'Hide Details' : 'What\'s New?'}
             </button>
             <a
-              href="/docs/STUDENT-EXPLORER-GUIDE.md"
+              href="https://github.com/jdoner02/ewu-cyber-games-portal/blob/main/docs/STUDENT-EXPLORER-GUIDE.md"
               target="_blank"
               rel="noopener noreferrer"
               className="flex-1 bg-purple-500 hover:bg-purple-600 text-white font-medium py-2 px-3 rounded-lg transition-colors text-sm flex items-center justify-center gap-2"
@@ -171,7 +184,7 @@ export default function PlatformUpdateNotification() {
 
                 <div className="mt-3 flex gap-2">
                   <a
-                    href="/public/PLATFORM-UPDATE-v2.1.0.md"
+                    href="/ewu-cyber-games-portal/PLATFORM-UPDATE-v2.1.0.md"
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="flex-1 text-center bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-3 rounded-lg transition-colors text-sm flex items-center justify-center gap-2"
