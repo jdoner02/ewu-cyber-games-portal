@@ -39,7 +39,8 @@ const nextConfig = {
   // Next.js has cool experimental features we can use for learning
   experimental: {
     // Enable TypeScript plugin for better IntelliSense
-    typedRoutes: true,
+    // Note: typedRoutes temporarily disabled for Turbopack compatibility
+    // typedRoutes: true,
   },
 };
 
