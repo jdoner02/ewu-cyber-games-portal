@@ -1,474 +1,663 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Wifi, Shield, Zap, Eye, AlertTriangle, CheckCircle, Play, Pause, RotateCcw } from 'lucide-react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
+import { motion } from 'framer-motion'
+import { Eye, Shield, CheckCircle, RotateCcw } from 'lucide-react'
 
-interface NetworkNode {
+interface SilkStroke {
+  id: string
+  points: { x: number; y: number; pressure: number }[]
+  color: string
+  protocol: 'HTTP' | 'HTTPS' | 'SSH' | 'FTP' | 'SMTP'
+  security: 'secure' | 'unsecure' | 'encrypted'
+  opacity: number
+  createdAt: number
+}
+
+interface ParticleEffect {
   id: string
   x: number
   y: number
-  type: 'device' | 'router' | 'server' | 'suspicious'
-  connections: string[]
-  data: number
-  security: 'secure' | 'vulnerable' | 'compromised'
-  isActive: boolean
-}
-
-interface DataPacket {
-  id: string
-  from: string
-  to: string
-  progress: number
-  type: 'normal' | 'malicious' | 'encrypted'
+  vx: number
+  vy: number
+  life: number
+  maxLife: number
+  color: string
   size: number
 }
 
-export default function CyberSilkGame() {
+type DrawingMode = 'network' | 'dataflow' | 'encryption' | 'attacks' | 'freeform'
+type SymmetryMode = 'none' | 'bilateral' | 'radial4' | 'radial6' | 'radial8'
+
+const CyberSilkGame: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const [nodes, setNodes] = useState<NetworkNode[]>([])
-  const [packets, setPackets] = useState<DataPacket[]>([])
-  const [isRunning, setIsRunning] = useState(false)
+  const [silkStrokes, setSilkStrokes] = useState<SilkStroke[]>([])
+  const [particles, setParticles] = useState<ParticleEffect[]>([])
+  const [isDrawing, setIsDrawing] = useState(false)
+  const [currentStroke, setCurrentStroke] = useState<SilkStroke | null>(null)
   const [score, setScore] = useState(0)
-  const [detectedThreats, setDetectedThreats] = useState(0)
-  const [selectedNode, setSelectedNode] = useState<NetworkNode | null>(null)
-  const [gameMode, setGameMode] = useState<'visualization' | 'security' | 'analysis'>('visualization')
-  const [timeElapsed, setTimeElapsed] = useState(0)
+  const [drawingMode, setDrawingMode] = useState<DrawingMode>('network')
+  const [symmetryMode, setSymmetryMode] = useState<SymmetryMode>('bilateral')
+  const [isSoundEnabled, setIsSoundEnabled] = useState(true)
+  const [networkConcepts, setNetworkConcepts] = useState<string[]>([])
 
-  // Initialize network nodes
-  useEffect(() => {
-    const initialNodes: NetworkNode[] = [
-      {
-        id: 'router-1',
-        x: 400,
-        y: 300,
-        type: 'router',
-        connections: ['device-1', 'device-2', 'server-1'],
-        data: 0,
-        security: 'secure',
-        isActive: true
-      },
-      {
-        id: 'device-1',
-        x: 200,
-        y: 200,
-        type: 'device',
-        connections: ['router-1'],
-        data: 0,
-        security: 'secure',
-        isActive: true
-      },
-      {
-        id: 'device-2',
-        x: 200,
-        y: 400,
-        type: 'device',
-        connections: ['router-1'],
-        data: 0,
-        security: 'vulnerable',
-        isActive: true
-      },
-      {
-        id: 'server-1',
-        x: 600,
-        y: 300,
-        type: 'server',
-        connections: ['router-1'],
-        data: 0,
-        security: 'secure',
-        isActive: true
-      },
-      {
-        id: 'suspicious-1',
-        x: 500,
-        y: 150,
-        type: 'suspicious',
-        connections: ['router-1'],
-        data: 0,
-        security: 'compromised',
-        isActive: false
-      }
-    ]
-    setNodes(initialNodes)
-  }, [])
-
-  // Animation loop
-  useEffect(() => {
-    let animationFrame: number
-    
-    if (isRunning) {
-      const animate = () => {
-        setPackets(prev => {
-          return prev.map(packet => ({
-            ...packet,
-            progress: Math.min(packet.progress + 0.02, 1)
-          })).filter(packet => packet.progress < 1)
-        })
-        
-        // Randomly generate new packets
-        if (Math.random() < 0.1) {
-          generateRandomPacket()
-        }
-        
-        animationFrame = requestAnimationFrame(animate)
-      }
-      animationFrame = requestAnimationFrame(animate)
-    }
-    
-    return () => {
-      if (animationFrame) {
-        cancelAnimationFrame(animationFrame)
-      }
-    }
-  }, [isRunning, nodes])
-
-  // Timer
-  useEffect(() => {
-    let interval: NodeJS.Timeout
-    if (isRunning) {
-      interval = setInterval(() => {
-        setTimeElapsed(prev => prev + 1)
-      }, 1000)
-    }
-    return () => clearInterval(interval)
-  }, [isRunning])
-
-  const generateRandomPacket = () => {
-    const activeNodes = nodes.filter(node => node.isActive)
-    if (activeNodes.length < 2) return
-
-    const fromNode = activeNodes[Math.floor(Math.random() * activeNodes.length)]
-    const possibleTargets = activeNodes.filter(node => 
-      node.id !== fromNode.id && fromNode.connections.includes(node.id)
-    )
-    
-    if (possibleTargets.length === 0) return
-
-    const toNode = possibleTargets[Math.floor(Math.random() * possibleTargets.length)]
-    
-    const packetTypes: Array<'normal' | 'malicious' | 'encrypted'> = ['normal', 'normal', 'normal', 'encrypted', 'malicious']
-    const packetType = packetTypes[Math.floor(Math.random() * packetTypes.length)]
-
-    const newPacket: DataPacket = {
-      id: `packet-${Date.now()}-${Math.random()}`,
-      from: fromNode.id,
-      to: toNode.id,
-      progress: 0,
-      type: packetType,
-      size: Math.floor(Math.random() * 100) + 10
-    }
-
-    setPackets(prev => [...prev, newPacket])
+  // Protocol colors for educational visualization
+  const protocolColors = {
+    'HTTP': '#ef4444',     // Red - unsecure
+    'HTTPS': '#10b981',    // Green - secure
+    'SSH': '#3b82f6',      // Blue - secure terminal
+    'FTP': '#f59e0b',      // Orange - file transfer
+    'SMTP': '#8b5cf6'      // Purple - email
   }
 
-  const handleNodeClick = (nodeId: string) => {
-    const node = nodes.find(n => n.id === nodeId)
-    if (node) {
-      setSelectedNode(node)
+  // Initialize educational content
+  useEffect(() => {
+    updateNetworkConcepts()
+  }, [drawingMode])
+
+  const updateNetworkConcepts = () => {
+    const concepts = {
+      'network': [
+        'Network Topology: The arrangement of interconnected devices',
+        'Router: Central hub that directs data between devices',
+        'Protocol: Rules for how data is transmitted (HTTP, HTTPS, SSH)',
+        'Security: Different protocols offer varying levels of protection'
+      ],
+      'dataflow': [
+        'Data Packets: Small chunks of information sent across networks',
+        'Bandwidth: The capacity of a network connection',
+        'Latency: The time it takes for data to travel from source to destination',
+        'Traffic Analysis: Monitoring data flow to detect anomalies'
+      ],
+      'encryption': [
+        'Encryption: Converting data into unreadable code for security',
+        'SSL/TLS: Protocols that encrypt web traffic (HTTPS)',
+        'Key Exchange: How devices securely share encryption keys',
+        'Cipher Strength: Different encryption methods offer varying protection'
+      ],
+      'attacks': [
+        'Attack Vectors: Ways malicious actors can compromise networks',
+        'Malware Propagation: How malicious software spreads through networks',
+        'DDoS: Overwhelming a system with excessive traffic',
+        'Man-in-the-Middle: Intercepting communications between devices'
+      ],
+      'freeform': [
+        'Creative Expression: Art as a medium for understanding complex systems',
+        'Pattern Recognition: Identifying structures in network behavior',
+        'Visualization: Making abstract concepts tangible through art',
+        'Synesthesia: Connecting visual, auditory, and conceptual learning'
+      ]
+    }
+    setNetworkConcepts(concepts[drawingMode] || [])
+  }
+
+  // Drawing functions
+  const getMousePos = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current
+    if (!canvas) return { x: 0, y: 0 }
+    
+    const rect = canvas.getBoundingClientRect()
+    return {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    }
+  }, [])
+
+  const startDrawing = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    const pos = getMousePos(e)
+    const protocol = getRandomProtocol()
+    const security = getSecurityFromProtocol(protocol)
+    
+    const newStroke: SilkStroke = {
+      id: `stroke-${Date.now()}`,
+      points: [{ x: pos.x, y: pos.y, pressure: 1 }],
+      color: protocolColors[protocol],
+      protocol,
+      security,
+      opacity: 1,
+      createdAt: Date.now()
+    }
+    
+    setCurrentStroke(newStroke)
+    setIsDrawing(true)
+    
+    if (isSoundEnabled) {
+      playDrawingSound(protocol)
+    }
+  }, [getMousePos, isSoundEnabled])
+
+  const continueDrawing = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!isDrawing || !currentStroke) return
+    
+    const pos = getMousePos(e)
+    const newPoint = { x: pos.x, y: pos.y, pressure: 1 }
+    
+    setCurrentStroke(prev => prev ? {
+      ...prev,
+      points: [...prev.points, newPoint]
+    } : null)
+    
+    createParticleEffect(pos.x, pos.y, currentStroke.color)
+  }, [isDrawing, currentStroke, getMousePos])
+
+  const stopDrawing = useCallback(() => {
+    if (currentStroke && currentStroke.points.length > 1) {
+      const finalStroke = { ...currentStroke }
+      const symmetricStrokes = applySymmetry(finalStroke)
       
-      if (gameMode === 'security' && node.security === 'compromised') {
-        setDetectedThreats(prev => prev + 1)
-        setScore(prev => prev + 100)
-        
-        // Update node security
-        setNodes(prev => prev.map(n => 
-          n.id === nodeId ? { ...n, security: 'secure' } : n
-        ))
+      setSilkStrokes(prev => [...prev, ...symmetricStrokes])
+      setScore(prev => prev + symmetricStrokes.length * 10)
+      
+      if (finalStroke.security === 'encrypted') {
+        setScore(prev => prev + 50)
       }
     }
+    
+    setCurrentStroke(null)
+    setIsDrawing(false)
+  }, [currentStroke, symmetryMode])
+
+  const getRandomProtocol = (): 'HTTP' | 'HTTPS' | 'SSH' | 'FTP' | 'SMTP' => {
+    const protocols: Array<'HTTP' | 'HTTPS' | 'SSH' | 'FTP' | 'SMTP'> = ['HTTP', 'HTTPS', 'SSH', 'FTP', 'SMTP']
+    
+    if (drawingMode === 'network' || drawingMode === 'encryption') {
+      const secureProtocols = ['HTTPS', 'SSH', 'HTTPS', 'SSH']
+      return secureProtocols[Math.floor(Math.random() * secureProtocols.length)] as any
+    }
+    
+    return protocols[Math.floor(Math.random() * protocols.length)]
+  }
+
+  const getSecurityFromProtocol = (protocol: string): 'secure' | 'unsecure' | 'encrypted' => {
+    switch (protocol) {
+      case 'HTTPS':
+      case 'SSH':
+        return 'encrypted'
+      case 'HTTP':
+      case 'FTP':
+        return 'unsecure'
+      default:
+        return 'secure'
+    }
+  }
+
+  const applySymmetry = (baseStroke: SilkStroke): SilkStroke[] => {
+    const strokes = [baseStroke]
+    const canvas = canvasRef.current
+    if (!canvas) return strokes
+    
+    const centerX = canvas.width / 2
+    const centerY = canvas.height / 2
+    
+    switch (symmetryMode) {
+      case 'bilateral':
+        strokes.push({
+          ...baseStroke,
+          id: `${baseStroke.id}-mirror`,
+          points: baseStroke.points.map(p => ({
+            ...p,
+            x: centerX * 2 - p.x
+          }))
+        })
+        break
+        
+      case 'radial4':
+      case 'radial6':
+      case 'radial8':
+        const divisions = symmetryMode === 'radial4' ? 4 : symmetryMode === 'radial6' ? 6 : 8
+        for (let i = 1; i < divisions; i++) {
+          const angle = (Math.PI * 2 * i) / divisions
+          strokes.push({
+            ...baseStroke,
+            id: `${baseStroke.id}-radial-${i}`,
+            points: baseStroke.points.map(p => {
+              const dx = p.x - centerX
+              const dy = p.y - centerY
+              const rotatedX = dx * Math.cos(angle) - dy * Math.sin(angle)
+              const rotatedY = dx * Math.sin(angle) + dy * Math.cos(angle)
+              return {
+                ...p,
+                x: rotatedX + centerX,
+                y: rotatedY + centerY
+              }
+            })
+          })
+        }
+        break
+    }
+    
+    return strokes
+  }
+
+  const createParticleEffect = (x: number, y: number, color: string) => {
+    const newParticles: ParticleEffect[] = []
+    
+    for (let i = 0; i < 3; i++) {
+      newParticles.push({
+        id: `particle-${Date.now()}-${i}`,
+        x: x + (Math.random() - 0.5) * 10,
+        y: y + (Math.random() - 0.5) * 10,
+        vx: (Math.random() - 0.5) * 2,
+        vy: (Math.random() - 0.5) * 2,
+        life: 60,
+        maxLife: 60,
+        color,
+        size: Math.random() * 3 + 1
+      })
+    }
+    
+    setParticles(prev => [...prev, ...newParticles])
+  }
+
+  const playDrawingSound = (protocol: string) => {
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+      const oscillator = audioContext.createOscillator()
+      const gainNode = audioContext.createGain()
+      
+      const frequencies = {
+        'HTTP': 220,
+        'HTTPS': 440,
+        'SSH': 330,
+        'FTP': 277,
+        'SMTP': 369
+      }
+      
+      oscillator.connect(gainNode)
+      gainNode.connect(audioContext.destination)
+      
+      oscillator.frequency.value = frequencies[protocol as keyof typeof frequencies] || 220
+      oscillator.type = 'sine'
+      
+      gainNode.gain.setValueAtTime(0.1, audioContext.currentTime)
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3)
+      
+      oscillator.start(audioContext.currentTime)
+      oscillator.stop(audioContext.currentTime + 0.3)
+    } catch (error) {
+      // Silently fail if audio context not available
+    }
+  }
+
+  // Canvas drawing effect
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    
+    canvas.width = canvas.offsetWidth
+    canvas.height = canvas.offsetHeight
+    
+    // Clear canvas with slight fade effect
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.02)'
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+    
+    // Draw all silk strokes
+    silkStrokes.forEach(stroke => {
+      if (stroke.points.length < 2) return
+      
+      ctx.save()
+      ctx.globalAlpha = stroke.opacity
+      ctx.strokeStyle = stroke.color
+      ctx.lineWidth = 3
+      ctx.lineCap = 'round'
+      ctx.lineJoin = 'round'
+      
+      if (stroke.security === 'encrypted') {
+        ctx.shadowColor = stroke.color
+        ctx.shadowBlur = 15
+      }
+      
+      ctx.beginPath()
+      ctx.moveTo(stroke.points[0].x, stroke.points[0].y)
+      
+      for (let i = 1; i < stroke.points.length; i++) {
+        const current = stroke.points[i]
+        const previous = stroke.points[i - 1]
+        const cpx = (previous.x + current.x) / 2
+        const cpy = (previous.y + current.y) / 2
+        ctx.quadraticCurveTo(previous.x, previous.y, cpx, cpy)
+      }
+      
+      ctx.stroke()
+      ctx.restore()
+    })
+    
+    // Draw current stroke
+    if (currentStroke && currentStroke.points.length > 1) {
+      ctx.save()
+      ctx.strokeStyle = currentStroke.color
+      ctx.lineWidth = 4
+      ctx.lineCap = 'round'
+      ctx.lineJoin = 'round'
+      ctx.shadowColor = currentStroke.color
+      ctx.shadowBlur = 10
+      
+      ctx.beginPath()
+      ctx.moveTo(currentStroke.points[0].x, currentStroke.points[0].y)
+      
+      for (let i = 1; i < currentStroke.points.length; i++) {
+        const current = currentStroke.points[i]
+        const previous = currentStroke.points[i - 1]
+        const cpx = (previous.x + current.x) / 2
+        const cpy = (previous.y + current.y) / 2
+        ctx.quadraticCurveTo(previous.x, previous.y, cpx, cpy)
+      }
+      
+      ctx.stroke()
+      ctx.restore()
+    }
+    
+    // Draw particles
+    particles.forEach(particle => {
+      ctx.save()
+      const alpha = particle.life / particle.maxLife
+      ctx.globalAlpha = alpha
+      ctx.fillStyle = particle.color
+      ctx.beginPath()
+      ctx.arc(particle.x, particle.y, particle.size * alpha, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.restore()
+    })
+  }, [silkStrokes, currentStroke, particles])
+
+  // Particle animation
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setParticles(prev => prev
+        .map(particle => ({
+          ...particle,
+          x: particle.x + particle.vx,
+          y: particle.y + particle.vy,
+          life: particle.life - 1
+        }))
+        .filter(particle => particle.life > 0)
+      )
+    }, 16)
+    
+    return () => clearInterval(interval)
+  }, [])
+
+  // Stroke fade effect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSilkStrokes(prev => prev.map(stroke => ({
+        ...stroke,
+        opacity: Math.max(0.1, stroke.opacity - 0.002)
+      })).filter(stroke => stroke.opacity > 0.05))
+    }, 100)
+    
+    return () => clearInterval(interval)
+  }, [])
+
+  const clearCanvas = () => {
+    setSilkStrokes([])
+    setParticles([])
+    setCurrentStroke(null)
+    setIsDrawing(false)
   }
 
   const resetSimulation = () => {
-    setIsRunning(false)
-    setPackets([])
+    setSilkStrokes([])
+    setParticles([])
     setScore(0)
-    setDetectedThreats(0)
-    setTimeElapsed(0)
-    setSelectedNode(null)
+    setCurrentStroke(null)
+    setIsDrawing(false)
   }
 
-  const getNodeColor = (node: NetworkNode) => {
-    switch (node.security) {
-      case 'secure': return '#10b981'
-      case 'vulnerable': return '#f59e0b'
-      case 'compromised': return '#ef4444'
-      default: return '#6b7280'
+  const getModeDescription = (mode: DrawingMode) => {
+    const descriptions = {
+      'network': 'Draw network topologies and connections. Each stroke represents a network link with different protocols.',
+      'dataflow': 'Visualize data flowing through networks. Create patterns that show how information moves.',
+      'encryption': 'Explore encryption patterns. Secure protocols glow with special effects.',
+      'attacks': 'Simulate attack patterns and learn how threats spread through networks.',
+      'freeform': 'Creative expression mode. Draw beautiful patterns while learning about network concepts.'
     }
-  }
-
-  const getPacketColor = (packet: DataPacket) => {
-    switch (packet.type) {
-      case 'normal': return '#3b82f6'
-      case 'encrypted': return '#10b981'
-      case 'malicious': return '#ef4444'
-      default: return '#6b7280'
-    }
+    return descriptions[mode]
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-900 via-purple-900 to-indigo-900 text-white">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 text-white overflow-hidden">
+      <div className="container mx-auto px-4 py-6">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-8"
+          className="text-center mb-6"
         >
-          <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
-            CyberSilk - Network Art Visualization
+          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+            CyberFlow Silk
           </h1>
           <p className="text-lg text-gray-300 max-w-3xl mx-auto">
-            Explore network security through interactive art and data visualization. 
-            Watch data flow like silk threads and learn to identify security threats.
+            Create flowing network art while learning cybersecurity concepts. 
+            Draw with silk-like strokes that represent data flows, protocols, and security patterns.
           </p>
         </motion.div>
 
-        {/* Game Controls */}
+        {/* Main Controls */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="flex flex-wrap justify-center gap-4 mb-6"
         >
+          {/* Drawing Mode Selector */}
           <div className="flex gap-2">
-            <button
-              onClick={() => setIsRunning(!isRunning)}
-              className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors"
-            >
-              {isRunning ? <Pause size={20} /> : <Play size={20} />}
-              {isRunning ? 'Pause' : 'Start'} Simulation
-            </button>
-            <button
-              onClick={resetSimulation}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg transition-colors"
-            >
-              <RotateCcw size={20} />
-              Reset
-            </button>
-          </div>
-
-          <div className="flex gap-2">
-            {(['visualization', 'security', 'analysis'] as const).map((mode) => (
+            {(['network', 'dataflow', 'encryption', 'attacks', 'freeform'] as const).map((mode) => (
               <button
                 key={mode}
-                onClick={() => setGameMode(mode)}
-                className={`px-4 py-2 rounded-lg transition-colors capitalize ${
-                  gameMode === mode
-                    ? 'bg-pink-600 hover:bg-pink-700'
-                    : 'bg-gray-600 hover:bg-gray-700'
+                onClick={() => setDrawingMode(mode)}
+                className={`px-4 py-2 rounded-lg transition-all capitalize ${
+                  drawingMode === mode
+                    ? 'bg-cyan-500 hover:bg-cyan-600 shadow-lg shadow-cyan-500/25'
+                    : 'bg-gray-700 hover:bg-gray-600'
                 }`}
               >
                 {mode}
               </button>
             ))}
           </div>
+
+          {/* Symmetry Controls */}
+          <div className="flex gap-2">
+            {(['none', 'bilateral', 'radial4', 'radial6', 'radial8'] as const).map((symmetry) => (
+              <button
+                key={symmetry}
+                onClick={() => setSymmetryMode(symmetry)}
+                className={`px-3 py-2 rounded-lg transition-all text-sm ${
+                  symmetryMode === symmetry
+                    ? 'bg-purple-500 hover:bg-purple-600 shadow-lg shadow-purple-500/25'
+                    : 'bg-gray-700 hover:bg-gray-600'
+                }`}
+              >
+                {symmetry === 'none' ? 'No Symmetry' : 
+                 symmetry === 'bilateral' ? 'Mirror' :
+                 symmetry.replace('radial', '') + '× Radial'}
+              </button>
+            ))}
+          </div>
+
+          {/* Utility Controls */}
+          <div className="flex gap-2">
+            <button
+              onClick={() => setIsSoundEnabled(!isSoundEnabled)}
+              className={`px-3 py-2 rounded-lg transition-all ${
+                isSoundEnabled ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-600 hover:bg-gray-700'
+              }`}
+            >
+              🔊 {isSoundEnabled ? 'On' : 'Off'}
+            </button>
+            <button
+              onClick={clearCanvas}
+              className="px-4 py-2 bg-orange-600 hover:bg-orange-700 rounded-lg transition-colors"
+            >
+              Clear Canvas
+            </button>
+            <button
+              onClick={resetSimulation}
+              className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+            >
+              <RotateCcw size={16} />
+              Reset All
+            </button>
+          </div>
         </motion.div>
 
-        {/* Stats */}
+        {/* Mode Description */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"
+          key={drawingMode}
+          className="text-center mb-4 p-3 bg-black/20 rounded-lg backdrop-blur-sm"
         >
-          <div className="bg-black/30 rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold text-blue-400">{timeElapsed}s</div>
-            <div className="text-sm text-gray-400">Time Elapsed</div>
+          <p className="text-sm text-gray-300">{getModeDescription(drawingMode)}</p>
+        </motion.div>
+
+        {/* Stats Dashboard */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6"
+        >
+          <div className="bg-black/30 rounded-lg p-3 text-center backdrop-blur-sm">
+            <div className="text-xl font-bold text-cyan-400">{silkStrokes.length}</div>
+            <div className="text-xs text-gray-400">Silk Strokes</div>
           </div>
-          <div className="bg-black/30 rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold text-green-400">{score}</div>
-            <div className="text-sm text-gray-400">Score</div>
+          <div className="bg-black/30 rounded-lg p-3 text-center backdrop-blur-sm">
+            <div className="text-xl font-bold text-purple-400">{score}</div>
+            <div className="text-xs text-gray-400">Score</div>
           </div>
-          <div className="bg-black/30 rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold text-red-400">{detectedThreats}</div>
-            <div className="text-sm text-gray-400">Threats Detected</div>
+          <div className="bg-black/30 rounded-lg p-3 text-center backdrop-blur-sm">
+            <div className="text-xl font-bold text-green-400">{symmetryMode}</div>
+            <div className="text-xs text-gray-400">Symmetry</div>
           </div>
-          <div className="bg-black/30 rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold text-purple-400">{packets.length}</div>
-            <div className="text-sm text-gray-400">Active Packets</div>
+          <div className="bg-black/30 rounded-lg p-3 text-center backdrop-blur-sm">
+            <div className="text-xl font-bold text-pink-400">{particles.length}</div>
+            <div className="text-xs text-gray-400">Particles</div>
+          </div>
+          <div className="bg-black/30 rounded-lg p-3 text-center backdrop-blur-sm">
+            <div className="text-xl font-bold text-yellow-400">{drawingMode}</div>
+            <div className="text-xs text-gray-400">Mode</div>
           </div>
         </motion.div>
 
-        {/* Network Visualization Canvas */}
+        {/* Main Canvas */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-black/30 rounded-lg p-6 mb-6"
+          className="bg-black/40 rounded-xl p-4 mb-6 backdrop-blur-sm relative"
         >
-          <div className="relative w-full h-96 bg-gray-900 rounded-lg overflow-hidden">
-            <svg className="w-full h-full">
-              {/* Connections */}
-              {nodes.map(node =>
-                node.connections.map(connectionId => {
-                  const targetNode = nodes.find(n => n.id === connectionId)
-                  if (!targetNode) return null
-                  
-                  return (
-                    <motion.line
-                      key={`${node.id}-${connectionId}`}
-                      x1={node.x}
-                      y1={node.y}
-                      x2={targetNode.x}
-                      y2={targetNode.y}
-                      stroke="rgba(147, 197, 253, 0.3)"
-                      strokeWidth="2"
-                      initial={{ pathLength: 0 }}
-                      animate={{ pathLength: 1 }}
-                      transition={{ duration: 1, delay: Math.random() * 0.5 }}
-                    />
-                  )
-                })
-              )}
-
-              {/* Data Packets */}
-              {packets.map(packet => {
-                const fromNode = nodes.find(n => n.id === packet.from)
-                const toNode = nodes.find(n => n.id === packet.to)
-                if (!fromNode || !toNode) return null
-
-                const x = fromNode.x + (toNode.x - fromNode.x) * packet.progress
-                const y = fromNode.y + (toNode.y - fromNode.y) * packet.progress
-
-                return (
-                  <motion.circle
-                    key={packet.id}
-                    cx={x}
-                    cy={y}
-                    r={Math.max(2, packet.size / 10)}
-                    fill={getPacketColor(packet)}
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    exit={{ scale: 0 }}
-                  />
-                )
-              })}
-
-              {/* Network Nodes */}
-              {nodes.map(node => (
-                <motion.g key={node.id}>
-                  <motion.circle
-                    cx={node.x}
-                    cy={node.y}
-                    r="20"
-                    fill={getNodeColor(node)}
-                    stroke="white"
-                    strokeWidth="2"
-                    className="cursor-pointer"
-                    onClick={() => handleNodeClick(node.id)}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: Math.random() * 0.5 }}
-                  />
-                  <text
-                    x={node.x}
-                    y={node.y + 35}
-                    textAnchor="middle"
-                    fill="white"
-                    fontSize="12"
-                    className="pointer-events-none"
-                  >
-                    {node.id.split('-')[0]}
-                  </text>
-                </motion.g>
-              ))}
-            </svg>
-          </div>
-        </motion.div>
-
-        {/* Node Information Panel */}
-        <AnimatePresence>
-          {selectedNode && (
+          <canvas
+            ref={canvasRef}
+            className="w-full h-96 bg-gradient-to-br from-gray-900/50 to-black/50 rounded-lg cursor-crosshair border border-white/10"
+            onMouseDown={startDrawing}
+            onMouseMove={continueDrawing}
+            onMouseUp={stopDrawing}
+            onMouseLeave={stopDrawing}
+          />
+          
+          {/* Drawing Instructions Overlay */}
+          {silkStrokes.length === 0 && (
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="bg-black/30 rounded-lg p-6 mb-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="absolute inset-0 flex items-center justify-center pointer-events-none"
             >
-              <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                {selectedNode.type === 'router' && <Wifi />}
-                {selectedNode.type === 'device' && <Shield />}
-                {selectedNode.type === 'server' && <Zap />}
-                {selectedNode.type === 'suspicious' && <AlertTriangle />}
-                Node Information: {selectedNode.id}
-              </h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <strong>Type:</strong> {selectedNode.type}
-                </div>
-                <div>
-                  <strong>Security Status:</strong>{' '}
-                  <span className={`font-bold ${
-                    selectedNode.security === 'secure' ? 'text-green-400' :
-                    selectedNode.security === 'vulnerable' ? 'text-yellow-400' :
-                    'text-red-400'
-                  }`}>
-                    {selectedNode.security}
-                  </span>
-                </div>
-                <div>
-                  <strong>Connections:</strong> {selectedNode.connections.length}
-                </div>
+              <div className="text-center text-white/60">
+                <div className="text-2xl mb-2">✨</div>
+                <div className="text-lg font-medium">Start Drawing</div>
+                <div className="text-sm">Click and drag to create flowing network patterns</div>
               </div>
-
-              {gameMode === 'security' && selectedNode.security === 'compromised' && (
-                <div className="mt-4 p-3 bg-red-500/20 border border-red-500 rounded-lg">
-                  <div className="flex items-center gap-2 text-red-400">
-                    <AlertTriangle size={20} />
-                    <strong>Security Threat Detected!</strong>
-                  </div>
-                  <p className="text-sm mt-2">Click this node to secure it and earn points.</p>
-                </div>
-              )}
             </motion.div>
           )}
-        </AnimatePresence>
-
-        {/* Learning Panel */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-black/30 rounded-lg p-6"
-        >
-          <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <Eye />
-            Learning Objectives
-          </h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h4 className="font-bold text-purple-400 mb-2">Network Visualization</h4>
-              <ul className="text-sm text-gray-300 space-y-1">
-                <li>• Understand network topology and data flow</li>
-                <li>• Visualize packet transmission patterns</li>
-                <li>• Identify network bottlenecks and congestion</li>
-                <li>• Learn about different node types and roles</li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-bold text-pink-400 mb-2">Security Analysis</h4>
-              <ul className="text-sm text-gray-300 space-y-1">
-                <li>• Detect suspicious network activity</li>
-                <li>• Identify compromised devices</li>
-                <li>• Understand attack vectors and patterns</li>
-                <li>• Practice incident response procedures</li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="mt-4 p-3 bg-blue-500/20 border border-blue-500 rounded-lg">
-            <div className="flex items-center gap-2 text-blue-400">
-              <CheckCircle size={20} />
-              <strong>Pro Tip:</strong>
-            </div>
-            <p className="text-sm mt-2">
-              In Security mode, look for red (compromised) nodes and click them to neutralize threats. 
-              Encrypted packets (green) are safer than regular packets (blue), while malicious packets (red) indicate potential attacks.
-            </p>
-          </div>
         </motion.div>
+
+        {/* Educational Content */}
+        <div className="grid lg:grid-cols-2 gap-6">
+          {/* Network Concepts */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="bg-black/30 rounded-lg p-6 backdrop-blur-sm"
+          >
+            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <Eye />
+              Learning: {drawingMode.charAt(0).toUpperCase() + drawingMode.slice(1)} Mode
+            </h3>
+            
+            <div className="space-y-3">
+              {networkConcepts.map((concept, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="p-3 bg-white/5 rounded-lg border-l-4 border-cyan-400"
+                >
+                  <p className="text-sm text-gray-300">{concept}</p>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Protocol Guide */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="bg-black/30 rounded-lg p-6 backdrop-blur-sm"
+          >
+            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <Shield />
+              Protocol Colors & Security
+            </h3>
+            
+            <div className="grid grid-cols-1 gap-3">
+              {Object.entries(protocolColors).map(([protocol, color]) => (
+                <div key={protocol} className="flex items-center gap-3 p-3 bg-white/5 rounded-lg">
+                  <div 
+                    className="w-4 h-4 rounded-full"
+                    style={{ backgroundColor: color }}
+                  />
+                  <div className="flex-1">
+                    <div className="font-medium text-white">{protocol}</div>
+                    <div className="text-xs text-gray-400">
+                      {protocol === 'HTTP' && 'Unsecure web traffic - visible to attackers'}
+                      {protocol === 'HTTPS' && 'Secure web traffic - encrypted connection'}
+                      {protocol === 'SSH' && 'Secure shell - encrypted terminal access'}
+                      {protocol === 'FTP' && 'File transfer - often unsecured'}
+                      {protocol === 'SMTP' && 'Email protocol - can be encrypted'}
+                    </div>
+                  </div>
+                  <div className={`text-xs px-2 py-1 rounded-full ${
+                    ['HTTPS', 'SSH'].includes(protocol) 
+                      ? 'bg-green-500/20 text-green-400' 
+                      : protocol === 'HTTP' 
+                        ? 'bg-red-500/20 text-red-400'
+                        : 'bg-yellow-500/20 text-yellow-400'
+                  }`}>
+                    {['HTTPS', 'SSH'].includes(protocol) ? 'Secure' : 
+                     protocol === 'HTTP' ? 'Unsecure' : 'Mixed'}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-4 p-3 bg-blue-500/20 border border-blue-500/50 rounded-lg">
+              <div className="flex items-center gap-2 text-blue-400 mb-2">
+                <CheckCircle size={16} />
+                <strong>Pro Tip:</strong>
+              </div>
+              <p className="text-xs text-blue-200">
+                Secure protocols (HTTPS, SSH) create glowing effects and earn bonus points. 
+                Try different symmetry modes to see how network patterns can represent different topologies!
+              </p>
+            </div>
+          </motion.div>
+        </div>
       </div>
     </div>
   )
 }
+
+export default CyberSilkGame

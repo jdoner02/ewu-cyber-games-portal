@@ -157,19 +157,19 @@ export default function HomePage() {
     },
     {
       id: 'cybersilk',
-      title: 'CyberSilk',
-      description: 'Learn network security through interactive art and data visualization',
-      icon: '🎨',
+      title: 'CyberFlow Silk',
+      description: '🆕 ENHANCED! Create beautiful silk art while learning network protocols. Draw flowing patterns with WeavesilK.com-inspired mechanics and discover cybersecurity through creative expression.',
+      icon: '✨',
       difficulty: 'Creative',
       category: 'Creative',
-      estimatedTime: '20-30 min',
+      estimatedTime: '20-45 min',
       rating: 4.9,
       plays: gameProgress.find((g: any) => g.gameId === 'cybersilk')?.attempts || 0,
       lastPlayed: gameProgress.find((g: any) => g.gameId === 'cybersilk')?.timeSpent || null,
-      isNew: false,
-      isFeatured: false,
-      gradient: 'from-pink-500 to-purple-600',
-      skillsLearned: ['Data Flow Analysis', 'Network Patterns']
+      isNew: true,
+      isFeatured: true,
+      gradient: 'from-cyan-400 via-purple-500 to-pink-600',
+      skillsLearned: ['Protocol Security', 'Network Visualization', 'Silk Drawing', 'Symmetry Patterns', 'Creative Cybersecurity']
     },
     {
       id: 'phishing-detective',
@@ -420,6 +420,69 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* What's New Section */}
+      <section className="relative z-10 py-8 px-4">
+        <div className="container mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="bg-gradient-to-r from-emerald-500/10 via-cyan-500/10 to-purple-500/10 backdrop-blur-sm rounded-2xl border border-emerald-400/20 p-6 mb-8"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <motion.div
+                animate={{ rotate: [0, 360] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                className="w-8 h-8 bg-gradient-to-r from-emerald-400 to-cyan-400 rounded-full flex items-center justify-center"
+              >
+                ✨
+              </motion.div>
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+                What's New & Exciting!
+              </h2>
+            </div>
+            
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="bg-black/30 rounded-xl p-4 border border-purple-500/20">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-2xl">🎨</span>
+                  <div>
+                    <h3 className="text-lg font-semibold text-white">CyberFlow Silk Enhanced!</h3>
+                    <span className="text-xs bg-gradient-to-r from-emerald-400 to-cyan-400 text-black px-2 py-1 rounded-full font-bold">NEW UPDATE</span>
+                  </div>
+                </div>
+                <p className="text-slate-300 text-sm leading-relaxed">
+                  Create mesmerizing silk art inspired by WeavesilK.com! Draw flowing patterns with bilateral and radial symmetry while learning network protocols. Features particle effects, protocol-based colors, and educational content that makes cybersecurity beautiful.
+                </p>
+                <div className="flex flex-wrap gap-2 mt-3">
+                  <span className="text-xs bg-purple-500/20 text-purple-300 px-2 py-1 rounded">Symmetry Drawing</span>
+                  <span className="text-xs bg-cyan-500/20 text-cyan-300 px-2 py-1 rounded">Protocol Learning</span>
+                  <span className="text-xs bg-pink-500/20 text-pink-300 px-2 py-1 rounded">Creative Expression</span>
+                </div>
+              </div>
+              
+              <div className="bg-black/30 rounded-xl p-4 border border-cyan-500/20">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-2xl">🚀</span>
+                  <div>
+                    <h3 className="text-lg font-semibold text-white">Enhanced Security</h3>
+                    <span className="text-xs bg-gradient-to-r from-blue-400 to-purple-400 text-white px-2 py-1 rounded-full font-bold">SECURE</span>
+                  </div>
+                </div>
+                <p className="text-slate-300 text-sm leading-relaxed">
+                  All games now feature comprehensive COPPA/FERPA compliance, advanced security logging, and educational data protection. Your learning journey is safe, secure, and private.
+                </p>
+                <div className="flex flex-wrap gap-2 mt-3">
+                  <span className="text-xs bg-blue-500/20 text-blue-300 px-2 py-1 rounded">COPPA Compliant</span>
+                  <span className="text-xs bg-green-500/20 text-green-300 px-2 py-1 rounded">Privacy Protected</span>
+                  <span className="text-xs bg-purple-500/20 text-purple-300 px-2 py-1 rounded">Audit Logging</span>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Category Filter */}
       <section className="relative z-10 px-4 mb-8">
         <div className="container mx-auto">
@@ -534,7 +597,7 @@ export default function HomePage() {
                   className="group"
                 >
                   <Link 
-                    href={`/games/${game.id}`}
+                    href={`/games/${game.id}` as const}
                     onClick={() => trackGameView(game.id)}
                   >
                     <motion.div
