@@ -93,19 +93,19 @@ export default function HomePage() {
     },
     {
       id: 'cyber-knowledge-brain',
-      title: 'Cyber Knowledge Brain',
-      description: 'Collect and evolve cybersecurity creatures in this advanced Pokemon-style adventure',
+      title: 'Cyber Knowledge Brain Network',
+      description: '🧠✨ RESTORED! Interactive knowledge visualization with weave silk mechanics! Watch your learning progress create beautiful patterns as you master cybersecurity concepts and build connections between ideas.',
       icon: '🧠',
-      difficulty: 'Intermediate',
-      category: 'RPG',
-      estimatedTime: '30+ min',
-      rating: 4.8,
+      difficulty: 'All Levels',
+      category: 'Visualization',
+      estimatedTime: '15-30 min',
+      rating: 4.9,
       plays: gameProgress.find((g: any) => g.gameId === 'cyber-knowledge-brain')?.attempts || 0,
       lastPlayed: gameProgress.find((g: any) => g.gameId === 'cyber-knowledge-brain')?.timeSpent || null,
-      isNew: false,
-      isFeatured: false,
-      gradient: 'from-green-500 to-emerald-600',
-      skillsLearned: ['Network Security', 'Threat Detection']
+      isNew: true,
+      isFeatured: true,
+      gradient: 'from-cyan-400 via-purple-500 to-pink-600',
+      skillsLearned: ['Knowledge Visualization', 'Learning Progress Tracking', 'Concept Mapping', 'Network Security Fundamentals', 'GenCyber Curriculum']
     },
     {
       id: 'packet-tracer-mmo',
@@ -237,19 +237,19 @@ export default function HomePage() {
     },
     {
       id: 'quantum-mystery-room',
-      title: 'Quantum Mystery Room',
-      description: '🔬 NEW! Explore mysterious quantum laboratories and uncover the secrets of quantum cryptography. Click hidden objects to discover quantum mechanics principles!',
-      icon: '🔬',
+      title: 'Dr. Quantum\'s Time-Lock Laboratory',
+      description: '� ESCAPE ROOM! Experience a thrilling quantum physics escape room adventure! Learn wave-particle duality, entanglement, and quantum cryptography while solving Dr. Quantum\'s time-lock crisis.',
+      icon: '⚛️',
       difficulty: 'Advanced',
-      category: 'Mystery',
-      estimatedTime: '30-45 min',
+      category: 'Escape Room',
+      estimatedTime: '45-60 min',
       rating: 4.9,
       plays: gameProgress.find((g: any) => g.gameId === 'quantum-mystery-room')?.attempts || 0,
       lastPlayed: gameProgress.find((g: any) => g.gameId === 'quantum-mystery-room')?.timeSpent || null,
       isNew: true,
       isFeatured: true,
       gradient: 'from-violet-500 via-purple-600 to-indigo-700',
-      skillsLearned: ['Quantum Mechanics', 'Quantum Cryptography', 'Advanced Security', 'Mystery Solving', 'Quantum Computing']
+      skillsLearned: ['Quantum Physics', 'Wave-Particle Duality', 'Quantum Entanglement', 'Quantum Cryptography', 'Temporal Mechanics', 'Problem Solving']
     }
   ]
 
@@ -474,40 +474,58 @@ export default function HomePage() {
               </h2>
             </div>
             
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid md:grid-cols-3 gap-6">
               <div className="bg-black/30 rounded-xl p-4 border border-purple-500/20">
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-2xl">🎨</span>
+                  <span className="text-2xl">⚛️</span>
                   <div>
-                    <h3 className="text-lg font-semibold text-white">CyberFlow Silk Enhanced!</h3>
-                    <span className="text-xs bg-gradient-to-r from-emerald-400 to-cyan-400 text-black px-2 py-1 rounded-full font-bold">NEW UPDATE</span>
+                    <h3 className="text-lg font-semibold text-white">Quantum Escape Room!</h3>
+                    <span className="text-xs bg-gradient-to-r from-violet-400 to-indigo-400 text-black px-2 py-1 rounded-full font-bold">BRAND NEW</span>
                   </div>
                 </div>
                 <p className="text-slate-300 text-sm leading-relaxed">
-                  Create mesmerizing silk art inspired by WeavesilK.com! Draw flowing patterns with bilateral and radial symmetry while learning network protocols. Features particle effects, protocol-based colors, and educational content that makes cybersecurity beautiful.
+                  Experience "Dr. Quantum's Time-Lock Laboratory" - a thrilling escape room adventure! Learn quantum physics, wave-particle duality, entanglement, and quantum cryptography while solving temporal puzzles across 4 immersive chambers.
                 </p>
                 <div className="flex flex-wrap gap-2 mt-3">
-                  <span className="text-xs bg-purple-500/20 text-purple-300 px-2 py-1 rounded">Symmetry Drawing</span>
-                  <span className="text-xs bg-cyan-500/20 text-cyan-300 px-2 py-1 rounded">Protocol Learning</span>
-                  <span className="text-xs bg-pink-500/20 text-pink-300 px-2 py-1 rounded">Creative Expression</span>
+                  <span className="text-xs bg-violet-500/20 text-violet-300 px-2 py-1 rounded">Escape Room</span>
+                  <span className="text-xs bg-indigo-500/20 text-indigo-300 px-2 py-1 rounded">Quantum Physics</span>
+                  <span className="text-xs bg-purple-500/20 text-purple-300 px-2 py-1 rounded">Problem Solving</span>
+                </div>
+              </div>
+
+              <div className="bg-black/30 rounded-xl p-4 border border-cyan-500/20">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-2xl">🧠</span>
+                  <div>
+                    <h3 className="text-lg font-semibold text-white">Knowledge Brain Restored!</h3>
+                    <span className="text-xs bg-gradient-to-r from-cyan-400 to-purple-400 text-black px-2 py-1 rounded-full font-bold">ENHANCED</span>
+                  </div>
+                </div>
+                <p className="text-slate-300 text-sm leading-relaxed">
+                  The beloved Cyber Knowledge Brain is back with beautiful weave silk mechanics! Watch your learning create stunning visual patterns as you master cybersecurity concepts and build connections between ideas.
+                </p>
+                <div className="flex flex-wrap gap-2 mt-3">
+                  <span className="text-xs bg-cyan-500/20 text-cyan-300 px-2 py-1 rounded">Knowledge Mapping</span>
+                  <span className="text-xs bg-purple-500/20 text-purple-300 px-2 py-1 rounded">Visual Learning</span>
+                  <span className="text-xs bg-pink-500/20 text-pink-300 px-2 py-1 rounded">Progress Tracking</span>
                 </div>
               </div>
               
-              <div className="bg-black/30 rounded-xl p-4 border border-cyan-500/20">
+              <div className="bg-black/30 rounded-xl p-4 border border-green-500/20">
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-2xl">🚀</span>
+                  <span className="text-2xl">�</span>
                   <div>
-                    <h3 className="text-lg font-semibold text-white">Enhanced Security</h3>
-                    <span className="text-xs bg-gradient-to-r from-blue-400 to-purple-400 text-white px-2 py-1 rounded-full font-bold">SECURE</span>
+                    <h3 className="text-lg font-semibold text-white">Snake Knowledge Arena!</h3>
+                    <span className="text-xs bg-gradient-to-r from-green-400 to-teal-400 text-black px-2 py-1 rounded-full font-bold">NEW GAME</span>
                   </div>
                 </div>
                 <p className="text-slate-300 text-sm leading-relaxed">
-                  All games now feature comprehensive COPPA/FERPA compliance, advanced security logging, and educational data protection. Your learning journey is safe, secure, and private.
+                  Multiplayer snake.io gameplay meets cybersecurity education! Consume knowledge orbs to grow your snake, specialize in different cyber domains, and compete with other students in real-time learning battles.
                 </p>
                 <div className="flex flex-wrap gap-2 mt-3">
-                  <span className="text-xs bg-blue-500/20 text-blue-300 px-2 py-1 rounded">COPPA Compliant</span>
-                  <span className="text-xs bg-green-500/20 text-green-300 px-2 py-1 rounded">Privacy Protected</span>
-                  <span className="text-xs bg-purple-500/20 text-purple-300 px-2 py-1 rounded">Audit Logging</span>
+                  <span className="text-xs bg-green-500/20 text-green-300 px-2 py-1 rounded">Multiplayer</span>
+                  <span className="text-xs bg-teal-500/20 text-teal-300 px-2 py-1 rounded">Competition</span>
+                  <span className="text-xs bg-emerald-500/20 text-emerald-300 px-2 py-1 rounded">Skill Building</span>
                 </div>
               </div>
             </div>
@@ -876,43 +894,56 @@ export default function HomePage() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
             <motion.div
-              className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-8 border border-green-400/30 hover:border-green-400/60 transition-all duration-300"
+              className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-6 border border-green-400/30 hover:border-green-400/60 transition-all duration-300"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
             >
               <div className="text-4xl mb-4">🌱</div>
-              <h3 className="text-xl font-bold text-white mb-3">Beginner Explorer</h3>
-              <p className="text-slate-400 mb-4">Start with password security, phishing detection, and digital hygiene fundamentals.</p>
+              <h3 className="text-lg font-bold text-white mb-3">Beginner Explorer</h3>
+              <p className="text-slate-400 mb-4 text-sm">Start with password security, phishing detection, and digital hygiene fundamentals.</p>
               <div className="text-green-400 text-sm font-medium">2-4 weeks • 4 modules</div>
             </motion.div>
 
             <motion.div
-              className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-8 border border-blue-400/30 hover:border-blue-400/60 transition-all duration-300"
+              className="bg-gradient-to-br from-violet-800 to-indigo-900 rounded-xl p-6 border border-violet-400/30 hover:border-violet-400/60 transition-all duration-300"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.15 }}
+            >
+              <div className="text-4xl mb-4">🎓</div>
+              <h3 className="text-lg font-bold text-white mb-3">GenCyber Track</h3>
+              <p className="text-slate-400 mb-4 text-sm">Explore our new enhanced games: Quantum Escape Room, Knowledge Brain, and Snake Arena!</p>
+              <div className="text-violet-400 text-sm font-medium">5 days • Camp focused</div>
+            </motion.div>
+
+            <motion.div
+              className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-6 border border-blue-400/30 hover:border-blue-400/60 transition-all duration-300"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
             >
               <div className="text-4xl mb-4">🔍</div>
-              <h3 className="text-xl font-bold text-white mb-3">Digital Detective</h3>
-              <p className="text-slate-400 mb-4">Develop analytical thinking and advanced threat recognition capabilities.</p>
+              <h3 className="text-lg font-bold text-white mb-3">Digital Detective</h3>
+              <p className="text-slate-400 mb-4 text-sm">Develop analytical thinking and advanced threat recognition capabilities.</p>
               <div className="text-blue-400 text-sm font-medium">4-8 weeks • 4 modules</div>
             </motion.div>
 
             <motion.div
-              className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-8 border border-purple-400/30 hover:border-purple-400/60 transition-all duration-300"
+              className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-6 border border-purple-400/30 hover:border-purple-400/60 transition-all duration-300"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.3 }}
             >
               <div className="text-4xl mb-4">🚀</div>
-              <h3 className="text-xl font-bold text-white mb-3">Cyber Guardian</h3>
-              <p className="text-slate-400 mb-4">Master advanced concepts and develop cybersecurity leadership skills.</p>
+              <h3 className="text-lg font-bold text-white mb-3">Cyber Guardian</h3>
+              <p className="text-slate-400 mb-4 text-sm">Master advanced concepts and develop cybersecurity leadership skills.</p>
               <div className="text-purple-400 text-sm font-medium">Ongoing • 4 modules</div>
             </motion.div>
           </div>

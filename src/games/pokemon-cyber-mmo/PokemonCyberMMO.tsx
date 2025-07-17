@@ -1144,3 +1144,5 @@ const PokemonCyberMMO: React.FC = () => {
     </div>
   );
 };
+
+export default PokemonCyberMMO;

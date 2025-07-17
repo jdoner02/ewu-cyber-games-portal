@@ -458,7 +458,7 @@ const QuantumEscapeRoom: React.FC = () => {
       if (hotspot.unlocks === 'game-complete') {
         setGamePhase('complete');
         addXP(200);
-        updateSkillProgress('quantum', 10);
+        updateSkillProgress('cryptography', 10);
         return;
       }
       if (hotspot.unlocks.endsWith('-room')) {
@@ -490,7 +490,7 @@ const QuantumEscapeRoom: React.FC = () => {
         addXP(modal.xpReward);
       }
       if (modal.skillReward) {
-        addSkillPoints('quantum', modal.skillReward);
+        updateSkillProgress('cryptography', modal.skillReward);
       }
       if (modal.givesItem && !inventory.some(item => item.id === modal.givesItem!.id)) {
         setInventory(prev => [...prev, modal.givesItem!]);
