@@ -594,7 +594,7 @@ export default function LearningAnalyticsPage() {
             { id: 'overview', label: 'Overview', icon: BarChart3 },
             { id: 'progress', label: 'Progress', icon: TrendingUp },
             { id: 'insights', label: 'AI Insights', icon: Zap },
-            { id: 'pathways', label: 'Learning Paths', icon: MapPin },
+            { id: 'pathways', label: 'Learning Paths', icon: Target },
             { id: 'educator', label: 'Educator View', icon: Users }
           ].map(view => (
             <button

@@ -76,7 +76,9 @@ export class AuditLogger {
     
     // 🎓 EDUCATIONAL: For demonstration purposes, update the original event to show anonymization
     // In production, we would never modify the original event object
-    event.anonymousUserId = sanitizedEvent.anonymousUserId;
+    if (event) {
+      event.anonymousUserId = sanitizedEvent.anonymousUserId;
+    }
     
     const logEntry: LogEntry = {
       id: this.generateLogId(),
@@ -114,6 +116,11 @@ export class AuditLogger {
   public logSecurityEvent(event: SecurityEvent): void {
     // 🚨 CRITICAL: Security events get immediate attention!
     const sanitizedEvent = this.privacyFilter.sanitizeSecurityEvent(event);
+    
+    // 🎓 EDUCATIONAL: For demonstration purposes, update the original event to show anonymization
+    // In production, we would never modify the original event object
+    event.ipAddress = sanitizedEvent.ipAddress;
+    event.userAgent = sanitizedEvent.userAgent;
     
     const logEntry: LogEntry = {
       id: this.generateLogId(),

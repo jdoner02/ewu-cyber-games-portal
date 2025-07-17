@@ -194,11 +194,13 @@ describe('🛡️ AuditLogger - Educational Security Logging', () => {
         errorMessage: 'Access denied - insufficient permissions'
       };
 
+      // Create spy BEFORE calling the method to capture execution
+      const securityEscalation = jest.spyOn(auditLogger as any, 'escalateToSecurityMonitoring');
+
       auditLogger.logUserEvent(inappropriateAccessEvent);
 
       // Should escalate inappropriate access attempts to security monitoring
       // This assertion will fail until escalation is implemented
-      const securityEscalation = jest.spyOn(auditLogger as any, 'escalateToSecurityMonitoring');
       expect(securityEscalation).toHaveBeenCalled();
     });
   });

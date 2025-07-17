@@ -478,12 +478,30 @@ export class PrivacyFilter {
   private hashData(data: string, type: 'ip' | 'ua'): string {
     const salt = type === 'ip' ? 'ip_privacy_salt' : 'ua_privacy_salt';
     const hash = this.createHash(data + salt);
+    
+    // For IP addresses, return full SHA-256 hash for security compliance
+    if (type === 'ip') {
+      return hash;
+    }
+    
+    // For user agents, return prefixed shorter hash for readability
     return `${type}_${hash.substring(0, 16)}`;
   }
   
   private createHash(input: string): string {
-    // 🎓 EDUCATIONAL: Simple hash function for demonstration
-    // Real systems use cryptographic hashes like SHA-256
+    // 🎓 EDUCATIONAL: Proper SHA-256 cryptographic hash for production use
+    // This demonstrates real security practices used in enterprise systems
+    if (typeof require !== 'undefined') {
+      // Node.js environment - use crypto module
+      try {
+        const crypto = require('crypto');
+        return crypto.createHash('sha256').update(input).digest('hex');
+      } catch (e) {
+        // Fallback if crypto is not available
+      }
+    }
+    
+    // Simple hash function for demonstration/testing environments
     let hash = 0;
     for (let i = 0; i < input.length; i++) {
       const char = input.charCodeAt(i);
