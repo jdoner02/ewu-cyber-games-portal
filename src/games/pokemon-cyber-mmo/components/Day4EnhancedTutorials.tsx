@@ -807,11 +807,12 @@ export const SteganographyTutorial: React.FC<TutorialProps> = ({ onComplete, onC
   );
 
   const renderLSBDemo = () => {
-    const [pixelData, setPixelData] = useState([
+    // Static data for demonstration - no hooks needed in render function
+    const pixelData = [
       { r: 255, g: 128, b: 64, binary: '11111111 10000000 01000000' },
       { r: 200, g: 150, b: 100, binary: '11001000 10010110 01100100' },
       { r: 175, g: 200, b: 225, binary: '10101111 11001000 11100001' }
-    ]);
+    ];
 
     return (
       <div className="space-y-6">
@@ -871,17 +872,18 @@ export const SteganographyTutorial: React.FC<TutorialProps> = ({ onComplete, onC
     );
   };
 
-  const renderImageDecodeChallenge = () => {
-    const [selectedImageForDecode, setSelectedImageForDecode] = useState<number | null>(null);
-    const [userGuess, setUserGuess] = useState('');
-    const [showHint, setShowHint] = useState(false);
+// Convert to proper component to use hooks
+const ImageDecodeChallenge: React.FC<{ onScoreUpdate: (points: number) => void; onMessageFound: (message: string) => void }> = ({ onScoreUpdate, onMessageFound }) => {
+  const [selectedImageForDecode, setSelectedImageForDecode] = useState<number | null>(null);
+  const [userGuess, setUserGuess] = useState('');
+  const [showHint, setShowHint] = useState(false);
 
-    const handleDecodeAttempt = () => {
-      if (selectedImageForDecode !== null) {
-        const correct = hiddenMessages[selectedImageForDecode];
-        if (userGuess.toUpperCase().includes(correct.message)) {
-          setScore(score + 25);
-          setDiscoveredMessages([...discoveredMessages, correct.message]);
+  const handleDecodeAttempt = () => {
+    if (selectedImageForDecode !== null) {
+      const correct = hiddenMessages[selectedImageForDecode];
+      if (userGuess.toUpperCase().includes(correct.message)) {
+        onScoreUpdate(25);
+        onMessageFound(correct.message);
           setUserGuess('');
           setSelectedImageForDecode(null);
           setShowHint(false);

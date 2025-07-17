@@ -848,7 +848,9 @@ export default function EncryptionEscapeRoom() {
                     )}
                     
                     <button
-                      onClick={() => useTool(selectedTool)}
+                      onClick={() => {
+                        useTool(selectedTool);
+                      }}
                       className="w-full bg-purple-500 hover:bg-purple-600 text-white p-2 rounded text-sm"
                     >
                       Apply Tool
