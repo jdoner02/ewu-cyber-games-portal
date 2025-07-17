@@ -260,7 +260,7 @@ describe('🛡️ SecurityMonitoringDashboard - Educational Safety Tests', () =>
         
         // Should show numeric aggregates only
         const metricsSection = totalEvents.closest('div')
-        expect(metricsSection?.textContent).toMatch(/\\d+/) // Contains numbers
+        expect(metricsSection?.textContent).toMatch(/\d+/) // Contains numbers
         expect(metricsSection?.textContent).not.toMatch(/[A-Za-z]+\\.[A-Za-z]+@/) // No email
       })
     })
@@ -369,8 +369,10 @@ describe('🛡️ SecurityMonitoringDashboard - Educational Safety Tests', () =>
       // Start monitoring
       fireEvent.click(screen.getByText('▶️ Start Real-Time Monitoring'))
       
-      // Simulate rapid event generation
-      jest.advanceTimersByTime(15000) // 15 seconds = 5 events
+      // Simulate rapid event generation with act()
+      await act(async () => {
+        jest.advanceTimersByTime(15000) // 15 seconds = 5 events
+      })
       
       await waitFor(() => {
         // Should limit total events to prevent overwhelming
@@ -378,7 +380,7 @@ describe('🛡️ SecurityMonitoringDashboard - Educational Safety Tests', () =>
         
         // Events should be rate-limited or summarized for teacher consumption
         // Should not show hundreds of individual events
-        expect(content).toMatch(/\\d+/) // Shows counts
+        expect(content).toMatch(/\d+/) // Shows counts
       })
     })
   })
@@ -459,7 +461,7 @@ describe('🛡️ SecurityMonitoringDashboard - Educational Safety Tests', () =>
       
       // Should display threat score in educational context
       const container = threatLevelElement.closest('div')
-      expect(container?.textContent).toMatch(/\\d+/) // Contains numeric score
+      expect(container?.textContent).toMatch(/\d+/) // Contains numeric score
     })
 
     test('should show geographic distribution safely for educational purposes', async () => {
@@ -567,14 +569,16 @@ describe('🛡️ SecurityMonitoringDashboard - Educational Safety Tests', () =>
       // Start real-time monitoring
       fireEvent.click(screen.getByText('▶️ Start Real-Time Monitoring'))
       
-      // Simulate extended use
-      jest.advanceTimersByTime(30000) // 30 seconds
+      // Simulate extended use with act()
+      await act(async () => {
+        jest.advanceTimersByTime(30000) // 30 seconds
+      })
       
       // Should not accumulate excessive events
       await waitFor(() => {
         // Events should be limited to prevent memory issues
         const content = document.body.textContent || ''
-        expect(content).toMatch(/\\d+/) // Should show manageable numbers
+        expect(content).toMatch(/\d+/) // Should show manageable numbers
       })
       
       // Stop monitoring

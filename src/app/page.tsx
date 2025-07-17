@@ -142,7 +142,7 @@ export default function HomePage() {
     {
       id: 'cyber-clicker',
       title: 'Cyber Clicker',
-      description: 'Build your cyber defense empire one click at a time! Learn cybersecurity fundamentals through addictive clicker gameplay.',
+      description: 'Build your cyber defense empire one click at a time! Learn cybersecurity fundamentals through compelling clicker gameplay that teaches real skills.',
       icon: '🖱️',
       difficulty: 'All Levels',
       category: 'Clicker',

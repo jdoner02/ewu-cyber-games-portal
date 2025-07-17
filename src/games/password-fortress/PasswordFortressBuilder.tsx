@@ -160,6 +160,36 @@ export default function PasswordFortressBuilder() {
       maxLevel: 3,
       icon: <Shield className="w-4 h-4" />,
       effect: 'Teaches: Mixed case adds more possible combinations!'
+    },
+    {
+      id: 'mfa-shield',
+      name: 'MFA Shield Generator',
+      description: 'Adds multi-factor authentication protection bonus',
+      cost: 300,
+      owned: 0,
+      maxLevel: 3,
+      icon: <Shield className="w-4 h-4" />,
+      effect: 'Teaches: Multi-Factor Authentication adds layers beyond passwords!'
+    },
+    {
+      id: 'password-manager',
+      name: 'Password Manager Vault',
+      description: 'Automatically generates and stores unique passwords',
+      cost: 500,
+      owned: 0,
+      maxLevel: 5,
+      icon: <Key className="w-4 h-4" />,
+      effect: 'Teaches: Password managers create unique passwords for every account!'
+    },
+    {
+      id: 'biometric-guard',
+      name: 'Biometric Guardian',
+      description: 'Adds fingerprint and face recognition security',
+      cost: 750,
+      owned: 0,
+      maxLevel: 2,
+      icon: <Target className="w-4 h-4" />,
+      effect: 'Teaches: Biometrics are something you ARE, not something you KNOW!'
     }
   ])
 
@@ -205,6 +235,33 @@ export default function PasswordFortressBuilder() {
       unlocked: false,
       icon: <Target className="w-4 h-4" />,
       cybersecurityConcept: 'Automation tools help create better passwords!'
+    },
+    {
+      id: 'mfa-pioneer',
+      name: 'Multi-Factor Master',
+      description: 'Activated MFA Shield protection!',
+      requirement: 'Purchase MFA Shield upgrade',
+      unlocked: false,
+      icon: <Shield className="w-4 h-4" />,
+      cybersecurityConcept: 'MFA requires something you KNOW, HAVE, and ARE!'
+    },
+    {
+      id: 'vault-keeper',
+      name: 'Digital Vault Keeper',
+      description: 'Mastered password manager technology!',
+      requirement: 'Purchase Password Manager Vault',
+      unlocked: false,
+      icon: <Key className="w-4 h-4" />,
+      cybersecurityConcept: 'Password managers generate unique passwords for every account!'
+    },
+    {
+      id: 'biometric-expert',
+      name: 'Biometric Security Expert',
+      description: 'Understood the power of biometric authentication!',
+      requirement: 'Purchase Biometric Guardian',
+      unlocked: false,
+      icon: <Target className="w-4 h-4" />,
+      cybersecurityConcept: 'Biometrics verify WHO you are, not WHAT you know!'
     }
   ])
 
@@ -228,15 +285,25 @@ export default function PasswordFortressBuilder() {
     if (/[0-9]/.test(pwd)) strength += 5    // numbers
     if (/[^A-Za-z0-9]/.test(pwd)) strength += 10  // special characters (!@#$)
     
+    // 🛡️ MFA AND SECURITY TOOL BONUSES
+    // These upgrades add additional security layers beyond just passwords!
+    const mfaShield = upgrades.find(u => u.id === 'mfa-shield')?.owned || 0
+    const passwordManager = upgrades.find(u => u.id === 'password-manager')?.owned || 0
+    const biometricGuard = upgrades.find(u => u.id === 'biometric-guard')?.owned || 0
+    
+    strength += mfaShield * 15      // MFA adds significant security
+    strength += passwordManager * 12   // Password managers help avoid reuse
+    strength += biometricGuard * 20    // Biometrics are extremely secure
+    
     // 🎯 PATTERN PENALTIES
     // Common patterns make passwords weaker
     if (pwd.includes('123')) strength -= 10    // sequential numbers
     if (pwd.includes('abc')) strength -= 10    // sequential letters
     if (pwd.toLowerCase().includes('password')) strength -= 20  // common word
     
-    // 📊 Keep strength between 0 and 100
-    return Math.max(0, Math.min(100, strength))
-  }, [])
+    // 📊 Keep strength between 0 and 150 (higher cap for MFA bonuses)
+    return Math.max(0, Math.min(150, strength))
+  }, [upgrades])
 
   /**
    * 🏰 FORTRESS LEVEL CALCULATOR
@@ -251,6 +318,9 @@ export default function PasswordFortressBuilder() {
     if (strength < 60) return 3   // Fortified house
     if (strength < 75) return 4   // Small castle
     if (strength < 90) return 5   // Medieval fortress
+    if (strength < 110) return 6  // Advanced fortress with MFA
+    if (strength < 130) return 7  // Cyber fortress with biometrics
+    return 8                      // Impenetrable digital fortress
     return 6                      // High-tech fortress
   }, [])
 
@@ -325,6 +395,15 @@ export default function PasswordFortressBuilder() {
           break
         case 'upgrade-master':
           shouldUnlock = upgrades.some(upgrade => upgrade.owned > 0)
+          break
+        case 'mfa-pioneer':
+          shouldUnlock = (upgrades.find(u => u.id === 'mfa-shield')?.owned || 0) > 0
+          break
+        case 'vault-keeper':
+          shouldUnlock = (upgrades.find(u => u.id === 'password-manager')?.owned || 0) > 0
+          break
+        case 'biometric-expert':
+          shouldUnlock = (upgrades.find(u => u.id === 'biometric-guard')?.owned || 0) > 0
           break
       }
       
@@ -432,6 +511,34 @@ export default function PasswordFortressBuilder() {
                   newPassword = newPassword.slice(0, -1) + lastChar.toUpperCase()
                   shouldUpdate = true
                 }
+              }
+              break
+
+            case 'mfa-shield':
+              // 🛡️ MFA provides passive security bonus (calculated in strength function)
+              // Shows educational toast about MFA concepts
+              if (Math.random() < 0.1) {
+                toast.info('🛡️ MFA Shield active: Your account has multiple protection layers!')
+              }
+              break
+
+            case 'password-manager':
+              // 🔐 Password Manager provides unique password generation
+              if (Math.random() < 0.2) {
+                // Simulate password manager generating unique characters
+                const uniqueChars = 'QWERTYqwerty789!@#'
+                newPassword += uniqueChars[Math.floor(Math.random() * uniqueChars.length)]
+                shouldUpdate = true
+                if (Math.random() < 0.3) {
+                  toast.info('🔐 Password Manager: Generating unique password for this account!')
+                }
+              }
+              break
+
+            case 'biometric-guard':
+              // 👤 Biometric Guard provides passive security bonus
+              if (Math.random() < 0.05) {
+                toast.info('👤 Biometric Guard: Your fingerprint/face adds extra security!')
               }
               break
           }
@@ -742,6 +849,107 @@ export default function PasswordFortressBuilder() {
                     </div>
                   </motion.button>
                 ))}
+              </div>
+            </div>
+
+            {/* 🛡️ MFA Education Center */}
+            <div className="bg-gradient-to-r from-purple-500/20 to-blue-500/20 backdrop-blur-md rounded-xl p-6 border border-purple-500/30">
+              <h3 className="text-xl font-bold text-white mb-4">
+                🛡️ Multi-Factor Authentication (MFA) Center
+              </h3>
+              
+              <div className="space-y-4">
+                {/* MFA Basics */}
+                <div className="bg-white/10 rounded-lg p-4">
+                  <h4 className="text-white font-semibold mb-2 flex items-center">
+                    <Shield className="w-5 h-5 mr-2" />
+                    The Three Factors of Authentication
+                  </h4>
+                  <div className="space-y-2 text-blue-200 text-sm">
+                    <div>🧠 <strong>Something you KNOW:</strong> Password, PIN, security questions</div>
+                    <div>📱 <strong>Something you HAVE:</strong> Phone, token, smart card</div>
+                    <div>👤 <strong>Something you ARE:</strong> Fingerprint, face, voice</div>
+                  </div>
+                </div>
+
+                {/* MFA Status Display */}
+                <div className="grid md:grid-cols-3 gap-3">
+                  <div className={`text-center p-3 rounded-lg ${
+                    (upgrades.find(u => u.id === 'mfa-shield')?.owned || 0) > 0 
+                      ? 'bg-green-500/20 border border-green-500/30' 
+                      : 'bg-white/5'
+                  }`}>
+                    <Shield className="w-8 h-8 mx-auto mb-2 text-blue-400" />
+                    <div className="text-white font-medium">MFA Shield</div>
+                    <div className="text-xs text-blue-200">
+                      Level {upgrades.find(u => u.id === 'mfa-shield')?.owned || 0}
+                    </div>
+                  </div>
+                  
+                  <div className={`text-center p-3 rounded-lg ${
+                    (upgrades.find(u => u.id === 'password-manager')?.owned || 0) > 0 
+                      ? 'bg-green-500/20 border border-green-500/30' 
+                      : 'bg-white/5'
+                  }`}>
+                    <Key className="w-8 h-8 mx-auto mb-2 text-blue-400" />
+                    <div className="text-white font-medium">Password Vault</div>
+                    <div className="text-xs text-blue-200">
+                      Level {upgrades.find(u => u.id === 'password-manager')?.owned || 0}
+                    </div>
+                  </div>
+                  
+                  <div className={`text-center p-3 rounded-lg ${
+                    (upgrades.find(u => u.id === 'biometric-guard')?.owned || 0) > 0 
+                      ? 'bg-green-500/20 border border-green-500/30' 
+                      : 'bg-white/5'
+                  }`}>
+                    <Target className="w-8 h-8 mx-auto mb-2 text-blue-400" />
+                    <div className="text-white font-medium">Biometric Guard</div>
+                    <div className="text-xs text-blue-200">
+                      Level {upgrades.find(u => u.id === 'biometric-guard')?.owned || 0}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Security Strength Display */}
+                <div className="bg-white/10 rounded-lg p-4">
+                  <h4 className="text-white font-semibold mb-2">🔒 Your Security Layers</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-blue-200">Password Strength:</span>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-20 bg-gray-700 rounded-full h-2">
+                          <div 
+                            className="bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 h-2 rounded-full transition-all duration-300"
+                            style={{ width: `${Math.min(100, (stats.strength / 100) * 100)}%` }}
+                          ></div>
+                        </div>
+                        <span className="text-white font-bold">{Math.round(stats.strength)}%</span>
+                      </div>
+                    </div>
+                    
+                    {(upgrades.find(u => u.id === 'mfa-shield')?.owned || 0) > 0 && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-green-300">+ MFA Protection:</span>
+                        <span className="text-green-400 font-bold">+{(upgrades.find(u => u.id === 'mfa-shield')?.owned || 0) * 15} points</span>
+                      </div>
+                    )}
+                    
+                    {(upgrades.find(u => u.id === 'password-manager')?.owned || 0) > 0 && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-blue-300">+ Unique Passwords:</span>
+                        <span className="text-blue-400 font-bold">+{(upgrades.find(u => u.id === 'password-manager')?.owned || 0) * 12} points</span>
+                      </div>
+                    )}
+                    
+                    {(upgrades.find(u => u.id === 'biometric-guard')?.owned || 0) > 0 && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-purple-300">+ Biometric Auth:</span>
+                        <span className="text-purple-400 font-bold">+{(upgrades.find(u => u.id === 'biometric-guard')?.owned || 0) * 20} points</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
 

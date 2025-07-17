@@ -15,6 +15,8 @@ An interactive cybersecurity education platform designed for gifted middle schoo
 
 ## 🔍 Hey Students - You Can Explore This Code!
 
+**👋 New here? Start with our [Welcome Guide for Students](WELCOME-STUDENTS.md)!**
+
 **Yes, really!** This entire codebase is designed for you to investigate, understand, and learn from. Every file includes educational comments explaining not just *how* it works, but *why* it was built this way.
 
 ### 🗺️ Start Your Code Exploration Journey:
