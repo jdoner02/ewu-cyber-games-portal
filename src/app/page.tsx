@@ -52,7 +52,7 @@ export default function HomePage() {
   
   const [favoriteGames, setFavoriteGames] = useState<string[]>([])
   const [recentGames, setRecentGames] = useState<string[]>([])
-  const [newGames] = useState(['cyber-knowledge-brain', 'packet-tracer-mmo', 'phishing-detective', 'network-defense', 'encryption-escape'])
+  const [newGames] = useState(['cyber-knowledge-brain', 'packet-tracer-mmo', 'phishing-detective', 'network-defense', 'encryption-escape', 'quantum-mystery-room'])
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [showPersonalizedView, setShowPersonalizedView] = useState(true)
   const [showPatchNotes, setShowPatchNotes] = useState(false)
@@ -218,6 +218,22 @@ export default function HomePage() {
       isFeatured: true,
       gradient: 'from-yellow-500 to-amber-600',
       skillsLearned: ['Cryptography', 'Data Protection', 'Mathematical Security']
+    },
+    {
+      id: 'quantum-mystery-room',
+      title: 'Quantum Mystery Room',
+      description: '🔬 NEW! Explore mysterious quantum laboratories and uncover the secrets of quantum cryptography. Click hidden objects to discover quantum mechanics principles!',
+      icon: '🔬',
+      difficulty: 'Advanced',
+      category: 'Mystery',
+      estimatedTime: '30-45 min',
+      rating: 4.9,
+      plays: gameProgress.find((g: any) => g.gameId === 'quantum-mystery-room')?.attempts || 0,
+      lastPlayed: gameProgress.find((g: any) => g.gameId === 'quantum-mystery-room')?.timeSpent || null,
+      isNew: true,
+      isFeatured: true,
+      gradient: 'from-violet-500 via-purple-600 to-indigo-700',
+      skillsLearned: ['Quantum Mechanics', 'Quantum Cryptography', 'Advanced Security', 'Mystery Solving', 'Quantum Computing']
     }
   ]
 
