@@ -13,6 +13,8 @@ import Day4EnhancedTutorials from './components/Day4EnhancedTutorials';
 import Day4AdditionalEnhancedTutorials from './components/Day4AdditionalEnhancedTutorials';
 import { PhishingIdentificationTutorial, OSINTTutorial, RedBlueTeamTutorial } from './components/Day5Tutorials';
 import Day5EnhancedTutorials from './components/Day5EnhancedTutorials';
+import AlgorithmTutorial from './components/AlgorithmTutorial';
+import CTFCompetitionTutorial from './components/CTFCompetitionTutorial';
 
 // Types for the Day 1 GenCyber Pokemon MMO
 interface CyberPokemon {
@@ -1147,6 +1149,7 @@ const PokemonCyberMMO: React.FC = () => {
         { id: 'cyber-careers', name: 'Cyber Careers Explorer', description: 'Discover your cybersecurity path!', icon: '🎯' },
         { id: 'hardware-software', name: 'Hardware vs Software', description: 'Learn the difference!', icon: '🔧' },
         { id: 'ethics', name: 'Cyber Ethics Challenge', description: 'Be an ethical hacker!', icon: '⚖️' },
+        { id: 'algorithm-thinking', name: 'Algorithm Thinking Lab', description: 'Build step-by-step security procedures!', icon: '🧠' },
         { id: 'day1-enhanced', name: 'Enhanced Team Training', description: 'Social features, Windows security & file systems!', icon: '🚀' }
       );
     }
@@ -1184,6 +1187,7 @@ const PokemonCyberMMO: React.FC = () => {
         { id: 'phishing-detection', name: 'Phishing Hunter', description: 'Spot malicious emails!', icon: '🎣' },
         { id: 'osint-investigation', name: 'OSINT Detective', description: 'Investigate with open sources!', icon: '🔍' },
         { id: 'red-blue-team', name: 'Red vs Blue Battle', description: 'Epic attack vs defense!', icon: '⚔️' },
+        { id: 'ctf-competition', name: 'CTF Competition Arena', description: 'Compete in capture the flag challenges!', icon: '🏆' },
         { id: 'day5-enhanced', name: 'Advanced Investigation Labs', description: 'File recovery, metadata analysis & escape room!', icon: '🕵️' }
       );
     }
@@ -1911,6 +1915,20 @@ const PokemonCyberMMO: React.FC = () => {
               <RedBlueTeamTutorial
                 tutorialId="red-blue-team"
                 onComplete={(score) => handleTutorialComplete('red-blue-team', score)}
+                onClose={() => setActiveTutorial(null)}
+              />
+            )}
+            {activeTutorial === 'algorithm-thinking' && (
+              <AlgorithmTutorial
+                tutorialId="algorithm-thinking"
+                onComplete={(score) => handleTutorialComplete('algorithm-thinking', score)}
+                onClose={() => setActiveTutorial(null)}
+              />
+            )}
+            {activeTutorial === 'ctf-competition' && (
+              <CTFCompetitionTutorial
+                tutorialId="ctf-competition"
+                onComplete={(score) => handleTutorialComplete('ctf-competition', score)}
                 onClose={() => setActiveTutorial(null)}
               />
             )}
