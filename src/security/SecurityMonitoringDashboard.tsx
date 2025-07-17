@@ -727,6 +727,33 @@ function OverviewView({ metrics, events }: OverviewViewProps) {
           </div>
         </div>
 
+        {/* 📊 Export Controls for Educational Compliance */}
+        <div className="bg-white rounded-xl shadow-lg p-6">
+          <h3 className="text-lg font-semibold mb-4 flex items-center">
+            <Download className="w-5 h-5 mr-2" />
+            📊 Export Data for Educational Reports
+          </h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+              📄 Export Security Report
+            </button>
+            <button className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
+              📋 Download Event Log
+            </button>
+            <button className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors">
+              📈 Export Analytics Data
+            </button>
+          </div>
+          
+          <div className="mt-4 p-3 bg-green-50 rounded-lg">
+            <h4 className="font-medium text-green-800 mb-1">🎓 Educational Compliance:</h4>
+            <p className="text-sm text-green-700">
+              Export capabilities support educational reporting requirements and compliance documentation for cybersecurity training programs.
+            </p>
+          </div>
+        </div>
+
         {/* 🏆 Top Event Types */}
         <div className="bg-white rounded-xl shadow-lg p-6">
           <h3 className="text-lg font-semibold mb-4 flex items-center">

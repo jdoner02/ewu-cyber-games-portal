@@ -238,47 +238,144 @@ const CyberSilkGame: React.FC = () => {
     }
   }
 
-  const updateNetworkConcepts = () => {
-    // Enhanced pedagogical content following first principles approach
-    const concepts = {
-      'network': [
-        '🏗️ **Network Topology Foundation**: The physical and logical arrangement of interconnected devices (nodes) that enables communication and data sharing.',
-        '🚦 **Router Functionality**: Central devices that examine data packet headers and determine the optimal path for forwarding information between networks.',
-        '📋 **Communication Protocols**: Standardized rules and procedures (HTTP, HTTPS, SSH, FTP, SMTP) that govern how devices exchange information.',
-        '🔒 **Security Implications**: Different protocols provide varying levels of data protection - encrypted protocols (HTTPS, SSH) vs. plaintext protocols (HTTP, FTP).',
-        '🎯 **Learning Objective**: By drawing network connections, students visualize how protocol choice affects overall network security posture.'
-      ],
-      'dataflow': [
-        '📦 **Data Packet Concept**: Information is broken into small, individually-addressed packets that travel independently through the network.',
-        '🌊 **Bandwidth Understanding**: The maximum data transfer capacity of a network connection, measured in bits per second (bps).',
-        '⏱️ **Latency Analysis**: The time delay between sending a request and receiving a response, critical for network performance.',
-        '🔍 **Traffic Pattern Recognition**: Monitoring data flow helps identify normal vs. abnormal network behavior for security purposes.',
-        '🎯 **Learning Objective**: Students learn to visualize data movement patterns and understand how traffic analysis supports cybersecurity.'
-      ],
-      'encryption': [
-        '🔐 **Encryption Fundamentals**: Mathematical process of converting readable data (plaintext) into unreadable code (ciphertext) for protection.',
-        '🔑 **SSL/TLS Implementation**: Security protocols that create encrypted tunnels for web traffic, indicated by HTTPS in URLs.',
-        '🤝 **Key Exchange Mechanisms**: Secure methods for sharing encryption keys between communicating parties without revealing them to attackers.',
-        '💪 **Cipher Strength Comparison**: Different encryption algorithms (AES-256, RSA-2048) provide varying levels of computational security.',
-        '🎯 **Learning Objective**: Students understand how encryption creates secure communication channels and can identify encrypted vs. unencrypted protocols.'
-      ],
-      'attacks': [
-        '⚔️ **Attack Vector Analysis**: Systematic examination of potential entry points and methods attackers use to compromise network security.',
-        '🦠 **Malware Propagation Patterns**: Understanding how malicious software spreads through network connections and infected systems.',
-        '🌊 **DDoS Attack Mechanics**: Coordinated overwhelming of target systems using multiple sources to deny service to legitimate users.',
-        '🕵️ **Man-in-the-Middle Scenarios**: Attackers intercepting communications between two parties who believe they are communicating directly.',
-        '🎯 **Learning Objective**: Students learn to identify attack patterns and understand how network vulnerabilities can be exploited.'
-      ],
-      'freeform': [
-        '🎨 **Creative Security Visualization**: Using artistic expression to represent abstract cybersecurity concepts in tangible, memorable ways.',
-        '🧩 **Pattern Recognition Skills**: Developing ability to identify structures and relationships in complex network security data.',
-        '👁️ **Visual Learning Enhancement**: Converting technical concepts into visual representations improves comprehension and retention.',
-        '🎵 **Synesthetic Learning**: Connecting visual, auditory, and conceptual elements to create multi-sensory understanding of cybersecurity.',
-        '🎯 **Learning Objective**: Students develop creative thinking skills while reinforcing technical cybersecurity knowledge through artistic expression.'
-      ]
+  // Enhanced cybersecurity education feedback
+  const showProtocolFeedback = (protocol: string, security: string, pos: { x: number; y: number }) => {
+    const messages = {
+      'HTTP': '⚠️ Unencrypted! Data visible to attackers',
+      'HTTPS': '🔒 Encrypted connection - data protected',
+      'SSH': '🛡️ Secure shell - authentication protected', 
+      'FTP': '📁 File transfer - consider SFTP instead',
+      'SMTP': '📧 Email protocol - encryption recommended'
     }
-    setNetworkConcepts(concepts[drawingMode] || [])
+    
+    const message = messages[protocol as keyof typeof messages]
+    
+    // Visual feedback near drawing point
+    createEducationalPopup(pos.x, pos.y, message, security === 'secure' ? 'success' : 'warning')
+    
+    // Update network concepts with real-time learning
+    updateNetworkConcepts()
   }
+
+  const createEducationalPopup = (x: number, y: number, message: string, type: 'success' | 'warning' | 'info') => {
+    const popup = document.createElement('div')
+    popup.className = `absolute pointer-events-none z-50 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-1000 ${
+      type === 'success' ? 'bg-green-500/90 text-white' :
+      type === 'warning' ? 'bg-yellow-500/90 text-black' :
+      'bg-blue-500/90 text-white'
+    }`
+    popup.style.left = `${x}px`
+    popup.style.top = `${y - 40}px`
+    popup.textContent = message
+    
+    const canvas = canvasRef.current
+    if (canvas && canvas.parentElement) {
+      canvas.parentElement.style.position = 'relative'
+      canvas.parentElement.appendChild(popup)
+      
+      // Animate and remove
+      setTimeout(() => {
+        popup.style.transform = 'translateY(-20px)'
+        popup.style.opacity = '0'
+      }, 100)
+      
+      setTimeout(() => {
+        if (popup.parentElement) {
+          popup.parentElement.removeChild(popup)
+        }
+      }, 1100)
+    }
+  }
+
+  // Enhanced network concepts with real cybersecurity learning
+  const updateNetworkConcepts = () => {
+    const concepts = []
+    
+    // Analyze current drawing for educational insights
+    const protocols = silkStrokes.map(stroke => stroke.protocol)
+    const secureCount = protocols.filter(p => ['HTTPS', 'SSH'].includes(p)).length
+    const insecureCount = protocols.filter(p => ['HTTP', 'FTP'].includes(p)).length
+    
+    if (secureCount > insecureCount) {
+      concepts.push('**Excellent Security Posture!** Your network uses mostly encrypted protocols.')
+    } else if (insecureCount > 0) {
+      concepts.push('**Security Alert!** Unencrypted protocols detected. Consider upgrading to secure alternatives.')
+    }
+    
+    // Mode-specific educational content
+    if (drawingMode === 'network') {
+      concepts.push('**Network Topology**: Each stroke represents a network connection. Notice how different protocols create different visual patterns.')
+      concepts.push('**OSI Model**: Your drawing shows different network layers - application (top), transport (middle), network (bottom).')
+    } else if (drawingMode === 'encryption') {
+      concepts.push('**Encryption in Transit**: Secure protocols (HTTPS, SSH) create glowing effects to show data protection.')
+      concepts.push('**Cryptographic Strength**: The visual intensity represents the strength of encryption algorithms.')
+    } else if (drawingMode === 'attacks') {
+      concepts.push('**Attack Vectors**: Vulnerable protocols show potential entry points for cybercriminals.')
+      concepts.push('**Threat Modeling**: Each insecure connection represents a possible attack path.')
+    } else if (drawingMode === 'dataflow') {
+      concepts.push('**Data Packet Flow**: Your strokes simulate how data packets travel through network infrastructure.')
+      concepts.push('**Bandwidth Visualization**: Thicker strokes represent higher data throughput.')
+    }
+    
+    // Advanced cybersecurity concepts based on stroke patterns
+    if (symmetryMode !== 'none') {
+      concepts.push('**Network Redundancy**: Symmetric patterns represent failover systems and backup connections.')
+    }
+    
+    if (silkStrokes.length > 10) {
+      concepts.push('**Complex Networks**: Large networks require careful security architecture and monitoring.')
+    }
+    
+    setNetworkConcepts(concepts.slice(0, 4)) // Keep most relevant concepts
+  }
+
+  // Enhanced interactive threat simulation
+  const simulateThreatScenario = useCallback(() => {
+    if (drawingMode !== 'attacks') return
+    
+    // Find vulnerable strokes (HTTP, FTP)
+    const vulnerableStrokes = silkStrokes.filter(stroke => 
+      ['HTTP', 'FTP'].includes(stroke.protocol)
+    )
+    
+    if (vulnerableStrokes.length > 0) {
+      // Simulate attack propagation
+      vulnerableStrokes.forEach(stroke => {
+        // Create visual "attack" effect
+        const attackParticles = Array.from({ length: 5 }, (_, i) => ({
+          id: `attack-${stroke.id}-${i}`,
+          x: stroke.points[0].x + Math.random() * 50 - 25,
+          y: stroke.points[0].y + Math.random() * 50 - 25,
+          vx: (Math.random() - 0.5) * 4,
+          vy: (Math.random() - 0.5) * 4,
+          life: 120,
+          maxLife: 120,
+          color: '#ff4444',
+          size: 3 + Math.random() * 2
+        }))
+        
+        setParticles(prev => [...prev, ...attackParticles])
+        
+        // Show educational alert
+        createEducationalPopup(
+          stroke.points[0].x, 
+          stroke.points[0].y, 
+          '🚨 Attack detected on vulnerable protocol!', 
+          'warning'
+        )
+      })
+      
+      setScore(prev => prev + 50) // Points for recognizing vulnerability
+    }
+  }, [drawingMode, silkStrokes])
+
+  // Auto-trigger threat simulation in attack mode
+  useEffect(() => {
+    if (drawingMode === 'attacks' && silkStrokes.length > 0) {
+      const timer = setTimeout(simulateThreatScenario, 2000)
+      return () => clearTimeout(timer)
+    }
+  }, [drawingMode, silkStrokes.length, simulateThreatScenario])
 
   const getAssessmentQuestions = (mode: DrawingMode): AssessmentQuestion[] => {
     const questions = {
@@ -358,7 +455,28 @@ const CyberSilkGame: React.FC = () => {
 
   const startDrawing = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const pos = getMousePos(e)
-    const protocol = getRandomProtocol()
+    
+    // Enhanced protocol selection based on drawing mode and position
+    let protocol: 'HTTP' | 'HTTPS' | 'SSH' | 'FTP' | 'SMTP'
+    
+    // Make protocol selection educational and contextual
+    if (drawingMode === 'encryption') {
+      // In encryption mode, prioritize secure protocols
+      protocol = Math.random() > 0.3 ? 'HTTPS' : 'SSH'
+    } else if (drawingMode === 'attacks') {
+      // In attack mode, start with vulnerable protocols
+      protocol = Math.random() > 0.7 ? 'HTTP' : 'FTP'
+    } else if (drawingMode === 'network') {
+      // In network mode, use position to determine protocol (simulate network layers)
+      const canvasHeight = canvasRef.current?.height || 400
+      const layer = pos.y / canvasHeight
+      if (layer < 0.3) protocol = 'HTTPS' // Application layer
+      else if (layer < 0.6) protocol = 'SSH' // Transport layer  
+      else protocol = 'HTTP' // Network layer
+    } else {
+      protocol = getRandomProtocol()
+    }
+    
     const security = getSecurityFromProtocol(protocol)
     
     const newStroke: SilkStroke = {
@@ -374,10 +492,14 @@ const CyberSilkGame: React.FC = () => {
     setCurrentStroke(newStroke)
     setIsDrawing(true)
     
+    // Enhanced audio feedback for cybersecurity learning
     if (isSoundEnabled) {
       playDrawingSound(protocol)
     }
-  }, [getMousePos, isSoundEnabled])
+    
+    // Real-time educational feedback
+    showProtocolFeedback(protocol, security, pos)
+  }, [getMousePos, isSoundEnabled, drawingMode])
 
   const continueDrawing = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!isDrawing || !currentStroke) return
@@ -390,8 +512,124 @@ const CyberSilkGame: React.FC = () => {
       points: [...prev.points, newPoint]
     } : null)
     
-    createParticleEffect(pos.x, pos.y, currentStroke.color)
+    // Enhanced particle effects based on security level
+    const particleColor = currentStroke.security === 'secure' ? 
+      currentStroke.color : '#ff6b6b' // Red particles for insecure protocols
+    
+    createParticleEffect(pos.x, pos.y, particleColor)
+    
+    // Interactive cybersecurity learning - detect drawing patterns
+    if (currentStroke.points.length > 5) {
+      detectCyberSecurityPatterns(currentStroke)
+    }
+    
+    // Dynamic scoring based on security awareness
+    if (currentStroke.security === 'secure') {
+      setScore(prev => prev + 1) // Reward secure protocol usage
+    }
   }, [isDrawing, currentStroke, getMousePos])
+
+  // Pattern recognition for cybersecurity education
+  const detectCyberSecurityPatterns = (stroke: SilkStroke) => {
+    const points = stroke.points
+    if (points.length < 5) return
+    
+    // Detect circular patterns (representing network loops/redundancy)
+    const isCircular = isCircularPattern(points)
+    if (isCircular && drawingMode === 'network') {
+      createEducationalPopup(
+        points[0].x, 
+        points[0].y, 
+        '🔄 Network redundancy detected! Great for failover protection.',
+        'success'
+      )
+      setScore(prev => prev + 25)
+    }
+    
+    // Detect branching patterns (representing network hierarchies)
+    const isBranching = isBranchingPattern(points)
+    if (isBranching && drawingMode === 'network') {
+      createEducationalPopup(
+        points[0].x, 
+        points[0].y, 
+        '🌳 Hierarchical network structure! Efficient for large organizations.',
+        'info'
+      )
+      setScore(prev => prev + 20)
+    }
+    
+    // Detect zigzag patterns (representing attack paths)
+    const isZigzag = isZigzagPattern(points)
+    if (isZigzag && drawingMode === 'attacks') {
+      createEducationalPopup(
+        points[0].x, 
+        points[0].y, 
+        '⚡ Lateral movement detected! Attackers use this to spread through networks.',
+        'warning'
+      )
+      setScore(prev => prev + 30)
+    }
+  }
+
+  // Pattern detection algorithms for educational feedback
+  const isCircularPattern = (points: { x: number; y: number }[]): boolean => {
+    if (points.length < 8) return false
+    
+    const firstPoint = points[0]
+    const lastPoint = points[points.length - 1]
+    const distance = Math.sqrt(
+      Math.pow(lastPoint.x - firstPoint.x, 2) + 
+      Math.pow(lastPoint.y - firstPoint.y, 2)
+    )
+    
+    // Check if end point is close to start point and path has curves
+    return distance < 50 && hasSignificantCurvature(points)
+  }
+
+  const isBranchingPattern = (points: { x: number; y: number }[]): boolean => {
+    if (points.length < 6) return false
+    
+    // Look for significant direction changes indicating branches
+    let directionChanges = 0
+    for (let i = 2; i < points.length - 2; i++) {
+      const angle1 = Math.atan2(points[i].y - points[i-1].y, points[i].x - points[i-1].x)
+      const angle2 = Math.atan2(points[i+1].y - points[i].y, points[i+1].x - points[i].x)
+      const angleDiff = Math.abs(angle2 - angle1)
+      
+      if (angleDiff > Math.PI / 3) { // 60 degrees or more
+        directionChanges++
+      }
+    }
+    
+    return directionChanges >= 2
+  }
+
+  const isZigzagPattern = (points: { x: number; y: number }[]): boolean => {
+    if (points.length < 6) return false
+    
+    let alternatingDirection = 0
+    for (let i = 2; i < points.length - 1; i++) {
+      const dx1 = points[i].x - points[i-1].x
+      const dx2 = points[i+1].x - points[i].x
+      
+      if ((dx1 > 0 && dx2 < 0) || (dx1 < 0 && dx2 > 0)) {
+        alternatingDirection++
+      }
+    }
+    
+    return alternatingDirection >= 3
+  }
+
+  const hasSignificantCurvature = (points: { x: number; y: number }[]): boolean => {
+    let totalAngleChange = 0
+    for (let i = 1; i < points.length - 1; i++) {
+      const angle1 = Math.atan2(points[i].y - points[i-1].y, points[i].x - points[i-1].x)
+      const angle2 = Math.atan2(points[i+1].y - points[i].y, points[i+1].x - points[i].x)
+      totalAngleChange += Math.abs(angle2 - angle1)
+    }
+    
+    return totalAngleChange > Math.PI // More than 180 degrees total curvature
+  }
 
   const stopDrawing = useCallback(() => {
     if (currentStroke && currentStroke.points.length > 1) {
@@ -399,6 +637,13 @@ const CyberSilkGame: React.FC = () => {
       const symmetricStrokes = applySymmetry(finalStroke)
       
       setSilkStrokes(prev => [...prev, ...symmetricStrokes])
+      
+      // Enhanced educational feedback on stroke completion
+      provideStrokeCompletionFeedback(finalStroke)
+      
+      // Update learning progress based on stroke characteristics
+      updateLearningProgress(finalStroke)
+      
       setScore(prev => prev + symmetricStrokes.length * 10)
       
       if (finalStroke.security === 'encrypted') {
@@ -409,6 +654,86 @@ const CyberSilkGame: React.FC = () => {
     setCurrentStroke(null)
     setIsDrawing(false)
   }, [currentStroke, symmetryMode])
+
+  const provideStrokeCompletionFeedback = (stroke: SilkStroke) => {
+    const strokeLength = calculateStrokeLength(stroke.points)
+    const complexity = stroke.points.length
+    
+    let feedback = ''
+    let feedbackType: 'success' | 'warning' | 'info' = 'info'
+    
+    if (stroke.security === 'encrypted' && strokeLength > 100) {
+      feedback = '🔐 Excellent! Long secure connection established.'
+      feedbackType = 'success'
+      markObjectiveProgress('encryption-concepts')
+    } else if (stroke.security === 'unsecure') {
+      feedback = '⚠️ Insecure protocol used. Consider HTTPS or SSH.'
+      feedbackType = 'warning'
+      markObjectiveProgress('protocol-identification')
+    } else if (complexity > 20) {
+      feedback = '🎨 Complex network path created! Great for redundancy.'
+      feedbackType = 'success'
+      markObjectiveProgress('network-topology-basics')
+    }
+    
+    if (feedback) {
+      const centerPoint = stroke.points[Math.floor(stroke.points.length / 2)]
+      createEducationalPopup(centerPoint.x, centerPoint.y, feedback, feedbackType)
+    }
+  }
+
+  const calculateStrokeLength = (points: { x: number; y: number }[]): number => {
+    let length = 0
+    for (let i = 1; i < points.length; i++) {
+      const dx = points[i].x - points[i-1].x
+      const dy = points[i].y - points[i-1].y
+      length += Math.sqrt(dx * dx + dy * dy)
+    }
+    return length
+  }
+
+  const markObjectiveProgress = (objectiveId: string) => {
+    setLearningObjectives(prev => 
+      prev.map(obj => {
+        if (obj.id === objectiveId && !obj.completed) {
+          // Check if prerequisites are met
+          const prerequisitesMet = obj.prerequisite?.every(prereqId => 
+            prev.find(p => p.id === prereqId)?.completed
+          ) ?? true
+          
+          if (prerequisitesMet) {
+            return { ...obj, completed: true }
+          }
+        }
+        return obj
+      })
+    )
+  }
+
+  const updateLearningProgress = (stroke: SilkStroke) => {
+    setStudentProgress(prev => {
+      const sessionTime = prev.learning_session_time + 1
+      const newStreak = stroke.security === 'secure' ? 
+        prev.current_streak + 1 : 
+        Math.max(0, prev.current_streak - 1)
+      
+      return {
+        ...prev,
+        current_streak: newStreak,
+        learning_session_time: sessionTime
+      }
+    })
+    
+    // Achievement unlocks based on streaks
+    if (studentProgress.current_streak >= 5) {
+      createEducationalPopup(
+        400, 300, 
+        '🏆 Security Streak! 5 secure protocols in a row!', 
+        'success'
+      )
+      setScore(prev => prev + 100)
+    }
+  }
 
   const getRandomProtocol = (): 'HTTP' | 'HTTPS' | 'SSH' | 'FTP' | 'SMTP' => {
     const protocols: Array<'HTTP' | 'HTTPS' | 'SSH' | 'FTP' | 'SMTP'> = ['HTTP', 'HTTPS', 'SSH', 'FTP', 'SMTP']
@@ -770,6 +1095,130 @@ const CyberSilkGame: React.FC = () => {
     return descriptions[mode]
   }
 
+  // Interactive cybersecurity mini-challenges
+  const startInteractiveChallenge = () => {
+    const challenges = {
+      'network': {
+        title: '🌐 Network Security Challenge',
+        instruction: 'Draw a secure network topology connecting 3 devices. Use only HTTPS and SSH.',
+        target: 'Create 3 secure connections',
+        validator: () => {
+          const secureConnections = silkStrokes.filter(s => ['HTTPS', 'SSH'].includes(s.protocol))
+          return secureConnections.length >= 3
+        }
+      },
+      'encryption': {
+        title: '🔐 Encryption Mastery',
+        instruction: 'Create an encrypted data flow. Draw smooth, continuous paths using only secure protocols.',
+        target: 'Achieve 100% encrypted communications',
+        validator: () => {
+          const totalStrokes = silkStrokes.length
+          const encryptedStrokes = silkStrokes.filter(s => s.security === 'encrypted').length
+          return totalStrokes > 0 && encryptedStrokes === totalStrokes
+        }
+      },
+      'attacks': {
+        title: '⚔️ Threat Simulation',
+        instruction: 'Demonstrate how attacks spread through vulnerable protocols. Start with HTTP.',
+        target: 'Show attack propagation paths',
+        validator: () => {
+          const vulnerableStrokes = silkStrokes.filter(s => s.protocol === 'HTTP')
+          return vulnerableStrokes.length >= 2
+        }
+      },
+      'dataflow': {
+        title: '📊 Data Flow Optimization',
+        instruction: 'Design efficient data paths. Create branching patterns for load distribution.',
+        target: 'Create 2+ branching patterns',
+        validator: () => {
+          let branchingPatterns = 0
+          silkStrokes.forEach(stroke => {
+            if (isBranchingPattern(stroke.points)) branchingPatterns++
+          })
+          return branchingPatterns >= 2
+        }
+      },
+      'freeform': {
+        title: '🎨 Creative Security Art',
+        instruction: 'Express network security concepts through art. Combine multiple protocol types.',
+        target: 'Use all 5 protocol types',
+        validator: () => {
+          const protocols = new Set(silkStrokes.map(s => s.protocol))
+          return protocols.size >= 5
+        }
+      }
+    }
+    
+    const challenge = challenges[drawingMode]
+    if (challenge) {
+      createEducationalPopup(400, 100, `${challenge.title}: ${challenge.instruction}`, 'info')
+      setCurrentChallenge(challenge)
+    }
+  }
+
+  // State for interactive challenges
+  const [currentChallenge, setCurrentChallenge] = useState<any>(null)
+
+  // Check challenge completion
+  useEffect(() => {
+    if (currentChallenge && currentChallenge.validator()) {
+      createEducationalPopup(400, 200, `🏆 Challenge Complete! ${currentChallenge.target}`, 'success')
+      setScore(prev => prev + 250)
+      setCurrentChallenge(null)
+      
+      // Mark advanced objectives as complete
+      markObjectiveProgress('security-architecture')
+    }
+  }, [silkStrokes, currentChallenge])
+
+  // Real-time cybersecurity insights panel
+  const getCyberSecurityInsights = () => {
+    const insights = []
+    const protocolCount = silkStrokes.reduce((acc, stroke) => {
+      acc[stroke.protocol] = (acc[stroke.protocol] || 0) + 1
+      return acc
+    }, {} as Record<string, number>)
+    
+    const totalStrokes = silkStrokes.length
+    const secureStrokes = silkStrokes.filter(s => s.security === 'secure').length
+    const encryptedStrokes = silkStrokes.filter(s => s.security === 'encrypted').length
+    
+    if (totalStrokes === 0) {
+      insights.push('🎨 Start drawing to see cybersecurity insights!')
+      return insights
+    }
+    
+    const securityScore = Math.round((secureStrokes / totalStrokes) * 100)
+    insights.push(`🛡️ Security Score: ${securityScore}%`)
+    
+    if (encryptedStrokes > 0) {
+      const encryptionRate = Math.round((encryptedStrokes / totalStrokes) * 100)
+      insights.push(`🔐 Encryption Rate: ${encryptionRate}%`)
+    }
+    
+    // Protocol distribution analysis
+    const mostUsed = Object.entries(protocolCount).sort(([,a], [,b]) => b - a)[0]
+    if (mostUsed) {
+      insights.push(`📊 Most Used: ${mostUsed[0]} (${mostUsed[1]} connections)`)
+    }
+    
+    // Security recommendations
+    if (protocolCount['HTTP'] > 0) {
+      insights.push('⚠️ Recommendation: Upgrade HTTP to HTTPS for security')
+    }
+    
+    if (protocolCount['FTP'] > 0) {
+      insights.push('💡 Tip: Consider SFTP instead of FTP for file transfers')
+    }
+    
+    // Network topology insights
+    if (totalStrokes > 5) {
+      insights.push('🌐 Complex network detected - consider segmentation')
+    }
+    
+    return insights.slice(0, 4) // Show top 4 insights
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 text-white overflow-hidden">
       <div className="container mx-auto px-4 py-6">
@@ -928,19 +1377,74 @@ const CyberSilkGame: React.FC = () => {
           </div>
         </motion.div>
 
-          {/* Mode Description with Enhanced Learning Context */}
+        {/* Interactive Challenge Panel */}
+        {currentChallenge && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-400/50 rounded-lg p-4 mb-4"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-yellow-300">{currentChallenge.title}</h3>
+                <p className="text-yellow-200 text-sm">{currentChallenge.instruction}</p>
+                <div className="text-orange-300 text-sm mt-1">
+                  🎯 Target: {currentChallenge.target}
+                </div>
+              </div>
+              <button
+                onClick={() => setCurrentChallenge(null)}
+                className="text-yellow-400 hover:text-yellow-300 text-2xl"
+              >
+                ×
+              </button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Cybersecurity Insights Panel */}
+        {silkStrokes.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-black/30 rounded-lg p-4 mb-4 backdrop-blur-sm border border-blue-400/30"
+          >
+            <h3 className="text-lg font-bold text-blue-300 mb-3 flex items-center gap-2">
+              🧠 Real-Time Cybersecurity Insights
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {getCyberSecurityInsights().map((insight, index) => (
+                <div key={index} className="text-sm text-blue-200 bg-blue-500/10 rounded-lg p-2">
+                  {insight}
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Enhanced Mode Description with Challenge Starter */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           key={`${drawingMode}-${learningMode}`}
           className="text-center mb-4 p-4 bg-black/30 rounded-lg backdrop-blur-sm border border-cyan-400/30"
         >
-          <h3 className="text-lg font-bold text-white mb-2">
-            {learningMode === 'tutorial' ? '📚 Interactive Tutorial Mode' :
-             learningMode === 'scenario' ? '🎯 Security Scenario Challenge' :
-             learningMode === 'assessment' ? '✅ Knowledge Assessment' :
-             '🎨 Creative Learning Mode'}
-          </h3>
+          <div className="flex items-center justify-center gap-4 mb-2">
+            <h3 className="text-lg font-bold text-white">
+              {learningMode === 'tutorial' ? '📚 Interactive Tutorial Mode' :
+               learningMode === 'scenario' ? '🎯 Security Scenario Challenge' :
+               learningMode === 'assessment' ? '✅ Knowledge Assessment' :
+               '🎨 Creative Learning Mode'}
+            </h3>
+            {!currentChallenge && learningMode === 'creative' && (
+              <button
+                onClick={startInteractiveChallenge}
+                className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2 rounded-lg font-medium hover:from-green-600 hover:to-emerald-700 transition-all"
+              >
+                🚀 Start Challenge
+              </button>
+            )}
+          </div>
           <p className="text-sm text-gray-300">{getModeDescription(drawingMode)}</p>
           
           {learningMode === 'scenario' && currentScenario && (
@@ -997,17 +1501,36 @@ const CyberSilkGame: React.FC = () => {
             onMouseLeave={stopDrawing}
           />
           
-          {/* Drawing Instructions Overlay */}
+          {/* Enhanced Drawing Instructions Overlay */}
           {silkStrokes.length === 0 && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               className="absolute inset-0 flex items-center justify-center pointer-events-none"
             >
-              <div className="text-center text-white/60">
-                <div className="text-2xl mb-2">✨</div>
-                <div className="text-lg font-medium">Start Drawing</div>
-                <div className="text-sm">Click and drag to create flowing network patterns</div>
+              <div className="text-center text-white/80 bg-black/40 rounded-lg p-6 border border-white/20">
+                <div className="text-3xl mb-3">
+                  {drawingMode === 'network' ? '🌐' :
+                   drawingMode === 'encryption' ? '🔐' :
+                   drawingMode === 'attacks' ? '⚔️' :
+                   drawingMode === 'dataflow' ? '📊' : '🎨'}
+                </div>
+                <div className="text-xl font-bold mb-2">
+                  {drawingMode === 'network' ? 'Design Your Network' :
+                   drawingMode === 'encryption' ? 'Secure Your Data' :
+                   drawingMode === 'attacks' ? 'Simulate Threats' :
+                   drawingMode === 'dataflow' ? 'Optimize Data Flow' : 'Create Security Art'}
+                </div>
+                <div className="text-sm text-white/70 max-w-md">
+                  {drawingMode === 'network' ? 'Draw network connections. Green lines = secure protocols, Red lines = vulnerable protocols.' :
+                   drawingMode === 'encryption' ? 'Create encrypted pathways. Secure protocols will glow with protective energy.' :
+                   drawingMode === 'attacks' ? 'Show how attacks spread. Vulnerable protocols will trigger threat simulations.' :
+                   drawingMode === 'dataflow' ? 'Design data highways. Branching patterns represent load balancing.' :
+                   'Express cybersecurity concepts through beautiful, flowing art patterns.'}
+                </div>
+                <div className="mt-3 text-cyan-400 text-sm animate-pulse">
+                  🖱️ Click and drag anywhere to start
+                </div>
               </div>
             </motion.div>
           )}

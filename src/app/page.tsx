@@ -52,7 +52,7 @@ export default function HomePage() {
   
   const [favoriteGames, setFavoriteGames] = useState<string[]>([])
   const [recentGames, setRecentGames] = useState<string[]>([])
-  const [newGames] = useState(['cyber-knowledge-brain', 'packet-tracer-mmo', 'phishing-detective', 'network-defense', 'encryption-escape', 'quantum-mystery-room'])
+  const [newGames] = useState(['cyber-knowledge-brain', 'packet-tracer-mmo', 'phishing-detective', 'network-defense', 'encryption-escape', 'quantum-mystery-room', 'snake-knowledge-arena'])
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [showPersonalizedView, setShowPersonalizedView] = useState(true)
   const [showPatchNotes, setShowPatchNotes] = useState(false)
@@ -170,6 +170,22 @@ export default function HomePage() {
       isFeatured: true,
       gradient: 'from-cyan-400 via-purple-500 to-pink-600',
       skillsLearned: ['Protocol Security', 'Network Visualization', 'Silk Drawing', 'Symmetry Patterns', 'Creative Cybersecurity']
+    },
+    {
+      id: 'snake-knowledge-arena',
+      title: 'Snake.io Knowledge Arena',
+      description: '🆕 NEW! Multiplayer snake game where you consume cybersecurity knowledge to grow! Compete with other players while learning different cyber domains.',
+      icon: '🐍',
+      difficulty: 'All Levels',
+      category: 'Multiplayer',
+      estimatedTime: '10-20 min',
+      rating: 4.9,
+      plays: gameProgress.find((g: any) => g.gameId === 'snake-knowledge-arena')?.attempts || 0,
+      lastPlayed: gameProgress.find((g: any) => g.gameId === 'snake-knowledge-arena')?.timeSpent || null,
+      isNew: true,
+      isFeatured: true,
+      gradient: 'from-green-500 to-teal-600',
+      skillsLearned: ['Knowledge Integration', 'Specialization Paths', 'Multiplayer Learning', 'Skill Building']
     },
     {
       id: 'phishing-detective',
