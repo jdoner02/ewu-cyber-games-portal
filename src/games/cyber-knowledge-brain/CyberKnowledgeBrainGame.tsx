@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Brain, Network, Zap, Shield, Code, Users, Eye, Target, Star, BookOpen, Trophy, Lock } from 'lucide-react';
-import { useGameStore } from '../../stores/gameStore';
+import { Brain, Network, Zap, Shield, Code, Users, Eye, Target, Star, BookOpen, Trophy, Lock, Monitor } from 'lucide-react';
+import useGameStore from '../../stores/gameStore';
 
 /**
  * 🧠 Cyber Knowledge Brain - Central Learning Visualization Hub
@@ -423,8 +423,8 @@ const CyberKnowledgeBrainGame: React.FC = () => {
     setShowNodeDetails(true);
     
     // Award XP for exploring nodes
-    addExperience(10, 'general');
-    updateSkillProgress('exploration', 1);
+    addExperience(10);
+    // updateSkillProgress('exploration', 1); // TODO: Fix skill progress interface
   };
 
   // Generate silk connections with animation

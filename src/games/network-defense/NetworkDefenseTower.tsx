@@ -344,7 +344,7 @@ export default function NetworkDefenseTower() {
   const [waveInProgress, setWaveInProgress] = useState(false)
   const [showEducationalInfo, setShowEducationalInfo] = useState<string | null>(null)
 
-  const gameLoopRef = useRef<number | undefined>()
+  const gameLoopRef = useRef<number | undefined>(undefined)
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   /**

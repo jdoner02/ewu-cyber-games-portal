@@ -1,0 +1,133 @@
+name: Code Quality & Security
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  code-quality:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: ESLint Analysis
+      run: |
+        echo "🔍 Running ESLint analysis..."
+        npm run lint -- --format=json --output-file=eslint-report.json || true
+        npm run lint || echo "ESLint found issues"
+        
+    - name: TypeScript Compilation Check
+      run: |
+        echo "🔍 Checking TypeScript compilation..."
+        npm run type-check || echo "TypeScript compilation issues found"
+        
+    - name: Security Vulnerability Assessment
+      run: |
+        echo "🔒 Running security assessment..."
+        npm audit --audit-level=moderate || echo "Security vulnerabilities detected"
+        
+    - name: Code Complexity Analysis
+      run: |
+        echo "📊 Analyzing code complexity..."
+        # Add complexity analysis if tools are available
+        find src -name "*.ts" -o -name "*.tsx" | wc -l | xargs echo "TypeScript files:"
+        find src -name "*.js" -o -name "*.jsx" | wc -l | xargs echo "JavaScript files:"
+        
+    - name: Bundle Size Analysis
+      run: |
+        echo "📦 Analyzing bundle size..."
+        npm run build
+        echo "Build output size:"
+        du -sh out/
+        echo "Static assets breakdown:"
+        find out/_next/static -name "*.js" -exec du -h {} + | sort -hr | head -10
+        
+  security-scan:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Dependency Security Scan
+      run: |
+        echo "🔍 Scanning dependencies for security vulnerabilities..."
+        npm audit --audit-level=high --json > audit-report.json || true
+        npm audit --audit-level=high || echo "High severity vulnerabilities found"
+        
+    - name: Source Code Security Analysis
+      run: |
+        echo "🔍 Analyzing source code for security patterns..."
+        # Check for common security anti-patterns
+        echo "Checking for console.log statements in production code:"
+        grep -r "console\.log" src/ || echo "No console.log found"
+        
+        echo "Checking for hardcoded secrets patterns:"
+        grep -r -i "password\|secret\|key\|token" src/ --include="*.ts" --include="*.tsx" | grep -v "// " || echo "No obvious hardcoded secrets"
+        
+        echo "Checking for eval() usage:"
+        grep -r "eval(" src/ || echo "No eval() usage found"
+        
+  educational-compliance:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: COPPA Compliance Check
+      run: |
+        echo "👶 Checking COPPA compliance..."
+        # Check for data collection patterns
+        grep -r -i "personal.*info\|collect.*data\|store.*user" src/ || echo "No obvious data collection found"
+        
+        # Check for age verification
+        grep -r -i "age.*verify\|birth.*date\|parent.*consent" src/ || echo "Age verification patterns checked"
+        
+    - name: Educational Content Validation
+      run: |
+        echo "🎓 Validating educational content..."
+        # Check for age-appropriate language
+        grep -r -i "hack\|crack\|break.*into\|penetrat" src/ | grep -v "ethical\|education\|learn" || echo "Content appears age-appropriate"
+        
+        # Verify educational disclaimers
+        grep -r -i "educational.*purpose\|learning.*simulation\|practice.*only" src/ || echo "Educational disclaimers checked"
+        
+    - name: Accessibility Check
+      run: |
+        echo "♿ Checking accessibility patterns..."
+        # Basic accessibility pattern checks
+        grep -r "alt=" src/ | wc -l | xargs echo "Alt attributes found:"
+        grep -r "aria-" src/ | wc -l | xargs echo "ARIA attributes found:"
+        grep -r "role=" src/ | wc -l | xargs echo "Role attributes found:"

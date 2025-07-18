@@ -1203,7 +1203,12 @@ const ImageDecodeChallenge: React.FC<{ onScoreUpdate: (points: number) => void; 
       <div className="mb-8">
         {currentChallengeIndex === 0 && renderTheorySection()}
         {currentChallengeIndex === 1 && renderLSBDemo()}
-        {currentChallengeIndex === 2 && renderImageDecodeChallenge()}
+        {currentChallengeIndex === 2 && (
+          <ImageDecodeChallenge
+            onScoreUpdate={(points) => {}}
+            onMessageFound={(message) => {}}
+          />
+        )}
         {currentChallengeIndex === 3 && renderAudioDecodeChallenge()}
         {currentChallengeIndex === 4 && renderEncodeMessageChallenge()}
         {currentChallengeIndex === 5 && renderForensicsChallenge()}

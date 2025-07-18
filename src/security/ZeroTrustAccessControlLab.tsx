@@ -267,7 +267,7 @@ export default function ZeroTrustAccessControlLab() {
   const [policies, setPolicies] = useState<SecurityPolicy[]>(SECURITY_POLICIES)
   const [riskLevel, setRiskLevel] = useState<'low' | 'medium' | 'high'>('low')
   const [isMonitoring, setIsMonitoring] = useState(false)
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'policies' | 'simulator' | 'learning'>('dashboard')
+  const [activeTab, setActiveTab] = useState<'concepts' | 'riskassessment' | 'accesscontrol' | 'learning'>('concepts')
 
   /**
    * 🎯 RISK CALCULATION ENGINE
@@ -687,6 +687,23 @@ export default function ZeroTrustAccessControlLab() {
                 <li>• Real techniques used by security professionals</li>
               </ul>
             </div>
+
+            {/* Educational standards alignment */}
+            <div className="bg-purple-50 p-4 rounded-lg mb-6">
+              <h3 className="font-semibold text-purple-800 mb-2">📚 Curriculum Standards</h3>
+              <ul className="text-sm text-purple-700 space-y-1 text-left">
+                <li>• NIST Cybersecurity Framework alignment</li>
+                <li>• Grade 6-8 Computer Science Standards</li>
+                <li>• Digital Citizenship Objectives</li>
+              </ul>
+            </div>
+
+            {/* Risk indicators for educational purposes */}
+            <div className="grid grid-cols-3 gap-2 mb-6">
+              <img src="/risk-low.png" alt="Low risk indicator" className="w-8 h-8 mx-auto" onError={(e) => e.currentTarget.style.display = 'none'} />
+              <img src="/risk-medium.png" alt="Medium risk indicator" className="w-8 h-8 mx-auto" onError={(e) => e.currentTarget.style.display = 'none'} />
+              <img src="/risk-high.png" alt="High risk indicator" className="w-8 h-8 mx-auto" onError={(e) => e.currentTarget.style.display = 'none'} />
+            </div>
             
             <motion.button
               onClick={createDemoUser}
@@ -707,6 +724,327 @@ export default function ZeroTrustAccessControlLab() {
         </AnimatePresence>
       )}
     </main>
+  )
+}
+
+/**
+ * 🎓 CONCEPTS VIEW - Educational Zero Trust Introduction
+ */
+function ConceptsView() {
+  return (
+    <motion.div
+      key="concepts"
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 20 }}
+      className="space-y-6"
+    >
+      <div className="bg-white rounded-xl shadow-lg p-6">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">
+          Understanding Zero Trust Security
+        </h2>
+        
+        <div className="grid md:grid-cols-2 gap-6">
+          <div>
+            <h3 className="text-lg font-semibold text-blue-800 mb-3">🏰 Old Security (Castle Model)</h3>
+            <p className="text-gray-700 mb-3">
+              Traditional security was like a castle with high walls - once you got inside, 
+              you could go anywhere. This worked when everyone worked in the same building!
+            </p>
+            <ul className="text-sm text-gray-600 space-y-1">
+              <li>• Trust employees inside the network</li>
+              <li>• Strong perimeter, weak inside</li>
+              <li>• One login = access to everything</li>
+            </ul>
+          </div>
+          
+          <div>
+            <h3 className="text-lg font-semibold text-purple-800 mb-3">🔐 Zero Trust (Modern Security)</h3>
+            <p className="text-gray-700 mb-3">
+              Zero Trust is like having checkpoints everywhere, just like airport security. 
+              Perfect for our mobile, cloud-connected world where people work from anywhere!
+            </p>
+            <ul className="text-sm text-gray-600 space-y-1">
+              <li>• Never trust, always verify</li>
+              <li>• Check every request</li>
+              <li>• Assume attackers are already inside</li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="mt-6 p-4 bg-green-50 rounded-lg">
+          <h4 className="font-semibold text-green-800 mb-2">🌟 Why Zero Trust is Revolutionary</h4>
+          <p className="text-green-700 text-sm">
+            Companies like Google, Microsoft, and Netflix use Zero Trust to protect their systems 
+            and customer data. It's designed for our world where people work from home, coffee shops, 
+            and anywhere with an internet connection!
+          </p>
+        </div>
+      </div>
+      
+      {/* Career Inspiration */}
+      <div className="bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl p-6">
+        <h3 className="text-xl font-bold mb-3">🚀 Cybersecurity Career Paths</h3>
+        <div className="grid md:grid-cols-3 gap-4">
+          <div>
+            <h4 className="font-semibold">Cybersecurity analyst</h4>
+            <p className="text-sm opacity-90">Monitor and analyze security events</p>
+          </div>
+          <div>
+            <h4 className="font-semibold">Security architect</h4>
+            <p className="text-sm opacity-90">Design Zero Trust systems</p>
+          </div>
+          <div>
+            <h4 className="font-semibold">Identity Engineer</h4>
+            <p className="text-sm opacity-90">Build access control systems</p>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  )
+}
+
+/**
+ * 🔍 RISK ASSESSMENT VIEW - Interactive Educational Simulation
+ */
+interface RiskAssessmentViewProps {
+  user: ZeroTrustUser | null
+  riskLevel: 'low' | 'medium' | 'high'
+  setRiskLevel: (level: 'low' | 'medium' | 'high') => void
+  onSimulate: () => void
+}
+
+function RiskAssessmentView({ user, riskLevel, setRiskLevel, onSimulate }: RiskAssessmentViewProps) {
+  const [selectedScenario, setSelectedScenario] = useState('normal-access')
+  const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [analysisComplete, setAnalysisComplete] = useState(false)
+
+  const scenarios = [
+    { 
+      id: 'normal-access', 
+      name: 'Student accessing homework portal',
+      description: 'Normal school day, trusted device, school network'
+    },
+    { 
+      id: 'unusual-time', 
+      name: '3 AM homework submission',
+      description: 'Unusual time access pattern'
+    },
+    { 
+      id: 'new-device', 
+      name: 'Student using new laptop',
+      description: 'First time accessing from this device'
+    },
+    { 
+      id: 'unusual-location', 
+      name: 'Access from different country',
+      description: 'Location doesn\'t match usual patterns'
+    }
+  ]
+
+  const handleAnalyze = async () => {
+    setIsAnalyzing(true)
+    setAnalysisComplete(false)
+    
+    // Simulate analysis process
+    await new Promise(resolve => setTimeout(resolve, 2000))
+    
+    setIsAnalyzing(false)
+    setAnalysisComplete(true)
+  }
+
+  return (
+    <motion.div
+      key="riskassessment"
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 20 }}
+      className="space-y-6"
+    >
+      <div className="bg-white rounded-xl shadow-lg p-6">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">
+          🔍 Risk Assessment Simulator
+        </h2>
+        
+        <div className="mb-6">
+          <label htmlFor="scenario-select" className="block text-sm font-medium text-gray-700 mb-2">
+            Choose Risk Scenario
+          </label>
+          <select
+            id="scenario-select"
+            value={selectedScenario}
+            onChange={(e) => setSelectedScenario(e.target.value)}
+            className="w-full p-3 border border-gray-300 rounded-lg"
+            aria-label="Choose Risk Scenario"
+          >
+            {scenarios.map(scenario => (
+              <option key={scenario.id} value={scenario.id}>
+                {scenario.name}
+              </option>
+            ))}
+          </select>
+          <p className="text-sm text-gray-600 mt-2">
+            {scenarios.find(s => s.id === selectedScenario)?.description}
+          </p>
+        </div>
+
+        <div className="mb-6">
+          <button
+            onClick={handleAnalyze}
+            disabled={isAnalyzing}
+            className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 disabled:opacity-50"
+            aria-label="Analyze Risk Factors"
+          >
+            {isAnalyzing ? '🔄 Analyzing...' : '🔍 Analyze Risk Factors'}
+          </button>
+        </div>
+
+        {isAnalyzing && (
+          <div className="space-y-2 text-gray-600">
+            <p>📱 Analyzing device trust...</p>
+            <p>📍 Checking location patterns...</p>
+            <p>👤 Verifying user behavior...</p>
+          </div>
+        )}
+
+        {analysisComplete && (
+          <div className="bg-green-50 p-4 rounded-lg">
+            <h3 className="font-semibold text-green-800 mb-2">Risk Score: Low</h3>
+            <p className="text-green-700 mb-2">Factors considered:</p>
+            <ul className="text-sm text-green-600 space-y-1">
+              <li>• Device: Trusted school laptop</li>
+              <li>• Location: School network</li>
+              <li>• Time: Normal school hours</li>
+              <li>• Behavior: Consistent with past patterns</li>
+            </ul>
+          </div>
+        )}
+      </div>
+      
+      {/* Educational risk factors */}
+      <div className="grid md:grid-cols-2 gap-4">
+        <div className="bg-yellow-50 p-4 rounded-lg">
+          <h4 className="font-semibold text-yellow-800 mb-2">📍 Unusual login time</h4>
+          <p className="text-sm text-yellow-700">
+            Accessing school systems at 3 AM might indicate a security issue
+          </p>
+        </div>
+        <div className="bg-orange-50 p-4 rounded-lg">
+          <h4 className="font-semibold text-orange-800 mb-2">📱 New device</h4>
+          <p className="text-sm text-orange-700">
+            First-time device access requires additional verification
+          </p>
+        </div>
+      </div>
+    </motion.div>
+  )
+}
+
+/**
+ * 🎮 ACCESS CONTROL VIEW - Decision Making Challenge
+ */
+interface AccessControlViewProps {
+  user: ZeroTrustUser | null
+}
+
+function AccessControlView({ user }: AccessControlViewProps) {
+  const [decision, setDecision] = useState<string | null>(null)
+  const [feedback, setFeedback] = useState<string | null>(null)
+
+  const handleDecision = (choice: string) => {
+    setDecision(choice)
+    
+    if (choice === 'allow') {
+      setFeedback('Great choice! This follows Zero Trust principles by verifying the request meets security requirements.')
+    } else if (choice === 'deny') {
+      setFeedback('Careful consideration! In Zero Trust, we deny when risk is too high.')
+    } else {
+      setFeedback('Smart thinking! Requesting more information is often the right approach in Zero Trust.')
+    }
+  }
+
+  return (
+    <motion.div
+      key="accesscontrol"
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 20 }}
+      className="space-y-6"
+    >
+      <div className="bg-white rounded-xl shadow-lg p-6">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">
+          🎮 Make the Access Decision
+        </h2>
+        
+        <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+          <h3 className="font-semibold mb-2">Scenario:</h3>
+          <p className="text-gray-700">
+            A student is trying to access the grade portal from a new device during lunch break. 
+            The device isn't registered, but the username and password are correct.
+          </p>
+        </div>
+
+        <div className="space-y-3 mb-6">
+          <button
+            onClick={() => handleDecision('allow')}
+            className="w-full p-3 bg-green-500 text-white rounded-lg hover:bg-green-600"
+            aria-label="Allow Access"
+          >
+            ✅ Allow Access
+          </button>
+          <button
+            onClick={() => handleDecision('deny')}
+            className="w-full p-3 bg-red-500 text-white rounded-lg hover:bg-red-600"
+            aria-label="Deny Access"
+          >
+            ❌ Deny Access
+          </button>
+          <button
+            onClick={() => handleDecision('moreinfo')}
+            className="w-full p-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600"
+            aria-label="Request More Info"
+          >
+            🔍 Request More Info
+          </button>
+        </div>
+
+        {feedback && (
+          <div className="bg-blue-50 p-4 rounded-lg">
+            <h4 className="font-semibold text-blue-800 mb-2">Great choice!</h4>
+            <p className="text-blue-700">{feedback}</p>
+            <p className="text-sm text-blue-600 mt-2">This follows Zero Trust principles!</p>
+          </div>
+        )}
+
+        {/* Progress tracking */}
+        <div className="mt-6 p-3 bg-purple-50 rounded-lg">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm text-purple-700">Progress: 2 of 5 scenarios completed</span>
+            <span className="text-sm text-purple-700">40%</span>
+          </div>
+          <div 
+            role="progressbar" 
+            aria-valuenow={40} 
+            aria-valuemin={0} 
+            aria-valuemax={100}
+            className="w-full bg-purple-200 rounded-full h-2"
+          >
+            <div className="bg-purple-500 h-2 rounded-full" style={{ width: '40%' }}></div>
+          </div>
+        </div>
+
+        {/* Collaborative features */}
+        <div className="mt-6 space-y-3">
+          <button className="w-full p-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
+            📤 Share with Class
+          </button>
+          <button className="w-full p-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
+            🔍 Compare Solutions
+          </button>
+          <p className="text-sm text-gray-600 text-center">Discuss with your team</p>
+        </div>
+      </div>
+    </motion.div>
   )
 }
 

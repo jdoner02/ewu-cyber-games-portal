@@ -47,7 +47,7 @@ interface CyberKnowledgeBrain {
 
 const KnowledgeArena: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationRef = useRef<number>();
+  const animationRef = useRef<number>(0);
   const [arenaState, setArenaState] = useState<ArenaState>({
     players: [],
     knowledgeOrbs: [],

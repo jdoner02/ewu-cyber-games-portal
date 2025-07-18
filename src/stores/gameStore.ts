@@ -86,6 +86,31 @@ interface AICompanionState {
   helpTopics: string[]
 }
 
+// Game-specific state structures
+interface PasswordFortressState {
+  password: string
+  securityPoints: number
+  clickCount: number
+  fortressLevel: number
+  upgrades: { [key: string]: { owned: number; cost: number } }
+  achievements: { [key: string]: boolean }
+  lastSaved: string
+}
+
+interface PokemonMMOState {
+  totalExp: number
+  playerLevel: number
+  currentPokemon: string
+  badgesEarned: number
+  lastSaved: string
+}
+
+interface GameSpecificStates {
+  passwordFortress?: PasswordFortressState
+  pokemonMMO?: PokemonMMOState
+  cyberKnowledgeBrain?: any
+}
+
 interface GameState {
   // Player progression
   playerStats: PlayerStats
@@ -102,6 +127,9 @@ interface GameState {
   showStats: boolean
   soundEnabled: boolean
   
+  // 🆕 GAME-SPECIFIC STATE MANAGEMENT
+  gameSpecificStates: GameSpecificStates
+  
   // 🆕 ENHANCED PERSISTENCE FEATURES
   persistenceHealth: {
     available: boolean
@@ -112,6 +140,8 @@ interface GameState {
   
   // Actions
   addXP: (amount: number) => void
+  addExperience: (amount: number) => void  // Alias for addXP
+  getPlayerLevel: () => number
   unlockAchievement: (id: string, title: string, description: string, category?: string) => void
   updateGameProgress: (gameId: string, progress: Partial<GameProgress>) => void
   updateSkillProgress: (skill: keyof SkillProgress, increment: number) => void
@@ -123,6 +153,11 @@ interface GameState {
   setCurrentGame: (gameId: string | null) => void
   toggleSound: () => void
   
+  // 🆕 GAME-SPECIFIC STATE ACTIONS
+  savePasswordFortressState: (state: PasswordFortressState) => void
+  savePokemonMMOState: (state: PokemonMMOState) => void
+  clearGameSpecificState: (gameId: string) => void
+  
   // 🆕 ENHANCED PERSISTENCE ACTIONS
   forceSyncToCookies: () => Promise<boolean>
   clearAllData: () => Promise<boolean>
@@ -130,9 +165,9 @@ interface GameState {
   getPerformanceMetrics: () => any
 }
 
-const useGameStore = create<GameState>()(
+export const useGameStore = create<GameState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       // Initial state
       playerStats: {
         level: 1,
@@ -212,6 +247,9 @@ const useGameStore = create<GameState>()(
       showStats: false,
       soundEnabled: true,
       
+      // 🆕 GAME-SPECIFIC STATE INITIALIZATION
+      gameSpecificStates: {},
+      
       // Actions
       addXP: (amount: number) => {
         set((state) => {
@@ -226,6 +264,16 @@ const useGameStore = create<GameState>()(
             }
           }
         })
+      },
+      
+      // Alias for addXP to maintain compatibility
+      addExperience: (amount: number) => {
+        useGameStore.getState().addXP(amount)
+      },
+      
+      // Get current player level
+      getPlayerLevel: () => {
+        return useGameStore.getState().playerStats.level
       },
       
       unlockAchievement: (id: string, title: string, description: string, category = 'general') => {
@@ -363,6 +411,52 @@ const useGameStore = create<GameState>()(
         set((state) => ({ soundEnabled: !state.soundEnabled }))
       },
       
+      // 🆕 GAME-SPECIFIC STATE ACTIONS
+      
+      /**
+       * 🔑 SAVE PASSWORD FORTRESS STATE
+       * 
+       * Stores password fortress specific game progress
+       */
+      savePasswordFortressState: (state: PasswordFortressState) => {
+        set((currentState) => ({
+          gameSpecificStates: {
+            ...currentState.gameSpecificStates,
+            passwordFortress: state
+          }
+        }))
+      },
+      
+      /**
+       * 🐾 SAVE POKEMON MMO STATE
+       * 
+       * Stores Pokemon MMO specific game progress
+       */
+      savePokemonMMOState: (state: PokemonMMOState) => {
+        set((currentState) => ({
+          gameSpecificStates: {
+            ...currentState.gameSpecificStates,
+            pokemonMMO: state
+          }
+        }))
+      },
+      
+      /**
+       * 🧹 CLEAR GAME-SPECIFIC STATE
+       * 
+       * Removes saved state for a specific game
+       */
+      clearGameSpecificState: (gameId: string) => {
+        set((currentState) => {
+          const newGameSpecificStates = { ...currentState.gameSpecificStates }
+          delete newGameSpecificStates[gameId as keyof GameSpecificStates]
+          
+          return {
+            gameSpecificStates: newGameSpecificStates
+          }
+        })
+      },
+      
       // 🆕 ENHANCED PERSISTENCE ACTIONS
       
       /**
@@ -486,7 +580,8 @@ const useGameStore = create<GameState>()(
         achievements: state.achievements,
         gameProgress: state.gameProgress,
         skillProgress: state.skillProgress,
-        soundEnabled: state.soundEnabled
+        soundEnabled: state.soundEnabled,
+        gameSpecificStates: state.gameSpecificStates
       })
     }
   )
