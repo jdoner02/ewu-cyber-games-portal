@@ -1,4 +1,4 @@
-import PasswordFortressGame from './PasswordFortressGame-v1-streamlined'
+import PasswordFortressGame from './PasswordFortressGame'
 
 export default function PasswordFortressPage() {
   return <PasswordFortressGame />

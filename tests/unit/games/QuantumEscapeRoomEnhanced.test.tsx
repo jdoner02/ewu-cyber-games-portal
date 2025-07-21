@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
-import QuantumEscapeRoomEnhanced from '../../../src/games/quantum-mystery-room/QuantumEscapeRoomEnhanced';
+import QuantumEscapeRoomEnhanced from '../../../src/app/games/quantum-mystery-room/QuantumEscapeRoomEnhanced-v2-educational';
 
 // Mock framer-motion to avoid animation issues in tests
 jest.mock('framer-motion', () => ({
