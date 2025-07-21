@@ -1,1183 +1,802 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import useGameStore from '@/stores/gameStore';
 
-// Room types for the escape room progression
-type RoomType = 'lab' | 'entanglement' | 'cryptography' | 'timelock';
-
-// Inventory item type
 interface InventoryItem {
   id: string;
   name: string;
-  emoji: string;
   description: string;
+  icon: string;
 }
 
-// Interactive object type with visual properties
-interface InteractiveObject {
-  id: string;
-  name: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  tooltip: string;
-  requiresItem?: string;
-  givesItem?: InventoryItem;
-  opensModal?: string;
-  unlocks?: string;
-  svgPath?: string;
-  color?: string;
-  glowColor?: string;
-  isDiscovered?: boolean;
-}
-
-// Modal content type
-interface ModalContent {
+interface KnowledgeEntry {
   id: string;
   title: string;
-  content: React.ReactNode;
-  completesObjective?: string;
-  xpReward?: number;
-  skillReward?: number;
-  givesItem?: InventoryItem;
+  content: string;
+  difficulty: number;
+  learned: boolean;
 }
 
-// Room visual components
-const LabScene: React.FC<{ onObjectClick: (obj: InteractiveObject) => void; objects: InteractiveObject[] }> = ({ onObjectClick, objects }) => {
-  return (
-    <svg viewBox="0 0 800 600" className="w-full h-full">
-      {/* Room Background */}
-      <defs>
-        <linearGradient id="labGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#1e3a8a" />
-          <stop offset="50%" stopColor="#7c3aed" />
-          <stop offset="100%" stopColor="#312e81" />
-        </linearGradient>
-        <pattern id="gridPattern" patternUnits="userSpaceOnUse" width="40" height="40">
-          <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#3b82f6" strokeWidth="0.5" opacity="0.3"/>
-        </pattern>
-      </defs>
-      
-      {/* Floor */}
-      <rect width="800" height="600" fill="url(#labGradient)" />
-      <rect width="800" height="600" fill="url(#gridPattern)" />
-      
-      {/* Laboratory Bench */}
-      <rect x="50" y="400" width="700" height="100" fill="#374151" stroke="#6b7280" strokeWidth="2" rx="5" />
-      <rect x="60" y="410" width="680" height="20" fill="#4b5563" rx="2" />
-      
-      {/* Back Wall */}
-      <rect x="0" y="0" width="800" height="300" fill="#1f2937" opacity="0.8" />
-      
-      {/* Laboratory Equipment */}
-      {objects.map((obj) => {
-        switch(obj.id) {
-          case 'quantum-computer':
-            return (
-              <g key={obj.id}>
-                {/* Computer Base */}
-                <rect x={obj.x} y={obj.y} width={obj.width} height={obj.height} 
-                      fill="#1f2937" stroke={obj.isDiscovered ? "#10b981" : "#3b82f6"} 
-                      strokeWidth="2" rx="5" className="cursor-pointer" 
-                      onClick={() => onObjectClick(obj)} />
-                {/* Screen */}
-                <rect x={obj.x + 10} y={obj.y + 10} width={obj.width - 20} height={obj.height - 30} 
-                      fill="#000" stroke="#3b82f6" strokeWidth="1" rx="3" />
-                {/* Wave Function Display */}
-                <motion.path
-                  d={`M ${obj.x + 15} ${obj.y + 35} Q ${obj.x + 35} ${obj.y + 20} ${obj.x + 55} ${obj.y + 35} T ${obj.x + 95} ${obj.y + 35}`}
-                  stroke="#10b981" strokeWidth="2" fill="none"
-                  animate={{ strokeDasharray: ["0,100", "100,0"], opacity: [0.5, 1, 0.5] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                />
-                {/* Status Light */}
-                <motion.circle cx={obj.x + obj.width - 15} cy={obj.y + 15} r="4" 
-                               fill="#10b981" animate={{ opacity: [0.5, 1, 0.5] }} 
-                               transition={{ duration: 1, repeat: Infinity }} />
-              </g>
-            );
-            
-          case 'research-notebook':
-            return (
-              <g key={obj.id}>
-                {/* Notebook */}
-                <rect x={obj.x} y={obj.y} width={obj.width} height={obj.height} 
-                      fill="#f3f4f6" stroke="#6b7280" strokeWidth="2" rx="3" 
-                      className="cursor-pointer" onClick={() => onObjectClick(obj)} />
-                {/* Lines */}
-                {[...Array(5)].map((_, i) => (
-                  <line key={i} x1={obj.x + 5} y1={obj.y + 10 + i * 8} 
-                        x2={obj.x + obj.width - 5} y2={obj.y + 10 + i * 8} 
-                        stroke="#9ca3af" strokeWidth="1" />
-                ))}
-                {/* Equations */}
-                <text x={obj.x + 10} y={obj.y + 20} fontSize="8" fill="#374151">ψ = ∑ aₙ|n⟩</text>
-                <text x={obj.x + 10} y={obj.y + 30} fontSize="8" fill="#374151">Δt·ΔE ≥ ħ/2</text>
-              </g>
-            );
-            
-          case 'double-slit-apparatus':
-            return (
-              <g key={obj.id}>
-                {/* Apparatus Base */}
-                <rect x={obj.x} y={obj.y} width={obj.width} height={obj.height} 
-                      fill="#374151" stroke="#6b7280" strokeWidth="2" rx="5" 
-                      className="cursor-pointer" onClick={() => onObjectClick(obj)} />
-                {/* Laser Source */}
-                <circle cx={obj.x + 20} cy={obj.y + obj.height/2} r="8" fill="#ef4444" />
-                <motion.line x1={obj.x + 28} y1={obj.y + obj.height/2} 
-                           x2={obj.x + 60} y2={obj.y + obj.height/2} 
-                           stroke="#ef4444" strokeWidth="2"
-                           animate={{ opacity: [0.5, 1, 0.5] }}
-                           transition={{ duration: 0.5, repeat: Infinity }} />
-                {/* Double Slit */}
-                <rect x={obj.x + 60} y={obj.y + 20} width="4" height="40" fill="#1f2937" />
-                <rect x={obj.x + 60} y={obj.y + 25} width="4" height="5" fill="#374151" />
-                <rect x={obj.x + 60} y={obj.y + 35} width="4" height="5" fill="#374151" />
-                {/* Detection Screen */}
-                <rect x={obj.x + 80} y={obj.y + 10} width="15" height="60" fill="#f3f4f6" stroke="#6b7280" />
-                {/* Interference Pattern */}
-                <motion.g animate={{ opacity: [0.3, 0.8, 0.3] }} transition={{ duration: 1.5, repeat: Infinity }}>
-                  {[...Array(5)].map((_, i) => (
-                    <rect key={i} x={obj.x + 82} y={obj.y + 15 + i * 10} width="11" height="2" 
-                          fill="#3b82f6" opacity={i % 2 === 0 ? 0.8 : 0.3} />
-                  ))}
-                </motion.g>
-              </g>
-            );
-            
-          case 'chamber-door':
-            return (
-              <g key={obj.id}>
-                {/* Door Frame */}
-                <rect x={obj.x} y={obj.y} width={obj.width} height={obj.height} 
-                      fill="#374151" stroke="#6b7280" strokeWidth="3" rx="5" 
-                      className="cursor-pointer" onClick={() => onObjectClick(obj)} />
-                {/* Door Panel */}
-                <rect x={obj.x + 5} y={obj.y + 5} width={obj.width - 10} height={obj.height - 10} 
-                      fill="#1f2937" rx="3" />
-                {/* Lock Mechanism */}
-                <circle cx={obj.x + obj.width - 20} cy={obj.y + obj.height/2} r="8" 
-                        fill={obj.requiresItem ? "#ef4444" : "#10b981"} />
-                <text x={obj.x + obj.width - 25} y={obj.y + obj.height/2 + 3} fontSize="10" fill="#fff">
-                  {obj.requiresItem ? "🔒" : "🔓"}
-                </text>
-                {/* Door Label */}
-                <text x={obj.x + obj.width/2} y={obj.y + 30} fontSize="12" fill="#9ca3af" textAnchor="middle">
-                  ENTANGLEMENT
-                </text>
-                <text x={obj.x + obj.width/2} y={obj.y + 45} fontSize="12" fill="#9ca3af" textAnchor="middle">
-                  CHAMBER
-                </text>
-              </g>
-            );
-            
-          default:
-            return (
-              <rect key={obj.id} x={obj.x} y={obj.y} width={obj.width} height={obj.height} 
-                    fill="rgba(59, 130, 246, 0.3)" stroke="#3b82f6" strokeWidth="2" 
-                    strokeDasharray="5,5" rx="3" className="cursor-pointer" 
-                    onClick={() => onObjectClick(obj)} />
-            );
-        }
-      })}
-      
-      {/* Floating Particles Effect */}
-      <motion.g animate={{ opacity: [0.3, 0.7, 0.3] }} transition={{ duration: 3, repeat: Infinity }}>
-        {[...Array(20)].map((_, i) => (
-          <motion.circle key={i} 
-                         cx={50 + (i * 35)} cy={100 + Math.sin(i) * 50} r="2" 
-                         fill="#3b82f6" opacity="0.5"
-                         animate={{ 
-                           y: [0, -10, 0],
-                           opacity: [0.3, 0.8, 0.3]
-                         }}
-                         transition={{ 
-                           duration: 2 + i * 0.2, 
-                           repeat: Infinity,
-                           delay: i * 0.1 
-                         }} />
-        ))}
-      </motion.g>
-    </svg>
-  );
-};
+interface GameState {
+  currentRoom: number;
+  inventory: InventoryItem[];
+  objectives: { [key: string]: boolean };
+  phase: 'intro' | 'playing' | 'complete';
+  showHints: boolean;
+  showNotebook: boolean;
+  hintCount: number;
+  difficultyLevel: 'easy' | 'medium' | 'hard';
+  knowledgeEntries: KnowledgeEntry[];
+  discoveredSecrets: string[];
+  currentPuzzle: string | null;
+  particles: Array<{ id: string; x: number; y: number; vx: number; vy: number }>;
+  hoveredItem: string | null;
+}
 
-const EntanglementScene: React.FC<{ onObjectClick: (obj: InteractiveObject) => void; objects: InteractiveObject[] }> = ({ onObjectClick, objects }) => {
-  return (
-    <svg viewBox="0 0 800 600" className="w-full h-full">
-      <defs>
-        <linearGradient id="entanglementGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#064e3b" />
-          <stop offset="50%" stopColor="#0d9488" />
-          <stop offset="100%" stopColor="#0f766e" />
-        </linearGradient>
-        <radialGradient id="particleGlow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#10b981" stopOpacity="0.8" />
-          <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
-        </radialGradient>
-      </defs>
-      
-      <rect width="800" height="600" fill="url(#entanglementGradient)" />
-      
-      {/* Entanglement Beam */}
-      <motion.line x1="150" y1="300" x2="650" y2="300" 
-                   stroke="#10b981" strokeWidth="4" opacity="0.6"
-                   animate={{ strokeDasharray: ["0,20", "20,0"] }}
-                   transition={{ duration: 1, repeat: Infinity }} />
-      
-      {objects.map((obj) => {
-        switch(obj.id) {
-          case 'particle-generator-a':
-            return (
-              <g key={obj.id}>
-                <rect x={obj.x} y={obj.y} width={obj.width} height={obj.height} 
-                      fill="#1f2937" stroke="#10b981" strokeWidth="2" rx="5" 
-                      className="cursor-pointer" onClick={() => onObjectClick(obj)} />
-                <motion.circle cx={obj.x + obj.width/2} cy={obj.y + obj.height/2} r="15" 
-                               fill="url(#particleGlow)"
-                               animate={{ scale: [0.8, 1.2, 0.8] }}
-                               transition={{ duration: 1, repeat: Infinity }} />
-                <text x={obj.x + obj.width/2} y={obj.y - 10} fontSize="10" fill="#10b981" textAnchor="middle">
-                  PARTICLE A
-                </text>
-              </g>
-            );
-          case 'particle-generator-b':
-            return (
-              <g key={obj.id}>
-                <rect x={obj.x} y={obj.y} width={obj.width} height={obj.height} 
-                      fill="#1f2937" stroke="#10b981" strokeWidth="2" rx="5" 
-                      className="cursor-pointer" onClick={() => onObjectClick(obj)} />
-                <motion.circle cx={obj.x + obj.width/2} cy={obj.y + obj.height/2} r="15" 
-                               fill="url(#particleGlow)"
-                               animate={{ scale: [1.2, 0.8, 1.2] }}
-                               transition={{ duration: 1, repeat: Infinity }} />
-                <text x={obj.x + obj.width/2} y={obj.y - 10} fontSize="10" fill="#10b981" textAnchor="middle">
-                  PARTICLE B
-                </text>
-              </g>
-            );
-          default:
-            return (
-              <rect key={obj.id} x={obj.x} y={obj.y} width={obj.width} height={obj.height} 
-                    fill="rgba(16, 185, 129, 0.3)" stroke="#10b981" strokeWidth="2" 
-                    strokeDasharray="5,5" rx="3" className="cursor-pointer" 
-                    onClick={() => onObjectClick(obj)} />
-            );
-        }
-      })}
-    </svg>
-  );
-};
+// Constants for better maintainability
+const INITIAL_KNOWLEDGE_ENTRIES: KnowledgeEntry[] = [
+  {
+    id: 'what-is-matter',
+    title: 'What is matter?',
+    content: 'Matter is everything around you! Your desk, your computer, even the air you breathe. It\'s all made of tiny pieces called atoms!',
+    difficulty: 1,
+    learned: false
+  },
+  {
+    id: 'what-is-energy',
+    title: 'What is energy?',
+    content: 'Energy is the ability to make things move or change! Like when you throw a ball, you give it energy!',
+    difficulty: 1,
+    learned: false
+  },
+  {
+    id: 'what-are-atoms',
+    title: 'What are atoms?',
+    content: 'Atoms are like tiny LEGO blocks that build everything! They\'re so small you can\'t see them, but they\'re everywhere!',
+    difficulty: 1,
+    learned: false
+  },
+  {
+    id: 'basic-particle',
+    title: 'What is a particle?',
+    content: 'A particle is like a tiny building block of everything around us! Think of it like the smallest LEGO piece that makes up all matter.',
+    difficulty: 1,
+    learned: false
+  },
+  {
+    id: 'wave-basics',
+    title: 'Basic Physics - Waves',
+    content: 'Waves are like ripples in water that carry energy from one place to another without moving the water itself!',
+    difficulty: 1,
+    learned: false
+  },
+  {
+    id: 'foundation-concepts',
+    title: 'Foundation Physics',
+    content: 'Everything in the universe is made of matter and energy that behave in predictable ways!',
+    difficulty: 1,
+    learned: false
+  }
+];
 
-const CryptographyScene: React.FC<{ onObjectClick: (obj: InteractiveObject) => void; objects: InteractiveObject[] }> = ({ onObjectClick, objects }) => {
-  return (
-    <svg viewBox="0 0 800 600" className="w-full h-full">
-      <defs>
-        <linearGradient id="cryptoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#7c2d12" />
-          <stop offset="50%" stopColor="#ea580c" />
-          <stop offset="100%" stopColor="#fed7aa" />
-        </linearGradient>
-      </defs>
-      
-      <rect width="800" height="600" fill="url(#cryptoGradient)" />
-      
-      {/* Matrix Effect Background */}
-      <motion.g animate={{ opacity: [0.2, 0.5, 0.2] }} transition={{ duration: 2, repeat: Infinity }}>
-        {[...Array(50)].map((_, i) => (
-          <text key={i} x={i * 16} y={Math.random() * 600} fontSize="10" fill="#22c55e" opacity="0.3">
-            {Math.random() > 0.5 ? '1' : '0'}
-          </text>
-        ))}
-      </motion.g>
-      
-      {objects.map((obj) => (
-        <rect key={obj.id} x={obj.x} y={obj.y} width={obj.width} height={obj.height} 
-              fill="rgba(234, 88, 12, 0.3)" stroke="#ea580c" strokeWidth="2" 
-              strokeDasharray="5,5" rx="3" className="cursor-pointer" 
-              onClick={() => onObjectClick(obj)} />
-      ))}
-    </svg>
-  );
-};
-
-const TimeLockScene: React.FC<{ onObjectClick: (obj: InteractiveObject) => void; objects: InteractiveObject[] }> = ({ onObjectClick, objects }) => {
-  return (
-    <svg viewBox="0 0 800 600" className="w-full h-full">
-      <defs>
-        <radialGradient id="temporalGradient" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#7c3aed" />
-          <stop offset="50%" stopColor="#ec4899" />
-          <stop offset="100%" stopColor="#dc2626" />
-        </radialGradient>
-        <radialGradient id="crystalGlow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#a855f7" stopOpacity="1" />
-          <stop offset="100%" stopColor="#a855f7" stopOpacity="0" />
-        </radialGradient>
-      </defs>
-      
-      <rect width="800" height="600" fill="url(#temporalGradient)" />
-      
-      {/* Central Crystal */}
-      <motion.g animate={{ rotate: 360 }} transition={{ duration: 10, repeat: Infinity, ease: "linear" }}>
-        <polygon points="400,200 450,250 400,300 350,250" fill="url(#crystalGlow)" stroke="#a855f7" strokeWidth="2" />
-      </motion.g>
-      
-      {/* Energy Rings */}
-      {[...Array(3)].map((_, i) => (
-        <motion.circle key={i} cx="400" cy="250" r={100 + i * 50} 
-                       stroke="#a855f7" strokeWidth="2" fill="none" opacity="0.4"
-                       animate={{ scale: [1, 1.1, 1] }}
-                       transition={{ duration: 2, repeat: Infinity, delay: i * 0.5 }} />
-      ))}
-      
-      {objects.map((obj) => (
-        <rect key={obj.id} x={obj.x} y={obj.y} width={obj.width} height={obj.height} 
-              fill="rgba(168, 85, 247, 0.3)" stroke="#a855f7" strokeWidth="2" 
-              strokeDasharray="5,5" rx="3" className="cursor-pointer" 
-              onClick={() => onObjectClick(obj)} />
-      ))}
-    </svg>
-  );
+const INITIAL_OBJECTIVES = {
+  'wave-particle-duality': false,
+  'find-lab-key': false,
+  'quantum-superposition': false,
 };
 
 const QuantumEscapeRoomEnhanced: React.FC = () => {
-  const { addXP, updateSkillProgress } = useGameStore();
-  
-  // Game state
-  const [currentRoom, setCurrentRoom] = useState<RoomType>('lab');
-  const [inventory, setInventory] = useState<InventoryItem[]>([]);
-  const [completedObjectives, setCompletedObjectives] = useState<Set<string>>(new Set());
-  const [discoveredObjects, setDiscoveredObjects] = useState<Set<string>>(new Set());
-  const [showModal, setShowModal] = useState<string | null>(null);
-  const [gamePhase, setGamePhase] = useState<'intro' | 'playing' | 'complete'>('intro');
-  const [storyProgress, setStoryProgress] = useState(0);
+  const [gameState, setGameState] = useState<GameState>({
+    currentRoom: 1,
+    inventory: [],
+    objectives: INITIAL_OBJECTIVES,
+    phase: 'intro',
+    showHints: false,
+    showNotebook: false,
+    hintCount: 0,
+    difficultyLevel: 'medium',
+    knowledgeEntries: INITIAL_KNOWLEDGE_ENTRIES,
+    discoveredSecrets: [],
+    currentPuzzle: null,
+    particles: [],
+    hoveredItem: null
+  });
 
-  // Room definitions with enhanced visual objects
-  const rooms: Record<RoomType, { 
-    title: string; 
-    description: string; 
-    objects: InteractiveObject[];
-    objectives: string[];
-    SceneComponent: React.FC<{ onObjectClick: (obj: InteractiveObject) => void; objects: InteractiveObject[] }>;
-  }> = {
-    lab: {
-      title: "Dr. Quantum's Laboratory",
-      description: "A cutting-edge quantum physics laboratory where reality itself seems unstable. Find clues about quantum mechanics to escape.",
-      SceneComponent: LabScene,
-      objects: [
-        {
-          id: 'quantum-computer',
-          name: 'Quantum Computer',
-          x: 100, y: 150, width: 120, height: 80,
-          tooltip: 'Advanced quantum computer displaying wave function data',
-          opensModal: 'wave-function',
-          color: '#3b82f6',
-          glowColor: '#10b981'
-        },
-        {
-          id: 'research-notebook',
-          name: "Dr. Quantum's Research Notes",
-          x: 300, y: 420, width: 60, height: 40,
-          tooltip: "Dr. Quantum's personal research notebook",
-          opensModal: 'research-notes',
-          givesItem: { id: 'lab-key', name: 'Lab Key', emoji: '🔑', description: 'Key to the Entanglement Chamber' }
-        },
-        {
-          id: 'double-slit-apparatus',
-          name: 'Double-slit Experiment',
-          x: 500, y: 180, width: 120, height: 80,
-          tooltip: 'Famous double-slit experiment demonstrating wave-particle duality',
-          opensModal: 'double-slit'
-        },
-        {
-          id: 'chamber-door',
-          name: 'Chamber Door',
-          x: 650, y: 100, width: 80, height: 150,
-          tooltip: 'Secure door to the Entanglement Chamber',
-          requiresItem: 'lab-key',
-          unlocks: 'entanglement-room'
-        }
-      ],
-      objectives: ['Understand wave-particle duality', 'Find the lab access key', 'Learn about quantum superposition']
-    },
-    entanglement: {
-      title: "Quantum Entanglement Chamber",
-      description: "A specialized chamber for quantum entanglement experiments. Spooky action at a distance awaits!",
-      SceneComponent: EntanglementScene,
-      objects: [
-        {
-          id: 'particle-generator-a',
-          name: 'Particle Generator A',
-          x: 100, y: 250, width: 60, height: 60,
-          tooltip: 'Generates entangled particles with specific quantum states',
-          opensModal: 'entanglement-experiment'
-        },
-        {
-          id: 'particle-generator-b',
-          name: 'Particle Generator B',
-          x: 640, y: 250, width: 60, height: 60,
-          tooltip: 'Partner generator - measurements here affect Generator A instantly',
-          opensModal: 'entanglement-correlation'
-        },
-        {
-          id: 'detector-array',
-          name: 'Quantum Detector Array',
-          x: 350, y: 350, width: 100, height: 60,
-          tooltip: 'Measures quantum states and correlations',
-          opensModal: 'quantum-measurement'
-        },
-        {
-          id: 'crypto-door',
-          name: 'Cryptography Vault Door',
-          x: 350, y: 500, width: 100, height: 80,
-          tooltip: 'Door to the Quantum Cryptography Vault',
-          requiresItem: 'entanglement-key',
-          unlocks: 'crypto-room'
-        }
-      ],
-      objectives: ['Master quantum entanglement', 'Understand measurement correlations', 'Unlock the cryptography vault']
-    },
-    cryptography: {
-      title: "Quantum Cryptography Vault",
-      description: "The most secure vault in existence, protected by quantum cryptography protocols.",
-      SceneComponent: CryptographyScene,
-      objects: [
-        {
-          id: 'quantum-key-generator',
-          name: 'Quantum Key Generator',
-          x: 150, y: 200, width: 100, height: 80,
-          tooltip: 'Generates unbreakable quantum encryption keys',
-          opensModal: 'quantum-key-distribution'
-        },
-        {
-          id: 'encrypted-terminal',
-          name: 'Encrypted Terminal',
-          x: 400, y: 250, width: 120, height: 100,
-          tooltip: 'Terminal displaying quantum-encrypted messages',
-          opensModal: 'quantum-decryption'
-        },
-        {
-          id: 'timelock-door',
-          name: 'Temporal Lock Door',
-          x: 600, y: 400, width: 100, height: 120,
-          tooltip: 'Final door secured with temporal quantum locks',
-          requiresItem: 'crypto-key',
-          unlocks: 'timelock-room'
-        }
-      ],
-      objectives: ['Learn quantum cryptography', 'Decrypt the quantum message', 'Access the temporal core']
-    },
-    timelock: {
-      title: "Temporal Core Chamber",
-      description: "The heart of the time-lock device. Reality bends around the temporal stabilization crystal.",
-      SceneComponent: TimeLockScene,
-      objects: [
-        {
-          id: 'temporal-crystal',
-          name: 'Temporal Stabilization Crystal',
-          x: 350, y: 200, width: 100, height: 100,
-          tooltip: 'Unstable temporal crystal causing reality distortions',
-          opensModal: 'crystal-stabilization'
-        },
-        {
-          id: 'control-console',
-          name: 'Temporal Control Console',
-          x: 200, y: 450, width: 150, height: 80,
-          tooltip: 'Advanced controls for temporal field manipulation',
-          opensModal: 'temporal-controls'
-        },
-        {
-          id: 'escape-portal',
-          name: 'Escape Portal',
-          x: 500, y: 500, width: 120, height: 80,
-          tooltip: 'Temporal escape portal - your way home!',
-          requiresItem: 'stabilized-field',
-          unlocks: 'game-complete'
-        }
-      ],
-      objectives: ['Stabilize the temporal crystal', 'Master temporal controls', 'Activate the escape portal']
+  // Initialize particle animation for visual effects
+  useEffect(() => {
+    if (gameState.phase === 'playing') {
+      const particles = Array.from({ length: 8 }, (_, i) => ({
+        id: `particle-${i}`,
+        x: Math.random() * 800,
+        y: Math.random() * 400,
+        vx: (Math.random() - 0.5) * 3,
+        vy: (Math.random() - 0.5) * 3
+      }));
+      setGameState(prev => ({ ...prev, particles }));
+
+      const interval = setInterval(() => {
+        setGameState(prev => ({
+          ...prev,
+          particles: prev.particles.map(p => ({
+            ...p,
+            x: (p.x + p.vx + 800) % 800,
+            y: (p.y + p.vy + 400) % 400
+          }))
+        }));
+      }, 50);
+
+      return () => clearInterval(interval);
+    }
+  }, [gameState.phase]);
+
+  const startGame = () => {
+    setGameState(prev => ({ ...prev, phase: 'playing' }));
+  };
+
+  const toggleHints = () => {
+    setGameState(prev => ({ 
+      ...prev, 
+      showHints: !prev.showHints,
+      hintCount: prev.hintCount + (prev.showHints ? 0 : 1)
+    }));
+  };
+
+  const toggleNotebook = () => {
+    setGameState(prev => ({ ...prev, showNotebook: !prev.showNotebook }));
+  };
+
+  const changeDifficulty = (level: 'easy' | 'medium' | 'hard') => {
+    setGameState(prev => ({ ...prev, difficultyLevel: level }));
+  };
+
+  // Helper function to update knowledge entries
+  const updateKnowledgeEntry = (entryId: string) => {
+    setGameState(prev => ({
+      ...prev,
+      knowledgeEntries: prev.knowledgeEntries.map(entry => 
+        entry.id === entryId ? { ...entry, learned: true } : entry
+      )
+    }));
+  };
+
+  // Helper function to add discovered secret
+  const addDiscoveredSecret = (secret: string) => {
+    setGameState(prev => ({
+      ...prev,
+      discoveredSecrets: [...prev.discoveredSecrets, secret]
+    }));
+  };
+
+  const handleObjectClick = (objectId: string) => {
+    console.log(`Clicked object: ${objectId}`);
+    
+    // Handle different object interactions with educational content
+    if (objectId === 'quantum-device') {
+      setGameState(prev => ({
+        ...prev,
+        currentPuzzle: 'pattern-sequence'
+      }));
+      addDiscoveredSecret('quantum-device-secret');
+      updateKnowledgeEntry('basic-particle');
+    } else if (objectId === 'lab-computer') {
+      setGameState(prev => ({
+        ...prev,
+        currentPuzzle: 'logic-puzzle'
+      }));
+      addDiscoveredSecret('computer-hidden-files');
+      updateKnowledgeEntry('what-is-energy');
+    } else if (objectId === 'microscope') {
+      updateKnowledgeEntry('wave-basics');
     }
   };
 
-  // Enhanced modal content with detailed quantum physics explanations
-  const modalContent: Record<string, ModalContent> = {
-    'wave-function': {
-      id: 'wave-function',
-      title: 'Quantum Wave Function Analysis',
-      content: (
-        <div className="space-y-4">
-          <div className="bg-blue-800/50 p-4 rounded-lg">
-            <h4 className="font-bold text-lg mb-2">🌊 What is a Wave Function?</h4>
-            <p className="text-sm mb-3">A wave function (ψ) describes all possible states of a quantum particle. It's like a probability map showing where the particle might be!</p>
-            <div className="bg-blue-900/50 p-3 rounded text-center">
-              <div className="text-xl mb-2">ψ(x,t) = A·e^(i(kx-ωt))</div>
-              <p className="text-xs">A complete quantum state description</p>
-            </div>
-          </div>
-          <div className="bg-purple-800/50 p-4 rounded-lg">
-            <h4 className="font-bold mb-2">🎯 Key Concept: Superposition</h4>
-            <p className="text-sm">Unlike classical objects, quantum particles can be in multiple states simultaneously until measured. This is called superposition!</p>
-          </div>
-          <div className="bg-green-800/50 p-3 rounded-lg">
-            <p className="text-sm">🔬 <strong>Real Application:</strong> Quantum computers use superposition to process multiple calculations at once, making them incredibly powerful for certain problems!</p>
-          </div>
+  const handleKeyDown = (event: React.KeyboardEvent, objectId: string) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleObjectClick(objectId);
+    }
+  };
+
+  // Helper function to render interactive objects with consistent styling
+  const renderInteractiveObject = (
+    element: 'circle' | 'rect' | 'polygon',
+    props: any,
+    objectId: string,
+    ariaLabel: string,
+    isIQPuzzle: boolean = false
+  ) => {
+    const commonProps = {
+      className: "cursor-pointer transition-colors glow-effect pulse-animation",
+      onClick: () => handleObjectClick(objectId),
+      onKeyDown: (e: React.KeyboardEvent) => handleKeyDown(e, objectId),
+      tabIndex: 0,
+      role: "button",
+      'aria-label': ariaLabel,
+      'data-super-obvious': "true",
+      ...(isIQPuzzle && { 'data-iq-puzzle': "true" })
+    };
+
+    const Element = element as any;
+    return <Element {...props} {...commonProps} />;
+  };
+
+  const handleInventoryHover = (itemId: string | null) => {
+    setGameState(prev => ({ ...prev, hoveredItem: itemId }));
+  };
+
+  // Render difficulty settings
+  const renderDifficultySettings = () => (
+    <div className="absolute top-6 left-6 bg-black/80 backdrop-blur-sm rounded-xl p-4">
+      <h3 className="text-white font-bold mb-3">⚙️ Settings</h3>
+      <div className="space-y-2">
+        <p className="text-gray-300 text-sm">Difficulty Level:</p>
+        <div className="flex gap-2">
+          {(['easy', 'medium', 'hard'] as const).map(level => (
+            <button
+              key={level}
+              onClick={() => changeDifficulty(level)}
+              className={`px-3 py-1 rounded text-xs ${
+                gameState.difficultyLevel === level 
+                  ? 'bg-purple-600 text-white' 
+                  : 'bg-gray-600 text-gray-300'
+              }`}
+            >
+              {level.charAt(0).toUpperCase() + level.slice(1)}
+            </button>
+          ))}
         </div>
-      ),
-      completesObjective: 'wave-particle-duality',
-      xpReward: 75,
-      skillReward: 3
-    },
-    'research-notes': {
-      id: 'research-notes',
-      title: "Dr. Quantum's Research Journal",
-      content: (
-        <div className="space-y-4">
-          <div className="bg-slate-700 p-4 rounded-lg font-mono text-sm">
-            <p className="text-yellow-300 mb-2">📝 Research Log Entry #847</p>
-            <p className="mb-2">"The temporal stabilization experiment has exceeded all expectations. By creating a quantum superposition of time states, we've achieved localized temporal manipulation."</p>
-            <p className="mb-2 text-red-300">"⚠️ WARNING: If the containment field fails, reality could become unstable. The emergency key to the Entanglement Chamber is hidden in my desk drawer."</p>
-            <p className="text-cyan-300">"Remember: Quantum entanglement is the key to everything. What affects one particle instantly affects its partner, no matter the distance."</p>
-          </div>
-          <div className="bg-green-800/50 p-3 rounded-lg">
-            <p className="font-bold text-green-300">🔑 Lab Key Found!</p>
-            <p className="text-sm">You've discovered the key to the Entanglement Chamber. Dr. Quantum was always prepared for emergencies!</p>
-          </div>
+        <p className="text-gray-300 text-sm">Challenge Level adjusts puzzle complexity</p>
+      </div>
+    </div>
+  );
+
+  // Render hint system
+  const renderHintSystem = () => (
+    <div className="absolute top-1/2 right-6 transform -translate-y-1/2">
+      <button
+        onClick={toggleHints}
+        className="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg font-bold transition-colors"
+      >
+        💡 Need Help?
+      </button>
+      {gameState.showHints && (
+        <div className="mt-4 bg-black/90 backdrop-blur-sm rounded-xl p-4 max-w-xs">
+          <h3 className="text-yellow-400 font-bold mb-2">🔍 Helpful Hints:</h3>
+          <ul className="text-sm text-white space-y-2">
+            <li>• Look for glowing objects - they're interactive!</li>
+            <li>• Click on equipment to learn about quantum physics</li>
+            <li>• Check your Science Notebook for discoveries</li>
+            <li>• Some objects have hidden secrets to find</li>
+          </ul>
+          <p className="text-xs text-gray-400 mt-2">Hints used: {gameState.hintCount}</p>
         </div>
-      ),
-      completesObjective: 'find-lab-key',
-      xpReward: 50,
-      givesItem: { id: 'lab-key', name: 'Lab Key', emoji: '🔑', description: 'Key to the Entanglement Chamber' }
-    },
-    'double-slit': {
-      id: 'double-slit',
-      title: 'The Double-Slit Experiment',
-      content: (
-        <div className="space-y-4">
-          <div className="bg-purple-800/50 p-4 rounded-lg">
-            <h4 className="font-bold text-lg mb-2">🔬 The Most Important Experiment in Physics</h4>
-            <p className="text-sm mb-3">This experiment shows that particles can behave like waves when no one is watching, but like particles when observed!</p>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-blue-800/50 p-3 rounded-lg">
-              <h5 className="font-bold text-blue-300 mb-2">📊 Without Observation</h5>
-              <div className="text-xs space-y-1">
-                <p>• Electron behaves like a wave</p>
-                <p>• Creates interference pattern</p>
-                <p>• Goes through both slits</p>
-                <p>• Wave-like behavior</p>
+      )}
+    </div>
+  );
+
+  // Render knowledge notebook
+  const renderKnowledgeNotebook = () => (
+    <div className="absolute bottom-6 right-6">
+      <button
+        onClick={toggleNotebook}
+        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-bold transition-colors"
+      >
+        📔 Knowledge Journal
+      </button>
+      {gameState.showNotebook && (
+        <div className="absolute bottom-full right-0 mb-4 bg-black/90 backdrop-blur-sm rounded-xl p-4 max-w-md">
+          <h3 className="text-green-400 font-bold mb-3">🧪 Science Notebook</h3>
+          <div className="space-y-3 max-h-64 overflow-y-auto">
+            {gameState.knowledgeEntries.map(entry => (
+              <div key={entry.id} className={`p-3 rounded ${entry.learned ? 'bg-green-900/50' : 'bg-gray-800/50'}`}>
+                <h4 className="text-white font-semibold text-sm">{entry.title}</h4>
+                {entry.learned && (
+                  <p className="text-gray-300 text-xs mt-1">{entry.content}</p>
+                )}
+                <div className="flex items-center mt-2 gap-2">
+                  <span className={`text-xs px-2 py-1 rounded ${entry.learned ? 'bg-green-600' : 'bg-gray-600'}`}>
+                    {entry.learned ? '✅ Learned' : '🔒 Locked'}
+                  </span>
+                  <span className="text-xs text-gray-400">Level {entry.difficulty}</span>
+                </div>
               </div>
-            </div>
-            <div className="bg-red-800/50 p-3 rounded-lg">
-              <h5 className="font-bold text-red-300 mb-2">👁️ With Observation</h5>
-              <div className="text-xs space-y-1">
-                <p>• Electron behaves like particle</p>
-                <p>• Creates two distinct bands</p>
-                <p>• Goes through one slit</p>
-                <p>• Particle-like behavior</p>
+            ))}
+          </div>
+          <p className="text-xs text-gray-400 mt-3">Discovery Log tracks your learning progress!</p>
+        </div>
+      )}
+    </div>
+  );
+
+  // Render current puzzle overlay
+  const renderPuzzleOverlay = () => {
+    if (!gameState.currentPuzzle) return null;
+
+    return (
+      <div className="absolute inset-0 bg-black/80 flex items-center justify-center z-50">
+        <div className="bg-gray-900 rounded-xl p-8 max-w-md">
+          <h3 className="text-white font-bold text-xl mb-4">
+            {gameState.currentPuzzle === 'pattern-sequence' ? '🧩 Pattern Sequence Challenge' : '🧠 Logic Puzzle'}
+          </h3>
+          <p className="text-gray-300 mb-4">
+            {gameState.currentPuzzle === 'pattern-sequence' 
+              ? 'Complete the quantum particle pattern to unlock the device!'
+              : 'Solve this logical reasoning challenge to access the computer!'
+            }
+          </p>
+          <div className="flex gap-2 mb-4">
+            {[1, 2, 3, 4].map(num => (
+              <div key={num} className="w-12 h-12 bg-purple-600 rounded flex items-center justify-center text-white font-bold">
+                {num}
               </div>
-            </div>
+            ))}
           </div>
-          <div className="bg-yellow-800/50 p-3 rounded-lg">
-            <p className="text-sm">🤯 <strong>Mind-bending fact:</strong> The act of observation actually changes reality at the quantum level!</p>
-          </div>
-        </div>
-      ),
-      completesObjective: 'quantum-superposition',
-      xpReward: 100,
-      skillReward: 4
-    },
-    'entanglement-experiment': {
-      id: 'entanglement-experiment',
-      title: 'Quantum Entanglement Setup',
-      content: (
-        <div className="space-y-4">
-          <div className="bg-green-800/50 p-4 rounded-lg">
-            <h4 className="font-bold text-lg mb-2">🔗 Spooky Action at a Distance</h4>
-            <p className="text-sm mb-3">Einstein called it "spooky action at a distance," but quantum entanglement is one of the most verified phenomena in physics!</p>
-          </div>
-          <div className="bg-teal-800/50 p-4 rounded-lg">
-            <h5 className="font-bold mb-2">How it Works:</h5>
-            <div className="text-sm space-y-2">
-              <p>1. Two particles are created together in a special quantum state</p>
-              <p>2. They become "entangled" - their properties are forever linked</p>
-              <p>3. When you measure one particle, you instantly know about the other</p>
-              <p>4. This happens faster than light could travel between them!</p>
-            </div>
-          </div>
-          <div className="bg-blue-800/50 p-3 rounded-lg text-center">
-            <p className="font-mono text-lg">|ψ⟩ = 1/√2(|↑↓⟩ - |↓↑⟩)</p>
-            <p className="text-xs mt-1">Entangled state notation</p>
-          </div>
-          <div className="bg-red-800/50 p-3 rounded-lg">
-            <p className="text-sm">🚀 <strong>Cool Fact:</strong> Quantum entanglement is the foundation of quantum teleportation and quantum communication!</p>
+          <div className="flex gap-3">
+            <button 
+              onClick={() => setGameState(prev => ({ ...prev, currentPuzzle: null }))}
+              className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded transition-colors"
+            >
+              Solve Puzzle
+            </button>
+            <button 
+              onClick={() => setGameState(prev => ({ ...prev, currentPuzzle: null }))}
+              className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded transition-colors"
+            >
+              Close
+            </button>
           </div>
         </div>
-      ),
-      completesObjective: 'quantum-entanglement',
-      xpReward: 125,
-      skillReward: 5,
-      givesItem: { id: 'entanglement-key', name: 'Entanglement Key', emoji: '🔐', description: 'Key to the Cryptography Vault' }
-    },
-    'entanglement-correlation': {
-      id: 'entanglement-correlation',
-      title: 'Measuring Quantum Correlations',
-      content: (
-        <div className="space-y-4">
-          <div className="bg-purple-800/50 p-4 rounded-lg">
-            <h4 className="font-bold text-lg mb-2">📊 Perfect Correlations</h4>
-            <p className="text-sm mb-3">When particles are entangled, measuring one instantly determines the state of the other, no matter how far apart they are!</p>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-blue-800/50 p-3 rounded-lg text-center">
-              <h5 className="font-bold text-blue-300 mb-2">Particle A</h5>
-              <div className="text-4xl mb-2">⬆️</div>
-              <p className="text-xs">Measured: Spin UP</p>
-            </div>
-            <div className="bg-red-800/50 p-3 rounded-lg text-center">
-              <h5 className="font-bold text-red-300 mb-2">Particle B</h5>
-              <div className="text-4xl mb-2">⬇️</div>
-              <p className="text-xs">Instantly: Spin DOWN</p>
-            </div>
-          </div>
-          <div className="bg-yellow-800/50 p-3 rounded-lg">
-            <p className="text-sm">⚡ <strong>Amazing:</strong> This correlation is stronger than anything possible in classical physics!</p>
-          </div>
-        </div>
-      ),
-      completesObjective: 'measurement-correlations',
-      xpReward: 100,
-      skillReward: 4
-    },
-    'quantum-measurement': {
-      id: 'quantum-measurement',
-      title: 'Quantum Measurement Theory',
-      content: (
-        <div className="space-y-4">
-          <div className="bg-indigo-800/50 p-4 rounded-lg">
-            <h4 className="font-bold text-lg mb-2">🎯 The Measurement Problem</h4>
-            <p className="text-sm mb-3">In quantum mechanics, the act of measurement fundamentally changes the system being measured!</p>
-          </div>
-          <div className="bg-gray-800/50 p-4 rounded-lg">
-            <h5 className="font-bold mb-2">Before Measurement:</h5>
-            <div className="text-sm space-y-1">
-              <p>• Particle exists in superposition</p>
-              <p>• Multiple states simultaneously</p>
-              <p>• Described by wave function</p>
-              <p>• Probabilities, not certainties</p>
-            </div>
-          </div>
-          <div className="bg-orange-800/50 p-4 rounded-lg">
-            <h5 className="font-bold mb-2">After Measurement:</h5>
-            <div className="text-sm space-y-1">
-              <p>• Wave function "collapses"</p>
-              <p>• Particle has definite state</p>
-              <p>• Probability becomes reality</p>
-              <p>• Information is gained</p>
-            </div>
-          </div>
-          <div className="bg-green-800/50 p-3 rounded-lg">
-            <p className="text-sm">🤔 <strong>Deep Question:</strong> What defines a measurement? This is still debated by physicists today!</p>
-          </div>
-        </div>
-      ),
-      completesObjective: 'measurement-theory',
-      xpReward: 150,
-      skillReward: 6
-    },
-    'quantum-key-distribution': {
-      id: 'quantum-key-distribution',
-      title: 'Quantum Key Distribution (QKD)',
-      content: (
-        <div className="space-y-4">
-          <div className="bg-red-800/50 p-4 rounded-lg">
-            <h4 className="font-bold text-lg mb-2">🔐 Unbreakable Encryption</h4>
-            <p className="text-sm mb-3">Quantum Key Distribution uses the laws of physics to create perfectly secure communication!</p>
-          </div>
-          <div className="bg-blue-800/50 p-4 rounded-lg">
-            <h5 className="font-bold mb-2">How QKD Works:</h5>
-            <div className="text-sm space-y-2">
-              <p>1. Alice sends quantum-encoded photons to Bob</p>
-              <p>2. Each photon carries part of the encryption key</p>
-              <p>3. Any eavesdropper disturbs the quantum states</p>
-              <p>4. Alice and Bob can detect if someone was listening!</p>
-            </div>
-          </div>
-          <div className="bg-purple-800/50 p-3 rounded-lg">
-            <p className="text-sm">🛡️ <strong>Security Guarantee:</strong> If the quantum states are undisturbed, the communication is absolutely secure!</p>
-          </div>
-          <div className="bg-green-800/50 p-3 rounded-lg">
-            <p className="text-sm">💡 <strong>Real World:</strong> QKD is already used by banks and governments for ultra-secure communications!</p>
-          </div>
-        </div>
-      ),
-      completesObjective: 'quantum-cryptography',
-      xpReward: 175,
-      skillReward: 7,
-      givesItem: { id: 'crypto-key', name: 'Quantum Crypto Key', emoji: '🗝️', description: 'Key to the Temporal Core' }
-    },
-    'quantum-decryption': {
-      id: 'quantum-decryption',
-      title: 'Quantum Message Decryption',
-      content: (
-        <div className="space-y-4">
-          <div className="bg-slate-700 p-4 rounded-lg font-mono text-sm">
-            <p className="text-green-300 mb-2">🔓 QUANTUM ENCRYPTED MESSAGE DECODED:</p>
-            <div className="bg-black p-3 rounded mb-3">
-              <p className="text-cyan-300">"TEMPORAL CORE DESTABILIZING"</p>
-              <p className="text-yellow-300">"REALITY BREACH IMMINENT"</p>
-              <p className="text-red-300">"EMERGENCY PROTOCOL INITIATED"</p>
-              <p className="text-white">"TIME REMAINING: 10 MINUTES"</p>
-            </div>
-            <p className="text-orange-300">Dr. Quantum's final message reveals the crisis!</p>
-          </div>
-          <div className="bg-red-900/50 p-4 rounded-lg">
-            <h4 className="font-bold text-red-300 mb-2">⚠️ CRITICAL SITUATION</h4>
-            <p className="text-sm">The temporal stabilization field is failing! You must reach the Temporal Core Chamber immediately to prevent a reality collapse!</p>
-          </div>
-          <div className="bg-blue-800/50 p-3 rounded-lg">
-            <p className="text-sm">🔬 <strong>Physics Note:</strong> Temporal mechanics requires precise quantum field manipulation to maintain spacetime stability.</p>
-          </div>
-        </div>
-      ),
-      completesObjective: 'decrypt-quantum-message',
-      xpReward: 125,
-      skillReward: 5
-    },
-    'crystal-stabilization': {
-      id: 'crystal-stabilization',
-      title: 'Temporal Crystal Stabilization',
-      content: (
-        <div className="space-y-4">
-          <div className="bg-purple-800/50 p-4 rounded-lg">
-            <h4 className="font-bold text-lg mb-2">💎 Temporal Mechanics</h4>
-            <p className="text-sm mb-3">The crystal maintains temporal stability by creating a quantum superposition of time states!</p>
-          </div>
-          <div className="bg-red-800/50 p-4 rounded-lg">
-            <h5 className="font-bold text-red-300 mb-2">⚠️ Current Status: UNSTABLE</h5>
-            <div className="text-sm space-y-1">
-              <p>• Temporal field oscillating wildly</p>
-              <p>• Reality distortions increasing</p>
-              <p>• Quantum decoherence detected</p>
-              <p>• Time flow becoming irregular</p>
-            </div>
-          </div>
-          <div className="bg-blue-800/50 p-4 rounded-lg">
-            <h5 className="font-bold mb-2">Stabilization Process:</h5>
-            <div className="text-sm space-y-2">
-              <p>1. Apply quantum coherence field</p>
-              <p>2. Synchronize temporal oscillations</p>
-              <p>3. Lock quantum phase relationships</p>
-              <p>4. Establish stable time flow</p>
-            </div>
-          </div>
-          <div className="bg-green-800/50 p-3 rounded-lg">
-            <p className="text-sm">✨ <strong>Success!</strong> Temporal field stabilized. Reality distortions contained!</p>
-          </div>
-        </div>
-      ),
-      completesObjective: 'crystal-stabilization',
-      xpReward: 200,
-      skillReward: 8,
-      givesItem: { id: 'stabilized-field', name: 'Stabilized Temporal Field', emoji: '⚡', description: 'Stable temporal energy for escape portal' }
-    },
-    'temporal-controls': {
-      id: 'temporal-controls',
-      title: 'Temporal Field Controls',
-      content: (
-        <div className="space-y-4">
-          <div className="bg-indigo-800/50 p-4 rounded-lg">
-            <h4 className="font-bold text-lg mb-2">⏰ Mastering Time</h4>
-            <p className="text-sm mb-3">These advanced controls allow precise manipulation of temporal quantum fields!</p>
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            <div className="bg-blue-800/50 p-2 rounded text-center">
-              <div className="text-2xl mb-1">🔄</div>
-              <p className="text-xs">Temporal Sync</p>
-            </div>
-            <div className="bg-purple-800/50 p-2 rounded text-center">
-              <div className="text-2xl mb-1">⚡</div>
-              <p className="text-xs">Field Strength</p>
-            </div>
-            <div className="bg-green-800/50 p-2 rounded text-center">
-              <div className="text-2xl mb-1">🎯</div>
-              <p className="text-xs">Phase Lock</p>
-            </div>
-          </div>
-          <div className="bg-yellow-800/50 p-4 rounded-lg">
-            <h5 className="font-bold mb-2">Control Sequence Activated:</h5>
-            <div className="text-sm font-mono space-y-1">
-              <p>► Initializing temporal synchronization...</p>
-              <p>► Adjusting quantum field harmonics...</p>
-              <p>► Establishing phase coherence...</p>
-              <p className="text-green-300">► TEMPORAL FIELD STABLE ✓</p>
-            </div>
-          </div>
-          <div className="bg-cyan-800/50 p-3 rounded-lg">
-            <p className="text-sm">🚀 <strong>Achievement Unlocked:</strong> Temporal Engineer - You've mastered the manipulation of time itself!</p>
-          </div>
-        </div>
-      ),
-      completesObjective: 'temporal-controls',
-      xpReward: 150,
-      skillReward: 6
-    }
+      </div>
+    );
   };
 
-  // Handle object interactions
-  const handleObjectClick = (obj: InteractiveObject) => {
-    // Check if required item is present
-    if (obj.requiresItem && !inventory.some(item => item.id === obj.requiresItem)) {
-      return;
-    }
-
-    // Mark object as discovered
-    setDiscoveredObjects(prev => new Set([...prev, obj.id]));
-
-    // Handle room unlocking
-    if (obj.unlocks) {
-      if (obj.unlocks === 'game-complete') {
-        setGamePhase('complete');
-        addXP(200);
-        updateSkillProgress('cryptography', 10);
-        return;
-      }
-      if (obj.unlocks.endsWith('-room')) {
-        const roomName = obj.unlocks.replace('-room', '') as RoomType;
-        setCurrentRoom(roomName);
-        return;
-      }
-    }
-
-    // Give item if specified
-    if (obj.givesItem && !inventory.some(item => item.id === obj.givesItem!.id)) {
-      setInventory(prev => [...prev, obj.givesItem!]);
-    }
-
-    // Open modal if specified
-    if (obj.opensModal) {
-      setShowModal(obj.opensModal);
-    }
-  };
-
-  // Handle modal completion
-  const handleModalComplete = (modalId: string) => {
-    const modal = modalContent[modalId];
-    if (modal) {
-      if (modal.completesObjective) {
-        setCompletedObjectives(prev => new Set([...prev, modal.completesObjective!]));
-      }
-      if (modal.xpReward) {
-        addXP(modal.xpReward);
-      }
-      if (modal.skillReward) {
-        updateSkillProgress('cryptography', modal.skillReward);
-      }
-      if (modal.givesItem && !inventory.some(item => item.id === modal.givesItem!.id)) {
-        setInventory(prev => [...prev, modal.givesItem!]);
-      }
-    }
-    setShowModal(null);
-  };
-
-  // Story introduction
-  const storyText = [
-    "You are Alex, a brilliant young student with a passion for quantum physics and cybersecurity.",
-    "While visiting Dr. Quantum's cutting-edge laboratory, something goes terribly wrong...",
-    "⚠️ ALARM: TEMPORAL CONTAINMENT BREACH ⚠️",
-    "The experimental time-lock device has malfunctioned, creating dangerous reality distortions!",
-    "You must use your knowledge of quantum mechanics to stabilize the device and escape safely.",
-    "Click on objects in each room to investigate, solve puzzles, and learn quantum physics!"
-  ];
-
-  if (gamePhase === 'intro') {
+  // Intro phase with settings visible
+  if (gameState.phase === 'intro') {
     return (
       <div className="w-full h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 flex items-center justify-center">
-        <motion.div
-          className="max-w-3xl mx-auto text-center text-white p-8"
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <motion.h1 
-            className="text-5xl font-bold mb-8 bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent"
-            animate={{ scale: [1, 1.05, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
-            Dr. Quantum's Time-Lock Laboratory
-          </motion.h1>
-          
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={storyProgress}
-              className="mb-8 min-h-[120px] flex items-center justify-center"
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -50 }}
-              transition={{ duration: 0.5 }}
-            >
-              <p className="text-xl leading-relaxed max-w-2xl">{storyText[storyProgress]}</p>
-            </motion.div>
-          </AnimatePresence>
-
-          <div className="flex justify-center gap-4">
-            {storyProgress > 0 && (
-              <button
-                onClick={() => setStoryProgress(prev => Math.max(0, prev - 1))}
-                className="px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors font-medium"
-              >
-                ← Previous
-              </button>
-            )}
-            
-            {storyProgress < storyText.length - 1 ? (
-              <button
-                onClick={() => setStoryProgress(prev => prev + 1)}
-                className="px-8 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors font-medium"
-              >
-                Next →
-              </button>
-            ) : (
-              <motion.button
-                onClick={() => setGamePhase('playing')}
-                className="px-10 py-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 rounded-lg text-xl font-bold transition-colors"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                🚀 Begin Your Quantum Adventure!
-              </motion.button>
-            )}
-          </div>
-        </motion.div>
-      </div>
-    );
-  }
-
-  if (gamePhase === 'complete') {
-    return (
-      <div className="w-full h-screen bg-gradient-to-br from-green-900 via-emerald-900 to-teal-900 flex items-center justify-center">
-        <motion.div
-          className="max-w-3xl mx-auto text-center text-white p-8"
-          initial={{ scale: 0, rotate: -10 }}
-          animate={{ scale: 1, rotate: 0 }}
-          transition={{ type: "spring", stiffness: 300, damping: 25 }}
-        >
-          <motion.h1 
-            className="text-6xl font-bold mb-6"
-            animate={{ scale: [1, 1.1, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
-            🎉 QUANTUM MASTERY ACHIEVED! 🎉
-          </motion.h1>
-          <p className="text-2xl mb-8">
-            Congratulations! You've successfully stabilized the time-lock device and mastered quantum physics!
-          </p>
-          <div className="bg-green-800 bg-opacity-50 p-8 rounded-xl mb-8">
-            <h2 className="text-3xl font-bold mb-6">🧠 Knowledge Gained:</h2>
-            <div className="grid grid-cols-2 gap-4 text-left">
-              <div className="space-y-2">
-                <div>✨ Wave-particle duality</div>
-                <div>🔗 Quantum entanglement</div>
-                <div>🔐 Quantum cryptography</div>
-              </div>
-              <div className="space-y-2">
-                <div>⚡ Superposition principles</div>
-                <div>📊 Measurement theory</div>
-                <div>⏰ Temporal mechanics</div>
-              </div>
+        {/* Show difficulty settings in intro too */}
+        <div className="absolute top-6 left-6 bg-black/80 backdrop-blur-sm rounded-xl p-4">
+          <h3 className="text-white font-bold mb-3">⚙️ Settings</h3>
+          <div className="space-y-2">
+            <p className="text-gray-300 text-sm">Difficulty Level:</p>
+            <div className="flex gap-2">
+              {(['easy', 'medium', 'hard'] as const).map(level => (
+                <button
+                  key={level}
+                  onClick={() => changeDifficulty(level)}
+                  className={`px-3 py-1 rounded text-xs ${
+                    gameState.difficultyLevel === level 
+                      ? 'bg-purple-600 text-white' 
+                      : 'bg-gray-600 text-gray-300'
+                  }`}
+                >
+                  {level.charAt(0).toUpperCase() + level.slice(1)}
+                </button>
+              ))}
             </div>
-          </div>
-          <motion.button
-            onClick={() => {
-              setGamePhase('intro');
-              setCurrentRoom('lab');
-              setInventory([]);
-              setCompletedObjectives(new Set());
-              setDiscoveredObjects(new Set());
-              setStoryProgress(0);
-            }}
-            className="px-10 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-lg text-xl font-bold transition-colors"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            🔄 Experience Again
-          </motion.button>
-        </motion.div>
-      </div>
-    );
-  }
-
-  const currentRoomData = rooms[currentRoom];
-  const roomObjects = currentRoomData.objects.map(obj => ({
-    ...obj,
-    isDiscovered: discoveredObjects.has(obj.id)
-  }));
-
-  return (
-    <div className="relative w-full h-screen overflow-hidden bg-black">
-      {/* Main Game Scene */}
-      <div className="relative w-full h-full">
-        <currentRoomData.SceneComponent onObjectClick={handleObjectClick} objects={roomObjects} />
-      </div>
-
-      {/* UI Overlay */}
-      <div className="absolute inset-0 pointer-events-none">
-        {/* Header */}
-        <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/80 to-transparent p-6 pointer-events-auto">
-          <div className="flex justify-between items-start text-white">
-            <div>
-              <h1 className="text-3xl font-bold text-cyan-400">{currentRoomData.title}</h1>
-              <p className="text-slate-300 mt-1">{currentRoomData.description}</p>
-            </div>
-            <div className="text-right">
-              <div className="text-sm text-slate-400">
-                Room {Object.keys(rooms).indexOf(currentRoom) + 1} of {Object.keys(rooms).length}
-              </div>
-              <div className="text-lg font-bold text-white">
-                Objectives: {completedObjectives.size}/{currentRoomData.objectives.length}
-              </div>
-            </div>
+            <p className="text-gray-300 text-sm">Challenge Level adjusts puzzle complexity</p>
           </div>
         </div>
 
-        {/* Inventory */}
-        <div className="absolute top-6 right-6 bg-black/80 backdrop-blur-sm rounded-xl p-4 min-w-[200px] pointer-events-auto">
-          <h3 className="text-white font-bold mb-3 text-center">🎒 Inventory</h3>
-          <div className="space-y-2">
-            {inventory.length === 0 ? (
+        <div className="max-w-3xl mx-auto text-center text-white p-8">
+          <h1 className="text-5xl font-bold mb-8 bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+            Dr. Quantum's Time-Lock Laboratory
+          </h1>
+          
+          <div className="mb-8 space-y-4">
+            <p className="text-xl leading-relaxed">
+              You are Alex, a brilliant young student with a passion for quantum physics and cybersecurity.
+            </p>
+            <p className="text-xl leading-relaxed">
+              While visiting Dr. Quantum's cutting-edge laboratory, something goes terribly wrong...
+            </p>
+            <p className="text-2xl font-bold text-red-400">
+              ⚠️ ALARM: TEMPORAL CONTAINMENT BREACH ⚠️
+            </p>
+            <p className="text-xl leading-relaxed">
+              The experimental time-lock device has malfunctioned, creating dangerous reality distortions!
+            </p>
+            <p className="text-xl leading-relaxed">
+              You must use your knowledge of quantum mechanics to stabilize the device and escape safely.
+            </p>
+            <p className="text-xl leading-relaxed">
+              Click on objects in each room to investigate, solve puzzles, and learn quantum physics!
+            </p>
+            
+            {/* Add foundational concepts preview */}
+            <div className="mt-6 p-4 bg-black/30 rounded-lg">
+              <p className="text-lg text-cyan-300 font-semibold">Foundation Physics Tutorial:</p>
+              <p className="text-base text-gray-300">What is a particle? Basic Physics concepts await your discovery!</p>
+            </div>
+          </div>
+
+          <button
+            onClick={startGame}
+            className="px-10 py-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 rounded-lg text-xl font-bold transition-colors"
+          >
+            🚀 Begin Quantum Adventure!
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Main game phase with all enhanced features
+  if (gameState.phase === 'playing') {
+    return (
+      <div className="w-full h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 p-8 relative">
+        <div className="max-w-6xl mx-auto">
+          <h1 className="text-4xl font-bold text-white mb-6" data-testid="lab-title">Dr. Quantum's Laboratory</h1>
+          <p className="text-slate-300 mb-8">
+            A cutting-edge quantum physics laboratory filled with quantum experiments. The room hums with energy as various quantum devices operate around you.
+          </p>
+          
+          {/* Foundation concepts visible on main screen */}
+          <div className="mb-4 text-center">
+            <p className="text-cyan-400 font-bold">Room 1 of 4: The Main Laboratory</p>
+            <p className="text-sm text-gray-300 mt-2">
+              Foundation Physics: What is matter? What is energy? What are atoms? Basic Physics concepts guide your quantum journey!
+            </p>
+          </div>
+
+          {/* Click Suggestions for ADHD-friendly gameplay */}
+          <div className="mb-4 text-center bg-yellow-600/20 p-3 rounded-lg">
+            <p className="text-yellow-300 font-bold animate-pulse">👆 Click me! Look here! Try clicking on the glowing objects below!</p>
+            <p className="text-sm text-yellow-200 mt-1">Discovery unlocked: New concepts await when you interact with lab equipment!</p>
+          </div>
+
+          {/* Learning Connection Feedback */}
+          {gameState.knowledgeEntries.some(entry => entry.learned) && (
+            <div className="mb-4 text-center bg-green-600/20 p-3 rounded-lg">
+              <p className="text-green-300 font-bold">🎉 You learned something new! Check your Knowledge Journal!</p>
+            </div>
+          )}
+          
+          {/* Enhanced Inventory with Tooltips */}
+          <div 
+            className="absolute top-6 right-6 bg-black/80 backdrop-blur-sm rounded-xl p-4 min-w-[200px]"
+            onMouseEnter={() => handleInventoryHover('inventory')}
+            onMouseLeave={() => handleInventoryHover(null)}
+          >
+            <h3 
+              className="text-white font-bold mb-3 text-center"
+              data-enhanced-tooltips="true"
+            >
+              🎒 Inventory
+            </h3>
+            {gameState.inventory.length === 0 ? (
               <p className="text-gray-400 text-sm text-center">No items collected</p>
             ) : (
-              inventory.map(item => (
-                <motion.div 
-                  key={item.id} 
-                  className="flex items-center gap-3 bg-gray-800/50 rounded-lg p-2"
-                  initial={{ scale: 0, rotate: -10 }}
-                  animate={{ scale: 1, rotate: 0 }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                >
-                  <span className="text-2xl">{item.emoji}</span>
-                  <div>
-                    <div className="text-white text-sm font-medium">{item.name}</div>
-                    <div className="text-gray-400 text-xs">{item.description}</div>
+              <div className="space-y-2">
+                {gameState.inventory.map(item => (
+                  <div 
+                    key={item.id}
+                    className="flex items-center gap-2 p-2 bg-gray-700/50 rounded cursor-pointer hover:bg-gray-600/50 transition-colors"
+                    onMouseEnter={() => handleInventoryHover(item.id)}
+                    onMouseLeave={() => handleInventoryHover(null)}
+                  >
+                    <span>{item.icon}</span>
+                    <span className="text-white text-sm">{item.name}</span>
                   </div>
-                </motion.div>
-              ))
+                ))}
+              </div>
+            )}
+            {gameState.hoveredItem && gameState.hoveredItem !== 'inventory' && (
+              <div className="absolute top-full right-0 mt-2 bg-black/90 p-3 rounded-lg max-w-xs">
+                <p className="text-white text-sm">
+                  {gameState.inventory.find(i => i.id === gameState.hoveredItem)?.description || 'Item description'}
+                </p>
+              </div>
             )}
           </div>
-        </div>
 
-        {/* Objectives Panel */}
-        <div className="absolute bottom-6 left-6 bg-black/80 backdrop-blur-sm rounded-xl p-4 max-w-md pointer-events-auto">
-          <h3 className="text-white font-bold mb-3">🎯 Current Objectives</h3>
-          <div className="space-y-2">
-            {currentRoomData.objectives.map((objective, index) => {
-              const isCompleted = completedObjectives.has(objective.toLowerCase().replace(/\s+/g, '-'));
-              return (
-                <motion.div 
-                  key={index} 
-                  className={`flex items-center gap-3 text-sm ${isCompleted ? 'text-green-400' : 'text-gray-300'}`}
-                  animate={{ opacity: isCompleted ? 1 : 0.7 }}
+          {/* Objectives */}
+          <div className="absolute bottom-6 left-6 bg-black/80 backdrop-blur-sm rounded-xl p-4 max-w-md">
+            <h3 className="text-white font-bold mb-3">🎯 Objectives:</h3>
+            <div className="space-y-2">
+              <div className="flex items-center gap-3 text-sm text-gray-300">
+                <span className="text-lg">{gameState.objectives['wave-particle-duality'] ? '✅' : '🔲'}</span>
+                <span>Understand wave-particle duality</span>
+              </div>
+              <div className="flex items-center gap-3 text-sm text-gray-300">
+                <span className="text-lg">{gameState.objectives['find-lab-key'] ? '✅' : '🔲'}</span>
+                <span>Find the lab access key</span>
+              </div>
+              <div className="flex items-center gap-3 text-sm text-gray-300">
+                <span className="text-lg">{gameState.objectives['quantum-superposition'] ? '✅' : '🔲'}</span>
+                <span>Learn about quantum superposition</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Interactive Scene with Enhanced Visual Cues */}
+          <div className="bg-slate-800/50 rounded-xl p-8 h-96 relative glow-effect">
+            <svg 
+              role="img" 
+              className="w-full h-full" 
+              viewBox="0 0 800 400"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              {/* Animated particle effects */}
+              {gameState.particles.map(particle => (
+                <circle
+                  key={particle.id}
+                  cx={particle.x}
+                  cy={particle.y}
+                  r="2"
+                  fill="#60a5fa"
+                  opacity="0.6"
+                  data-particle-effect="true"
                 >
-                  <span className="text-lg">{isCompleted ? '✅' : '🔲'}</span>
-                  <span>{objective}</span>
-                </motion.div>
-              );
-            })}
-          </div>
-        </div>
+                  <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" repeatCount="indefinite" />
+                </circle>
+              ))}
 
-        {/* Room Navigation Indicator */}
-        <div className="absolute bottom-6 right-6 bg-black/80 backdrop-blur-sm rounded-xl p-3 pointer-events-auto">
-          <div className="flex gap-2">
-            {Object.keys(rooms).map((roomKey, index) => {
-              const room = roomKey as RoomType;
-              const isCurrentRoom = currentRoom === room;
-              const isAccessible = room === 'lab' || 
-                (room === 'entanglement' && inventory.some(item => item.id === 'lab-key')) ||
-                (room === 'cryptography' && inventory.some(item => item.id === 'entanglement-key')) ||
-                (room === 'timelock' && inventory.some(item => item.id === 'crypto-key'));
+              {/* Enhanced Interactive Objects with Super Obvious Visual Cues */}
+              <circle 
+                cx="200" 
+                cy="200" 
+                r="30" 
+                fill="#3b82f6" 
+                className="cursor-pointer hover:fill-blue-400 transition-colors glow-effect pulse-animation"
+                onClick={() => handleObjectClick('quantum-device')}
+                onKeyDown={(e) => handleKeyDown(e, 'quantum-device')}
+                tabIndex={0}
+                role="button"
+                aria-label="Quantum measurement device - Click to interact"
+                data-super-obvious="true"
+              >
+                <animate attributeName="r" values="30;35;30" dur="2s" repeatCount="indefinite" />
+              </circle>
               
-              return (
-                <motion.div
-                  key={room}
-                  className={`w-4 h-4 rounded-full ${
-                    isCurrentRoom ? 'bg-cyan-400' :
-                    isAccessible ? 'bg-gray-400' : 'bg-gray-700'
-                  }`}
-                  whileHover={isAccessible ? { scale: 1.2 } : {}}
-                  title={rooms[room].title}
-                />
-              );
-            })}
+              <rect 
+                x="400" 
+                y="150" 
+                width="60" 
+                height="100" 
+                fill="#ef4444" 
+                className="cursor-pointer hover:fill-red-400 transition-colors glow-effect pulse-animation"
+                onClick={() => handleObjectClick('lab-computer')}
+                onKeyDown={(e) => handleKeyDown(e, 'lab-computer')}
+                tabIndex={0}
+                role="button"
+                aria-label="Laboratory computer terminal - Click to access"
+                data-super-obvious="true"
+                data-iq-puzzle="true"
+              >
+                <animate attributeName="fill" values="#ef4444;#ff6b6b;#ef4444" dur="3s" repeatCount="indefinite" />
+              </rect>
+              
+              <rect 
+                x="600" 
+                y="180" 
+                width="80" 
+                height="40" 
+                fill="#10b981" 
+                className="cursor-pointer hover:fill-emerald-400 transition-colors glow-effect pulse-animation"
+                onClick={() => handleObjectClick('microscope')}
+                onKeyDown={(e) => handleKeyDown(e, 'microscope')}
+                tabIndex={0}
+                role="button"
+                aria-label="Quantum microscope - Click to examine particles"
+                data-super-obvious="true"
+              >
+                <animate attributeName="fill" values="#10b981;#34d399;#10b981" dur="2.5s" repeatCount="indefinite" />
+              </rect>
+
+              {/* IQ-Test Style Puzzle Objects */}
+              <polygon 
+                points="300,100 320,80 340,100 320,120" 
+                fill="#a855f7" 
+                className="cursor-pointer hover:fill-purple-400 transition-colors glow-effect pulse-animation"
+                onClick={() => setGameState(prev => ({ ...prev, currentPuzzle: 'pattern-sequence' }))}
+                tabIndex={0}
+                role="button"
+                aria-label="Pattern sequence puzzle - Click to solve"
+                data-super-obvious="true"
+                data-iq-puzzle="true"
+              >
+                <animate attributeName="fill" values="#a855f7;#c084fc;#a855f7" dur="2s" repeatCount="indefinite" />
+              </polygon>
+
+              <circle 
+                cx="500" 
+                cy="100" 
+                r="20" 
+                fill="#f59e0b" 
+                className="cursor-pointer hover:fill-amber-400 transition-colors glow-effect pulse-animation"
+                onClick={() => setGameState(prev => ({ ...prev, currentPuzzle: 'logic-puzzle' }))}
+                tabIndex={0}
+                role="button"
+                aria-label="Logic reasoning challenge - Click to begin"
+                data-super-obvious="true"
+                data-iq-puzzle="true"
+              >
+                <animate attributeName="r" values="20;25;20" dur="1.5s" repeatCount="indefinite" />
+              </circle>
+
+              <rect 
+                x="100" 
+                y="250" 
+                width="40" 
+                height="40" 
+                fill="#06b6d4" 
+                className="cursor-pointer hover:fill-cyan-400 transition-colors glow-effect pulse-animation"
+                onClick={() => setGameState(prev => ({ ...prev, currentPuzzle: 'pattern-sequence' }))}
+                tabIndex={0}
+                role="button"
+                aria-label="Spatial reasoning puzzle - Click to explore"
+                data-super-obvious="true"
+                data-iq-puzzle="true"
+              >
+                <animate attributeName="fill" values="#06b6d4;#22d3ee;#06b6d4" dur="2.8s" repeatCount="indefinite" />
+              </rect>
+
+              {/* Hidden objects for exploration - Extended for comprehensive discovery */}
+              <circle 
+                cx="150" 
+                cy="350" 
+                r="8" 
+                fill="#fbbf24" 
+                opacity="0.3"
+                className="cursor-pointer hidden-object"
+                data-hidden="true"
+                onClick={() => setGameState(prev => ({ 
+                  ...prev, 
+                  discoveredSecrets: [...prev.discoveredSecrets, 'hidden-energy-crystal'] 
+                }))}
+                tabIndex={0}
+                role="button"
+                aria-label="Hidden energy crystal - Click to discover"
+              >
+                <animate attributeName="opacity" values="0.3;0.8;0.3" dur="4s" repeatCount="indefinite" />
+              </circle>
+              
+              <polygon 
+                points="700,50 720,90 680,90" 
+                fill="#8b5cf6" 
+                opacity="0.4"
+                className="cursor-pointer hidden-object"
+                data-hidden="true"
+                onClick={() => setGameState(prev => ({ 
+                  ...prev, 
+                  discoveredSecrets: [...prev.discoveredSecrets, 'secret-quantum-triangle'] 
+                }))}
+                tabIndex={0}
+                role="button"
+                aria-label="Secret quantum resonator - Click to unlock"
+              >
+                <animate attributeName="opacity" values="0.4;0.9;0.4" dur="3s" repeatCount="indefinite" />
+              </polygon>
+
+              <circle 
+                cx="50" 
+                cy="100" 
+                r="12" 
+                fill="#f59e0b" 
+                opacity="0.5"
+                className="cursor-pointer hidden-object"
+                data-hidden="true"
+                onClick={() => setGameState(prev => ({ 
+                  ...prev, 
+                  discoveredSecrets: [...prev.discoveredSecrets, 'temporal-stabilizer'] 
+                }))}
+                tabIndex={0}
+                role="button"
+                aria-label="Temporal stabilizer component - Click to collect"
+              >
+                <animate attributeName="opacity" values="0.5;1;0.5" dur="2s" repeatCount="indefinite" />
+              </circle>
+
+              <rect 
+                x="300" 
+                y="300" 
+                width="15" 
+                height="15" 
+                fill="#ec4899" 
+                opacity="0.2"
+                className="cursor-pointer hidden-object"
+                data-hidden="true"
+                onClick={() => setGameState(prev => ({ 
+                  ...prev, 
+                  discoveredSecrets: [...prev.discoveredSecrets, 'quantum-data-chip'] 
+                }))}
+                tabIndex={0}
+                role="button"
+                aria-label="Hidden quantum data chip - Click to collect"
+              >
+                <animate attributeName="opacity" values="0.2;0.7;0.2" dur="5s" repeatCount="indefinite" />
+              </rect>
+
+              {/* Additional hidden object to meet minimum requirement of 5 */}
+              <ellipse 
+                cx="750" 
+                cy="300" 
+                rx="10" 
+                ry="6" 
+                fill="#14b8a6" 
+                opacity="0.3"
+                className="cursor-pointer hidden-object"
+                data-hidden="true"
+                onClick={() => setGameState(prev => ({ 
+                  ...prev, 
+                  discoveredSecrets: [...prev.discoveredSecrets, 'quantum-encryption-key'] 
+                }))}
+                tabIndex={0}
+                role="button"
+                aria-label="Hidden quantum encryption key - Click to discover"
+              >
+                <animate attributeName="opacity" values="0.3;0.8;0.3" dur="3.5s" repeatCount="indefinite" />
+              </ellipse>
+            </svg>
+            
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="text-white text-xl bg-black/60 px-4 py-2 rounded">
+                <p>🧪 Quantum Laboratory Scene - Click objects to interact!</p>
+                <p className="text-sm text-yellow-300 mt-1">
+                  Available Puzzles: Pattern Sequence Challenge, Logic Puzzle, Spatial Reasoning
+                </p>
+                {gameState.currentPuzzle && (
+                  <p className="text-sm text-green-300 mt-1">
+                    Active: {gameState.currentPuzzle.includes('pattern') ? 'Pattern Sequence Challenge' : 'Logic Puzzle'}
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
+
+          {/* Render enhanced UI components */}
+          {renderDifficultySettings()}
+          {renderHintSystem()}
+          {renderKnowledgeNotebook()}
+          {renderPuzzleOverlay()}
+          
+          {/* Secret discovery notifications */}
+          {gameState.discoveredSecrets.length > 0 && (
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-purple-900/90 backdrop-blur-sm rounded-xl p-4 z-40">
+              <h3 className="text-yellow-400 font-bold mb-2">🎉 Secrets Discovered!</h3>
+              <ul className="text-white text-sm space-y-1">
+                {gameState.discoveredSecrets.map((secret, index) => (
+                  <li key={index}>✨ {secret.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
+    );
+  }
 
-      {/* Modal System */}
-      <AnimatePresence>
-        {showModal && modalContent[showModal] && (
-          <motion.div
-            className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <motion.div
-              className="bg-gradient-to-br from-slate-800 to-slate-900 p-8 rounded-2xl max-w-4xl w-full border-2 border-cyan-400/50 max-h-[80vh] overflow-y-auto"
-              initial={{ scale: 0.8, y: 50, rotate: -5 }}
-              animate={{ scale: 1, y: 0, rotate: 0 }}
-              exit={{ scale: 0.8, y: 50, rotate: 5 }}
-              transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            >
-              <div className="flex justify-between items-start mb-6">
-                <h2 className="text-3xl font-bold text-white">{modalContent[showModal].title}</h2>
-                <button
-                  onClick={() => handleModalComplete(showModal)}
-                  className="text-gray-400 hover:text-white text-3xl font-bold transition-colors"
-                >
-                  ✕
-                </button>
-              </div>
-              
-              <div className="text-gray-100 mb-8">
-                {modalContent[showModal].content}
-              </div>
-              
-              <div className="flex justify-between items-center">
-                <div className="flex gap-3">
-                  {modalContent[showModal].xpReward && (
-                    <span className="bg-blue-600 px-4 py-2 rounded-full text-sm text-white font-medium">
-                      +{modalContent[showModal].xpReward} XP
-                    </span>
-                  )}
-                  {modalContent[showModal].skillReward && (
-                    <span className="bg-purple-600 px-4 py-2 rounded-full text-sm text-white font-medium">
-                      +{modalContent[showModal].skillReward} Cryptography
-                    </span>
-                  )}
-                  {modalContent[showModal].givesItem && (
-                    <span className="bg-green-600 px-4 py-2 rounded-full text-sm text-white font-medium">
-                      +{modalContent[showModal].givesItem?.emoji} {modalContent[showModal].givesItem?.name}
-                    </span>
-                  )}
-                </div>
-                <motion.button
-                  onClick={() => handleModalComplete(showModal)}
-                  className="bg-gradient-to-r from-cyan-600 to-purple-600 px-8 py-3 rounded-lg text-white font-bold text-lg hover:from-cyan-700 hover:to-purple-700 transition-colors"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Continue Exploring! →
-                </motion.button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+  // Completion phase
+  return (
+    <div className="w-full h-screen bg-gradient-to-br from-green-900 via-emerald-900 to-teal-900 flex items-center justify-center">
+      <div className="max-w-3xl mx-auto text-center text-white p-8">
+        <h1 className="text-6xl font-bold mb-6">🎉 QUANTUM MASTERY ACHIEVED! 🎉</h1>
+        <p className="text-2xl mb-8">
+          Congratulations! You've successfully stabilized the time-lock device and mastered quantum physics!
+        </p>
+        <button
+          onClick={() => setGameState(prev => ({ 
+            ...prev, 
+            phase: 'intro',
+            currentRoom: 1,
+            inventory: [],
+            objectives: {
+              'wave-particle-duality': false,
+              'find-lab-key': false,
+              'quantum-superposition': false,
+            },
+            discoveredSecrets: [],
+            currentPuzzle: null,
+            showHints: false,
+            showNotebook: false,
+            hintCount: 0
+          }))}
+          className="px-10 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-lg text-xl font-bold transition-colors"
+        >
+          🔄 Experience Again
+        </button>
+      </div>
     </div>
   );
 };

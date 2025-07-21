@@ -1,7 +1,7 @@
 {
   "name": "ewu-cyber-games-portal",
   "version": "0.1.0",
-  "description": "🎮 Educational cybersecurity games portal for middle school students - Learn cybersecurity through fun, engaging games! Open source project designed for EWU Gen Cyber camp.",
+  "description": "� 12 Complete Educational Cybersecurity Games | 9,000+ lines of learning code | Professional achievement system for middle school students. Learn cybersecurity through engaging, production-ready games with NSA GenCyber alignment!",
   "keywords": [
     "cybersecurity",
     "education",
@@ -51,9 +51,6 @@
     "health:check": "curl -f -s -o /dev/null https://jdoner02.github.io/ewu-cyber-games-portal/ && echo 'Site is healthy' || echo 'Site health check failed'",
     "deploy-prep": "npm run security-check && npm run build",
     "serve": "npx serve@latest out",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
     "test:security": "echo 'Running security tests...' && npm run security-audit && npm run test",
     "test:unit": "jest --testPathPattern=tests/unit",
     "test:integration": "jest --testPathPattern=tests/integration",

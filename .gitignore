@@ -49,6 +49,9 @@ Thumbs.db
 # TypeScript
 *.tsbuildinfo
 
+# AI Development Logs (internal development process documentation)
+.ai-development-logs/
+
 # ESLint
 .eslintcache
 
