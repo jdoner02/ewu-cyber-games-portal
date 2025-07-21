@@ -2,7 +2,7 @@
 
 import { Suspense } from 'react'
 import { motion } from 'framer-motion'
-import NetworkDefenseTower from '@/games/network-defense/NetworkDefenseTower'
+import NetworkDefenseTower from './NetworkDefenseTower-v2-educational'
 
 /**
  * 🏰 Network Defense Tower - Route Page

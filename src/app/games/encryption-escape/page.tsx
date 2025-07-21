@@ -2,7 +2,7 @@
 
 import { Suspense } from 'react'
 import { motion } from 'framer-motion'
-import EncryptionEscapeRoom from '@/games/encryption-escape/EncryptionEscapeRoom'
+import EncryptionEscapeRoom from './EncryptionEscapeRoom-v2-educational'
 
 /**
  * 🔐 Encryption Escape Room - Route Page

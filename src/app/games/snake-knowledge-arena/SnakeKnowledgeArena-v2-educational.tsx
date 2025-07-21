@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Zap, Target, Shield, CheckCircle, Activity, Monitor } from 'lucide-react';
-import useGameStore from '../../stores/gameStore';
+import useGameStore from '../../../stores/gameStore';
 
 /**
  * 🐍 Snake.io Knowledge Arena - Multiplayer Knowledge Competition

@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic'
 import { Suspense } from 'react'
 
 const QuantumEscapeRoomEnhanced = dynamic(
-  () => import('@/games/quantum-mystery-room/QuantumEscapeRoomEnhanced'),
+  () => import('./QuantumEscapeRoomEnhanced-v2-educational'),
   { 
     ssr: false,
     loading: () => (

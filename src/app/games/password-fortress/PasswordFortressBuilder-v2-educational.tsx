@@ -1,5 +1,6 @@
 /**
  * 🔑 PASSWORD FORTRESS BUILDER - Educational Cybersecurity Game
+ * 🚧 STATUS: UNFINISHED - v2 Educational Implementation
  * 
  * 🎯 WHAT YOU'RE LEARNING:
  * This game teaches you how cybersecurity professionals think about password security!

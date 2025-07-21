@@ -2,7 +2,7 @@
 
 import { Suspense } from 'react'
 import { motion } from 'framer-motion'
-import PhishingDetectiveAgency from '@/games/phishing-detective/PhishingDetectiveAgency'
+import PhishingDetectiveAgency from './PhishingDetectiveAgency-v2-educational'
 
 /**
  * 🕵️ Phishing Detective Agency - Route Page
