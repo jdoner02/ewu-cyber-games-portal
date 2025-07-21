@@ -14,9 +14,10 @@ Think of components like LEGO blocks for websites! Each component does one speci
 
 ## 📁 Component Categories
 
-### 🎮 Game Components (`/games/`)
-**What They Do:** Create interactive learning experiences
+### 🎮 Game Components
+**What They Do:** Game components are now organized in `/src/games/` and `/src/app/games/` directories
 **Educational Purpose:** Engage students in active learning through play
+**Note:** Individual game components have been consolidated into their respective game directories for better organization
 
 ```typescript
 // Example: A password strength checker component
