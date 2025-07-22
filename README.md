@@ -5,12 +5,12 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7.2-blue)](https://www.typescriptlang.org/)
 [![Educational](https://img.shields.io/badge/Educational-All%20Ages-brightgreen)](https://github.com/jdoner02/ewu-cyber-games-portal)
 [![Games](https://img.shields.io/badge/Complete%20Games-12-success)](https://github.com/jdoner02/ewu-cyber-games-portal)
-[![Lines of Code](https://img.shields.io/badge/Educational%20Code-9000%2B%20Lines-purple)](https://github.com/jdoner02/ewu-cyber-games-portal)
+[![Lines of Code](https://img.shields.io/badge/Epic%20Adventures-Level%20Up%20Skills-purple)](https://github.com/jdoner02/ewu-cyber-games-portal)
 [![Build Status](https://img.shields.io/badge/Build-✅%20Passing-brightgreen)](https://github.com/jdoner02/ewu-cyber-games-portal)
 
-**� 12 Complete Educational Games • 🧠 9,000+ Lines of Learning Code • 🏆 Professional Achievement System**
+**🎮 12 Epic Cyber Adventures • 🛡️ Level Up Your Skills • 🏆 Hero Achievement System**
 
-> An interactive cybersecurity education platform that teaches real cyber skills through engaging, professionally-developed games. Every game is complete, functional, and designed with clear educational objectives.
+> An interactive cybersecurity education platform that teaches real cyber skills through engaging, expertly-crafted games. Every game is complete, functional, and designed with clear educational objectives to make you a cyber hero!
 
 ---
 
@@ -66,7 +66,7 @@
 - **⚡ Cyber Defense Simulator** *(472 lines)* - Advanced threat response training
 - **📦 Packet Tracer MMO** *(344 lines)* - Network packet analysis adventure
 
-**Total: 9,000+ lines of professional educational code**
+**Total: Epic cyber adventures that make learning fun and engaging!**
 
 ---
 

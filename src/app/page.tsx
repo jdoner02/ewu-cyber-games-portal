@@ -445,7 +445,7 @@ export default function HomePage() {
                 transition={{ duration: 2, repeat: Infinity }}
               >
                 <Shield className="w-5 h-5 text-cyan-400" />
-                <span className="text-cyan-300 font-medium">12 Complete Educational Games • 9,000+ Lines of Code</span>
+                <span className="text-cyan-300 font-medium">🎮 12 Epic Cyber Adventures • 🛡️ Level Up Your Security Skills</span>
               </motion.div>
 
               <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
@@ -577,16 +577,16 @@ export default function HomePage() {
                 🎮 12 Complete Educational Games Ready to Play!
               </h2>
               <p className="text-lg text-slate-300 max-w-3xl mx-auto leading-relaxed">
-                Each game is fully developed with professional code quality, engaging gameplay, and real cybersecurity learning objectives. 
-                No demos here - these are complete, playable educational experiences!
+                Each game is fully developed with epic gameplay, engaging challenges, and real cybersecurity learning objectives. 
+                No demos here - these are complete, playable educational experiences that make you a cyber hero!
               </p>
             </div>
             
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
               {/* Stats Grid */}
               <div className="bg-black/30 rounded-xl p-4 text-center border border-cyan-500/20">
-                <div className="text-2xl font-bold text-cyan-400">9,000+</div>
-                <div className="text-sm text-slate-400">Lines of Code</div>
+                <div className="text-2xl font-bold text-cyan-400">🚀 Epic</div>
+                <div className="text-sm text-slate-400">Adventures</div>
               </div>
               <div className="bg-black/30 rounded-xl p-4 text-center border border-purple-500/20">
                 <div className="text-2xl font-bold text-purple-400">12</div>
@@ -597,8 +597,8 @@ export default function HomePage() {
                 <div className="text-sm text-slate-400">Functional</div>
               </div>
               <div className="bg-black/30 rounded-xl p-4 text-center border border-yellow-500/20">
-                <div className="text-2xl font-bold text-yellow-400">Professional</div>
-                <div className="text-sm text-slate-400">Quality Code</div>
+                <div className="text-2xl font-bold text-yellow-400">🏆 Hero</div>
+                <div className="text-sm text-slate-400">Level Fun</div>
               </div>
             </div>
 
@@ -940,7 +940,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Professional Security Tools Section */}
+      {/* Advanced Cyber Hero Tools Section */}
       <section className="relative z-10 py-16 px-4">
         <div className="container mx-auto">
           <motion.div
@@ -950,10 +950,10 @@ export default function HomePage() {
             viewport={{ once: true }}
           >
             <h2 className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent mb-4">
-              🛡️ Professional Security Tools Lab
+              🛡️ Advanced Cyber Hero Tools Lab
             </h2>
             <p className="text-xl text-slate-300 max-w-3xl mx-auto mb-6">
-              Experience real cybersecurity tools used by professionals worldwide. Learn through hands-on interaction with industry-standard security systems.
+              Master the same cybersecurity tools used by real cyber heroes worldwide! Learn through hands-on interaction with industry-standard security systems.
             </p>
           </motion.div>
 
@@ -974,7 +974,7 @@ export default function HomePage() {
                   </div>
                   <h3 className="text-xl font-bold text-white mb-2">Vulnerability Scanner</h3>
                   <p className="text-slate-400 mb-4">
-                    Discover security weaknesses like professional penetration testers. Learn CVSS scoring and real vulnerability analysis.
+                    Discover security weaknesses like elite cyber detectives! Learn CVSS scoring and real vulnerability analysis techniques.
                   </p>
                   <div className="flex items-center justify-between">
                     <span className="bg-red-900/30 text-red-300 px-3 py-1 rounded-full text-sm">Security Pro</span>
@@ -1210,7 +1210,7 @@ export default function HomePage() {
               </div>
               <h3 className="text-xl font-bold text-white mb-2">🎮 Play & Learn</h3>
               <p className="text-slate-400">
-                Engage with professionally developed games that teach real cybersecurity concepts through interactive experiences.
+                Engage with expertly crafted games that teach real cybersecurity concepts through interactive experiences and exciting challenges!
               </p>
             </motion.div>
 
