@@ -26,6 +26,7 @@
     "url": "git+https://github.com/jdoner02/ewu-cyber-games-portal.git"
   },
   "private": false,
+
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
@@ -46,6 +47,7 @@
     "analyze:bundle": "npx next-bundle-analyzer",
     "clean": "rm -rf .next out",
     "clean:install": "npm run clean && rm -rf node_modules package-lock.json && npm install",
+    "postinstall": "npx --yes lightningcss --version || echo '⚠️  LightningCSS native build skipped (will fall back to WASM)'",
     "validate": "npm run type-check && npm run lint && npm run test:ci",
     "deploy:verify": "npm run validate && npm run build",
     "health:check": "curl -f -s -o /dev/null https://jdoner02.github.io/ewu-cyber-games-portal/ && echo 'Site is healthy' || echo 'Site health check failed'",
@@ -78,6 +80,9 @@
     "react-hot-toast": "^2.5.2",
     "sonner": "^2.0.6",
     "zustand": "^5.0.6"
+  },
+  "optionalDependencies": {
+    "lightningcss-linux-x64-gnu": "^1.23.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
