@@ -14,17 +14,74 @@ const SWOOP_RESPONSES = {
   encouragement: [
     "You're doing great! Every security expert started where you are now. Keep it up! 🌟",
     "Nice work! Remember, cybersecurity is all about thinking like both a defender AND an attacker.",
-    "Awesome progress! You're building skills that will protect the digital world. How cool is that? 🛡️"
+    "Awesome progress! You're building skills that will protect the digital world. How cool is that? 🛡️",
+    "Fantastic! The cybersecurity community needs more heroes like you! 🦸‍♀️"
   ],
-  hints: [
-    "💡 Pro tip: Strong passwords are like good locks - they keep the bad guys out!",
-    "🔍 Remember: Hackers often try the obvious passwords first. Be creative!",
-    "⚡ Fun fact: Adding just one more character to your password makes it exponentially harder to crack!"
-  ],
-  cybersecurity_facts: [
-    "🎯 Did you know? 95% of successful cyber attacks are due to human error. That's why education matters!",
-    "🔐 Cool fact: The first computer password was created in 1961 at MIT. We've come a long way!",
-    "🌐 Amazing stat: There are over 2,200 cyber attacks every day. Good thing we have heroes like you learning to stop them!"
+  gameSpecificHelp: {
+    'phishing-detective': [
+      "�️ Phishing Detective tips: Look for urgency tactics, spelling errors, and suspicious sender addresses!",
+      "🔍 Pro detective move: Hover over links to see where they REALLY lead before clicking!",
+      "📧 Remember: Legitimate companies never ask for passwords via email!"
+    ],
+    'network-defense': [
+      "🏰 Network Defense strategy: Layer your defenses! Different attacks need different countermeasures.",
+      "⚡ Tower Defense tip: Firewalls are your first line of defense, but don't forget about intrusion detection!",
+      "�️ Smart defenders know: Monitor your network traffic patterns to spot anomalies early!"
+    ],
+    'encryption-escape': [
+      "🔐 Encryption insight: Strong ciphers use mathematical complexity that even computers can't easily break!",
+      "🔑 Cipher tip: The key is often more important than the algorithm itself - protect it!",
+      "🧮 Fun fact: Modern encryption would take longer to crack than the age of the universe!"
+    ],
+    'password-fortress': [
+      "🏰 Password power: Length beats complexity! A long passphrase is stronger than a short complex password.",
+      "🎯 Security tip: Use unique passwords for every account - password managers make this easy!",
+      "⚡ Pro move: Enable two-factor authentication whenever possible for extra protection!"
+    ]
+  },
+  cybersecurityEducation: {
+    concepts: [
+      "🎯 The CIA Triad: Confidentiality, Integrity, and Availability - the foundation of all cybersecurity!",
+      "🔍 Defense in Depth: Like an onion, security has layers. Multiple defenses protect better than one!",
+      "🧠 Human Factor: People are often the weakest link in security. Education is the best defense!",
+      "⚡ Zero Trust: Never trust, always verify. Even internal network traffic should be authenticated!"
+    ],
+    threats: [
+      "🦠 Malware comes in many forms: viruses, worms, trojans, ransomware, and spyware. Each has different goals!",
+      "🎭 Social Engineering exploits human psychology, not technical vulnerabilities. Stay skeptical!",
+      "🌐 DDoS attacks overwhelm systems with traffic. It's like blocking a highway with too many cars!",
+      "🔑 Password attacks use brute force, dictionaries, or stolen data. Strong, unique passwords defend against all!"
+    ],
+    careers: [
+      "� Cybersecurity careers: Ethical hacker, Security analyst, Incident responder, Forensics investigator!",
+      "💼 Skills needed: Technical knowledge + critical thinking + communication + continuous learning!",
+      "🌟 The field is growing fast - cybersecurity jobs are projected to grow 35% by 2031!",
+      "🎓 Many paths to success: College degrees, certifications, bootcamps, or self-taught learning!"
+    ]
+  },
+  progressAdaptive: {
+    beginner: [
+      "🌱 You're just starting your cybersecurity journey - every expert was once a beginner!",
+      "📚 Focus on fundamentals first: passwords, phishing, and basic network security concepts.",
+      "� Games are a great way to learn! Try starting with Password Fortress for the basics."
+    ],
+    intermediate: [
+      "🚀 Great progress! You're building real cybersecurity skills that professionals use every day.",
+      "🔍 Ready for a challenge? Try the Phishing Detective game to sharpen your threat detection skills!",
+      "🏰 Your foundation is strong - time to explore advanced concepts like encryption and network defense!"
+    ],
+    advanced: [
+      "🎖️ Impressive skills! You're thinking like a true cybersecurity professional now.",
+      "🔬 Consider diving deep into our professional security tools - they're used by real SOC teams!",
+      "🌟 You could mentor other students - teaching others reinforces your own learning!"
+    ]
+  },
+  conversationStarters: [
+    "What cybersecurity topic interests you most? I can explain anything from passwords to quantum encryption!",
+    "Want to hear about a real-world cyber attack and how it was stopped?",
+    "Curious about what it's like to work in cybersecurity? I can share career insights!",
+    "Need help with any of our games? I've got strategies for all of them!",
+    "Want to test your knowledge? I can quiz you on any cybersecurity concept!"
   ]
 }
 
@@ -43,19 +100,44 @@ export default function AICompanion() {
     const userMessage = { type: 'user', message: message.trim(), timestamp: new Date() }
     setChatHistory(prev => [...prev, userMessage])
 
-    // Generate bot response
+    // Generate intelligent bot response
     let botResponse = ''
     const lowerMessage = message.toLowerCase()
 
-    if (lowerMessage.includes('help') || lowerMessage.includes('hint')) {
-      botResponse = SWOOP_RESPONSES.hints[Math.floor(Math.random() * SWOOP_RESPONSES.hints.length)]
-    } else if (lowerMessage.includes('password') || lowerMessage.includes('security')) {
-      botResponse = SWOOP_RESPONSES.cybersecurity_facts[Math.floor(Math.random() * SWOOP_RESPONSES.cybersecurity_facts.length)]
-    } else if (lowerMessage.includes('thank') || lowerMessage.includes('good') || lowerMessage.includes('awesome')) {
+    // Game-specific help
+    if (lowerMessage.includes('phishing') || lowerMessage.includes('detective')) {
+      botResponse = SWOOP_RESPONSES.gameSpecificHelp['phishing-detective'][Math.floor(Math.random() * SWOOP_RESPONSES.gameSpecificHelp['phishing-detective'].length)]
+    } else if (lowerMessage.includes('network') || lowerMessage.includes('defense') || lowerMessage.includes('tower')) {
+      botResponse = SWOOP_RESPONSES.gameSpecificHelp['network-defense'][Math.floor(Math.random() * SWOOP_RESPONSES.gameSpecificHelp['network-defense'].length)]
+    } else if (lowerMessage.includes('encryption') || lowerMessage.includes('cipher') || lowerMessage.includes('escape')) {
+      botResponse = SWOOP_RESPONSES.gameSpecificHelp['encryption-escape'][Math.floor(Math.random() * SWOOP_RESPONSES.gameSpecificHelp['encryption-escape'].length)]
+    } else if (lowerMessage.includes('password') || lowerMessage.includes('fortress')) {
+      botResponse = SWOOP_RESPONSES.gameSpecificHelp['password-fortress'][Math.floor(Math.random() * SWOOP_RESPONSES.gameSpecificHelp['password-fortress'].length)]
+    }
+    // Educational content
+    else if (lowerMessage.includes('concept') || lowerMessage.includes('fundamental') || lowerMessage.includes('basic')) {
+      botResponse = SWOOP_RESPONSES.cybersecurityEducation.concepts[Math.floor(Math.random() * SWOOP_RESPONSES.cybersecurityEducation.concepts.length)]
+    } else if (lowerMessage.includes('threat') || lowerMessage.includes('attack') || lowerMessage.includes('malware')) {
+      botResponse = SWOOP_RESPONSES.cybersecurityEducation.threats[Math.floor(Math.random() * SWOOP_RESPONSES.cybersecurityEducation.threats.length)]
+    } else if (lowerMessage.includes('career') || lowerMessage.includes('job') || lowerMessage.includes('work')) {
+      botResponse = SWOOP_RESPONSES.cybersecurityEducation.careers[Math.floor(Math.random() * SWOOP_RESPONSES.cybersecurityEducation.careers.length)]
+    }
+    // Encouragement and help
+    else if (lowerMessage.includes('help') || lowerMessage.includes('hint') || lowerMessage.includes('stuck')) {
+      // Provide adaptive help based on user progress
+      const playerLevel = aiCompanion.messagesCount
+      if (playerLevel < 5) {
+        botResponse = SWOOP_RESPONSES.progressAdaptive.beginner[Math.floor(Math.random() * SWOOP_RESPONSES.progressAdaptive.beginner.length)]
+      } else if (playerLevel < 15) {
+        botResponse = SWOOP_RESPONSES.progressAdaptive.intermediate[Math.floor(Math.random() * SWOOP_RESPONSES.progressAdaptive.intermediate.length)]
+      } else {
+        botResponse = SWOOP_RESPONSES.progressAdaptive.advanced[Math.floor(Math.random() * SWOOP_RESPONSES.progressAdaptive.advanced.length)]
+      }
+    } else if (lowerMessage.includes('thank') || lowerMessage.includes('good') || lowerMessage.includes('awesome') || lowerMessage.includes('great')) {
       botResponse = SWOOP_RESPONSES.encouragement[Math.floor(Math.random() * SWOOP_RESPONSES.encouragement.length)]
     } else {
-      // Default educational response
-      botResponse = "That's a great question! Cybersecurity is all about protecting data and systems. Want to learn more about a specific topic like passwords, phishing, or network security? 🤔"
+      // Default conversation starter
+      botResponse = SWOOP_RESPONSES.conversationStarters[Math.floor(Math.random() * SWOOP_RESPONSES.conversationStarters.length)]
     }
 
     setTimeout(() => {

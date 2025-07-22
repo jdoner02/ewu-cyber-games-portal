@@ -17,8 +17,27 @@ import { GameStatePersistenceManager, StorageMechanism } from '../utils/persiste
  * @since 2025-01-15
  */
 
-// Initialize our advanced persistence manager
-const persistenceManager = new GameStatePersistenceManager()
+// Lazy initialization of persistence manager to avoid SSR issues
+let persistenceManager: GameStatePersistenceManager | null = null
+
+function getPersistenceManager(): GameStatePersistenceManager {
+  if (typeof window === 'undefined') {
+    // Return a mock during SSR
+    return {
+      saveGameState: async () => ({ success: false, mechanisms: [], warnings: ['SSR mode'], performance: { writeTime: 0, compressionAchieved: 0 } }),
+      loadGameState: async () => null,
+      clearGameState: async () => ({ success: false, clearedMechanisms: [], warnings: ['SSR mode'] }),
+      healthCheck: async () => ({ available: false, secure: false, compliant: false, performance: { readLatency: 0, writeLatency: 0, storageSize: 0, errorRate: 0 }, storage: {} as any }),
+      getPerformanceMetrics: () => ({ storageOperations: 0, averageWriteTime: 0, averageReadTime: 0, cacheHitRate: 0, failoverCount: 0, compressionRatio: 1, lastOptimization: '' })
+    } as any
+  }
+  
+  if (!persistenceManager) {
+    persistenceManager = new GameStatePersistenceManager()
+  }
+  
+  return persistenceManager
+}
 
 // Types for our gaming state
 interface PlayerStats {
@@ -67,6 +86,31 @@ interface AICompanionState {
   helpTopics: string[]
 }
 
+// Game-specific state structures
+interface PasswordFortressState {
+  password: string
+  securityPoints: number
+  clickCount: number
+  fortressLevel: number
+  upgrades: { [key: string]: { owned: number; cost: number } }
+  achievements: { [key: string]: boolean }
+  lastSaved: string
+}
+
+interface PokemonMMOState {
+  totalExp: number
+  playerLevel: number
+  currentPokemon: string
+  badgesEarned: number
+  lastSaved: string
+}
+
+interface GameSpecificStates {
+  passwordFortress?: PasswordFortressState
+  pokemonMMO?: PokemonMMOState
+  cyberKnowledgeBrain?: any
+}
+
 interface GameState {
   // Player progression
   playerStats: PlayerStats
@@ -83,6 +127,9 @@ interface GameState {
   showStats: boolean
   soundEnabled: boolean
   
+  // 🆕 GAME-SPECIFIC STATE MANAGEMENT
+  gameSpecificStates: GameSpecificStates
+  
   // 🆕 ENHANCED PERSISTENCE FEATURES
   persistenceHealth: {
     available: boolean
@@ -93,6 +140,8 @@ interface GameState {
   
   // Actions
   addXP: (amount: number) => void
+  addExperience: (amount: number) => void  // Alias for addXP
+  getPlayerLevel: () => number
   unlockAchievement: (id: string, title: string, description: string, category?: string) => void
   updateGameProgress: (gameId: string, progress: Partial<GameProgress>) => void
   updateSkillProgress: (skill: keyof SkillProgress, increment: number) => void
@@ -104,6 +153,11 @@ interface GameState {
   setCurrentGame: (gameId: string | null) => void
   toggleSound: () => void
   
+  // 🆕 GAME-SPECIFIC STATE ACTIONS
+  savePasswordFortressState: (state: PasswordFortressState) => void
+  savePokemonMMOState: (state: PokemonMMOState) => void
+  clearGameSpecificState: (gameId: string) => void
+  
   // 🆕 ENHANCED PERSISTENCE ACTIONS
   forceSyncToCookies: () => Promise<boolean>
   clearAllData: () => Promise<boolean>
@@ -111,9 +165,9 @@ interface GameState {
   getPerformanceMetrics: () => any
 }
 
-const useGameStore = create<GameState>()(
+export const useGameStore = create<GameState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       // Initial state
       playerStats: {
         level: 1,
@@ -193,6 +247,9 @@ const useGameStore = create<GameState>()(
       showStats: false,
       soundEnabled: true,
       
+      // 🆕 GAME-SPECIFIC STATE INITIALIZATION
+      gameSpecificStates: {},
+      
       // Actions
       addXP: (amount: number) => {
         set((state) => {
@@ -207,6 +264,16 @@ const useGameStore = create<GameState>()(
             }
           }
         })
+      },
+      
+      // Alias for addXP to maintain compatibility
+      addExperience: (amount: number) => {
+        useGameStore.getState().addXP(amount)
+      },
+      
+      // Get current player level
+      getPlayerLevel: () => {
+        return useGameStore.getState().playerStats.level
       },
       
       unlockAchievement: (id: string, title: string, description: string, category = 'general') => {
@@ -344,6 +411,52 @@ const useGameStore = create<GameState>()(
         set((state) => ({ soundEnabled: !state.soundEnabled }))
       },
       
+      // 🆕 GAME-SPECIFIC STATE ACTIONS
+      
+      /**
+       * 🔑 SAVE PASSWORD FORTRESS STATE
+       * 
+       * Stores password fortress specific game progress
+       */
+      savePasswordFortressState: (state: PasswordFortressState) => {
+        set((currentState) => ({
+          gameSpecificStates: {
+            ...currentState.gameSpecificStates,
+            passwordFortress: state
+          }
+        }))
+      },
+      
+      /**
+       * 🐾 SAVE POKEMON MMO STATE
+       * 
+       * Stores Pokemon MMO specific game progress
+       */
+      savePokemonMMOState: (state: PokemonMMOState) => {
+        set((currentState) => ({
+          gameSpecificStates: {
+            ...currentState.gameSpecificStates,
+            pokemonMMO: state
+          }
+        }))
+      },
+      
+      /**
+       * 🧹 CLEAR GAME-SPECIFIC STATE
+       * 
+       * Removes saved state for a specific game
+       */
+      clearGameSpecificState: (gameId: string) => {
+        set((currentState) => {
+          const newGameSpecificStates = { ...currentState.gameSpecificStates }
+          delete newGameSpecificStates[gameId as keyof GameSpecificStates]
+          
+          return {
+            gameSpecificStates: newGameSpecificStates
+          }
+        })
+      },
+      
       // 🆕 ENHANCED PERSISTENCE ACTIONS
       
       /**
@@ -354,7 +467,7 @@ const useGameStore = create<GameState>()(
       forceSyncToCookies: async () => {
         try {
           const state = useGameStore.getState()
-          const result = await persistenceManager.saveGameState(state)
+          const result = await getPersistenceManager().saveGameState(state)
           
           // Update persistence health based on results
           set({
@@ -380,7 +493,7 @@ const useGameStore = create<GameState>()(
        */
       clearAllData: async () => {
         try {
-          const result = await persistenceManager.clearGameState()
+          const result = await getPersistenceManager().clearGameState()
           
           if (result.success) {
             // Reset to initial state
@@ -427,7 +540,7 @@ const useGameStore = create<GameState>()(
        */
       checkPersistenceHealth: async () => {
         try {
-          const health = await persistenceManager.healthCheck()
+          const health = await getPersistenceManager().healthCheck()
           
           set({
             persistenceHealth: {
@@ -456,7 +569,7 @@ const useGameStore = create<GameState>()(
        * Returns detailed performance metrics for the persistence system
        */
       getPerformanceMetrics: () => {
-        return persistenceManager.getPerformanceMetrics()
+        return getPersistenceManager().getPerformanceMetrics()
       }
     }),
     {
@@ -467,7 +580,8 @@ const useGameStore = create<GameState>()(
         achievements: state.achievements,
         gameProgress: state.gameProgress,
         skillProgress: state.skillProgress,
-        soundEnabled: state.soundEnabled
+        soundEnabled: state.soundEnabled,
+        gameSpecificStates: state.gameSpecificStates
       })
     }
   )

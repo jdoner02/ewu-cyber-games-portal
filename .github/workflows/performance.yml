@@ -1,0 +1,184 @@
+name: Performance & Monitoring
+
+on:
+  push:
+    branches: [ main ]
+  schedule:
+    # Run performance tests daily at 6 AM UTC
+    - cron: '0 6 * * *'
+
+jobs:
+  build-performance:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Build Performance Test
+      run: |
+        echo "⏱️ Testing build performance..."
+        
+        # Time the build process
+        start_time=$(date +%s)
+        npm run build
+        end_time=$(date +%s)
+        
+        build_duration=$((end_time - start_time))
+        echo "🏗️ Build completed in $build_duration seconds"
+        
+        # Check if build time is acceptable (under 5 minutes)
+        if [ $build_duration -gt 300 ]; then
+          echo "⚠️ Build time exceeded 5 minutes: ${build_duration}s"
+        else
+          echo "✅ Build time acceptable: ${build_duration}s"
+        fi
+        
+    - name: Bundle Analysis
+      run: |
+        echo "📦 Analyzing bundle sizes..."
+        
+        # Check total output size
+        total_size=$(du -sb out/ | cut -f1)
+        total_mb=$((total_size / 1024 / 1024))
+        
+        echo "📊 Total build size: ${total_mb}MB"
+        
+        # Check individual route sizes
+        echo "📄 Route sizes:"
+        find out -name "index.html" -exec dirname {} \; | while read dir; do
+          size=$(du -sh "$dir" | cut -f1)
+          route=$(echo "$dir" | sed 's|out||')
+          echo "  $route: $size"
+        done
+        
+        # Alert if total size is too large (over 100MB)
+        if [ $total_mb -gt 100 ]; then
+          echo "⚠️ Build size is large: ${total_mb}MB > 100MB"
+        else
+          echo "✅ Build size acceptable: ${total_mb}MB"
+        fi
+        
+  dependency-audit:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Dependency Analysis
+      run: |
+        echo "📚 Analyzing dependencies..."
+        
+        # Count dependencies
+        echo "📊 Dependency counts:"
+        npm list --depth=0 --json | jq '.dependencies | length' | xargs echo "Production dependencies:"
+        npm list --depth=0 --dev --json | jq '.devDependencies | length' | xargs echo "Development dependencies:"
+        
+        # Check for outdated packages
+        echo "📅 Checking for outdated packages..."
+        npm outdated || echo "Some packages may be outdated"
+        
+        # Security audit
+        echo "🔒 Security audit..."
+        npm audit --audit-level=low || echo "Security audit completed with issues"
+        
+  site-health-check:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Site Availability Test
+      run: |
+        echo "🌐 Testing site availability..."
+        
+        SITE_URL="https://jdoner02.github.io/ewu-cyber-games-portal/"
+        
+        # Test main site
+        if curl -f -s -o /dev/null "$SITE_URL"; then
+          echo "✅ Main site is accessible"
+        else
+          echo "❌ Main site is not accessible"
+          exit 1
+        fi
+        
+        # Test specific game routes
+        GAME_ROUTES=(
+          "games/pokemon-cyber-mmo/"
+          "games/cybersilk/"
+          "games/password-fortress/"
+          "games/phishing-detective/"
+        )
+        
+        for route in "${GAME_ROUTES[@]}"; do
+          if curl -f -s -o /dev/null "${SITE_URL}${route}"; then
+            echo "✅ $route is accessible"
+          else
+            echo "⚠️ $route may not be accessible"
+          fi
+        done
+        
+    - name: Performance Metrics
+      run: |
+        echo "⚡ Gathering performance metrics..."
+        
+        SITE_URL="https://jdoner02.github.io/ewu-cyber-games-portal/"
+        
+        # Measure response time
+        response_time=$(curl -o /dev/null -s -w '%{time_total}\n' "$SITE_URL")
+        echo "📊 Main page response time: ${response_time}s"
+        
+        # Check response headers
+        echo "📋 Response headers:"
+        curl -s -I "$SITE_URL" | grep -E "(content-type|content-length|cache-control)"
+        
+  repository-health:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Repository Metrics
+      run: |
+        echo "📊 Repository health metrics..."
+        
+        # Count files by type
+        echo "📁 File counts:"
+        find . -name "*.ts" | wc -l | xargs echo "TypeScript files:"
+        find . -name "*.tsx" | wc -l | xargs echo "TSX files:"
+        find . -name "*.js" | wc -l | xargs echo "JavaScript files:"
+        find . -name "*.jsx" | wc -l | xargs echo "JSX files:"
+        find . -name "*.css" | wc -l | xargs echo "CSS files:"
+        find . -name "*.md" | wc -l | xargs echo "Markdown files:"
+        
+        # Check git repository size
+        repo_size=$(du -sh .git | cut -f1)
+        echo "📦 Git repository size: $repo_size"
+        
+        # Count recent commits
+        recent_commits=$(git log --since="1 week ago" --oneline | wc -l)
+        echo "📝 Commits in last week: $recent_commits"
+        
+        # Check branch status
+        echo "🌿 Git status:"
+        git status --porcelain | wc -l | xargs echo "Modified files:"
+        git branch -r | wc -l | xargs echo "Remote branches:"
