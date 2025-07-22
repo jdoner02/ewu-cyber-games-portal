@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { GameStatePersistenceManager, StorageMechanism } from '../utils/persistence/GameStatePersistence'
+import type { GameProgress as GameProgressType } from '../types/game-types'
 
 /**
  * 🎮 ENHANCED GAME STORE WITH SECURE PERSISTENCE
