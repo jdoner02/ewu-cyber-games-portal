@@ -191,7 +191,8 @@ export default function CyberClickerGame() {
   const STORAGE_KEY = 'CyberClickerSave'
 
   // --- ENTERPRISE PERSISTENCE INTEGRATION ---
-  const { persistenceManager, isLoading: persistenceLoading, error: persistenceError } = useEnterprisePersistence()
+  const enterprisePersistenceResult = useEnterprisePersistence() || {}
+  const { persistenceManager = null, isLoading: persistenceLoading = false, error: persistenceError = null } = enterprisePersistenceResult
 
   // --- ENHANCED GAME STATE HOOKS ---
   // Core game mechanics

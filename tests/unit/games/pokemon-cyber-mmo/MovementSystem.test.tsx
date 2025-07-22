@@ -125,12 +125,27 @@ describe('🔴 Pokemon Cyber MMO - Movement System Tests (RED PHASE)', () => {
         expect(screen.getByTestId('player-character')).toBeInTheDocument();
       });
 
-      // Get initial position (should be at grid position 10,7 = 320px left, 224px top)
+      // First move UP to avoid obstacle at (10,8) below starting position (10,7)
+      fireEvent.keyDown(document, { key: 'w' });
+      
+      // Wait for movement to be processed (interval runs every 150ms)
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      fireEvent.keyUp(document, { key: 'w' });
+
+      // Get position after moving up
       let playerCharacter = screen.getByTestId('player-character');
       const initialTop = parseFloat(playerCharacter.style.top);
       
-      // Move down (increase Y by 1 tile = 32px)
+      // Now test downward movement from the safe position
       fireEvent.keyDown(document, { key: 's' });
+      
+      // Wait for movement to be processed (interval runs every 150ms)
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      fireEvent.keyUp(document, { key: 's' });
+
+      // Check that position changed downward
       await waitFor(() => {
         playerCharacter = screen.getByTestId('player-character');
         const newTop = parseFloat(playerCharacter.style.top);
@@ -265,12 +280,27 @@ describe('🔴 Pokemon Cyber MMO - Movement System Tests (RED PHASE)', () => {
         expect(screen.getByTestId('player-character')).toBeInTheDocument();
       });
 
-      // Get initial position
+      // First move UP to avoid obstacle at (10,8) below starting position (10,7)
+      fireEvent.keyDown(document, { key: 'ArrowUp' });
+      
+      // Wait for movement to be processed (interval runs every 150ms)
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      fireEvent.keyUp(document, { key: 'ArrowUp' });
+
+      // Get position after moving up
       let playerCharacter = screen.getByTestId('player-character');
       const initialTop = parseFloat(playerCharacter.style.top);
       
-      // Move down using arrow key
+      // Now test downward movement using arrow key from the safe position
       fireEvent.keyDown(document, { key: 'ArrowDown' });
+      
+      // Wait for movement to be processed (interval runs every 150ms)
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      fireEvent.keyUp(document, { key: 'ArrowDown' });
+
+      // Check that position changed downward
       await waitFor(() => {
         playerCharacter = screen.getByTestId('player-character');
         const newTop = parseFloat(playerCharacter.style.top);
