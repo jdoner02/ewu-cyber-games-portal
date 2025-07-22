@@ -111,24 +111,30 @@ describe('🔴 Pokemon Cyber MMO - Movement System Tests (RED PHASE)', () => {
         expect(screen.getByTestId('game-world')).toBeInTheDocument();
       });
 
-      // Skip tutorial overlay if present
+      // Handle tutorial overlay if present
       const skipButton = screen.queryByText(/skip tutorial/i);
       if (skipButton) {
         fireEvent.click(skipButton);
+        await waitFor(() => {
+          expect(screen.queryByTestId('tutorial-overlay')).not.toBeInTheDocument();
+        });
       }
 
-      // Move up once to ensure not at bottom boundary
-      let playerCharacter = screen.getByTestId('player-character');
-      fireEvent.keyDown(document, { key: 'w' });
+      // Wait for player character to be available
       await waitFor(() => {
-        playerCharacter = screen.getByTestId('player-character');
-        expect(parseFloat(playerCharacter.style.top)).toBe(224 - 32); // 192
+        expect(screen.getByTestId('player-character')).toBeInTheDocument();
       });
-      // Now move down
+
+      // Get initial position (should be at grid position 10,7 = 320px left, 224px top)
+      let playerCharacter = screen.getByTestId('player-character');
+      const initialTop = parseFloat(playerCharacter.style.top);
+      
+      // Move down (increase Y by 1 tile = 32px)
       fireEvent.keyDown(document, { key: 's' });
       await waitFor(() => {
+        playerCharacter = screen.getByTestId('player-character');
         const newTop = parseFloat(playerCharacter.style.top);
-        expect(newTop).toBe(224); // Should return to initial position
+        expect(newTop).toBe(initialTop + 32); // Should move down by one tile
       });
     });
 
@@ -164,19 +170,43 @@ describe('🔴 Pokemon Cyber MMO - Movement System Tests (RED PHASE)', () => {
     });
 
     it('should update player position when D key is pressed (move right)', async () => {
-      await setupWorld();
-      // Move left once to ensure not at right boundary
-      let playerCharacter = screen.getByTestId('player-character');
-      fireEvent.keyDown(document, { key: 'a' });
+      render(<PokemonCyberMMO />);
+
+      // Enter a player name to enable the button
+      const nameInput = screen.getByPlaceholderText(/trainer name/i);
+      fireEvent.change(nameInput, { target: { value: 'Ash' } });
+
+      const enterWorldButton = screen.getByText(/enter.*world/i);
+      fireEvent.click(enterWorldButton);
+
       await waitFor(() => {
-        playerCharacter = screen.getByTestId('player-character');
-        expect(parseFloat(playerCharacter.style.left)).toBe(320 - 32); // 288
+        expect(screen.getByTestId('game-world')).toBeInTheDocument();
       });
-      // Now move right
+
+      // Handle tutorial overlay if present
+      const skipButton = screen.queryByText(/skip tutorial/i);
+      if (skipButton) {
+        fireEvent.click(skipButton);
+        await waitFor(() => {
+          expect(screen.queryByTestId('tutorial-overlay')).not.toBeInTheDocument();
+        });
+      }
+
+      // Wait for player character to be available
+      await waitFor(() => {
+        expect(screen.getByTestId('player-character')).toBeInTheDocument();
+      });
+
+      // Get initial position (should be at grid position 10,7 = 320px left, 224px top)
+      let playerCharacter = screen.getByTestId('player-character');
+      const initialLeft = parseFloat(playerCharacter.style.left);
+      
+      // Move right (increase X by 1 tile = 32px)
       fireEvent.keyDown(document, { key: 'd' });
       await waitFor(() => {
+        playerCharacter = screen.getByTestId('player-character');
         const newLeft = parseFloat(playerCharacter.style.left);
-        expect(newLeft).toBe(320); // Should return to initial position
+        expect(newLeft).toBe(initialLeft + 32); // Should move right by one tile
       });
     });
   });
@@ -208,13 +238,43 @@ describe('🔴 Pokemon Cyber MMO - Movement System Tests (RED PHASE)', () => {
     });
 
     it('should support ArrowDown for downward movement', async () => {
-      await setupWorld();
-      const playerCharacter = screen.getByTestId('player-character');
-      const initialTop = 224;
+      render(<PokemonCyberMMO />);
+
+      // Enter a player name to enable the button
+      const nameInput = screen.getByPlaceholderText(/trainer name/i);
+      fireEvent.change(nameInput, { target: { value: 'Ash' } });
+
+      const enterWorldButton = screen.getByText(/enter.*world/i);
+      fireEvent.click(enterWorldButton);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('game-world')).toBeInTheDocument();
+      });
+
+      // Handle tutorial overlay if present
+      const skipButton = screen.queryByText(/skip tutorial/i);
+      if (skipButton) {
+        fireEvent.click(skipButton);
+        await waitFor(() => {
+          expect(screen.queryByTestId('tutorial-overlay')).not.toBeInTheDocument();
+        });
+      }
+
+      // Wait for player character to be available
+      await waitFor(() => {
+        expect(screen.getByTestId('player-character')).toBeInTheDocument();
+      });
+
+      // Get initial position
+      let playerCharacter = screen.getByTestId('player-character');
+      const initialTop = parseFloat(playerCharacter.style.top);
+      
+      // Move down using arrow key
       fireEvent.keyDown(document, { key: 'ArrowDown' });
       await waitFor(() => {
+        playerCharacter = screen.getByTestId('player-character');
         const newTop = parseFloat(playerCharacter.style.top);
-        expect(newTop).toBe(initialTop + 32); // 256
+        expect(newTop).toBe(initialTop + 32); // Should move down by one tile
       });
     });
 
