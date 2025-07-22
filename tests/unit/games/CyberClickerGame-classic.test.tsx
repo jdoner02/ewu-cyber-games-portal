@@ -41,6 +41,83 @@ describe('CyberClickerGame Classic - Cookie Clicker-style Persistence', () => {
   // RED PHASE: Write failing tests first
   // ========================================
   
+  describe('React Rendering Safety', () => {
+    
+    test('should not render objects directly (React error #130)', () => {
+      // This test captures the React error #130 issue where objects are rendered directly
+      localStorageMock.getItem.mockReturnValue(null)
+      
+      // Mock console.error to catch React warnings
+      const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {})
+      
+      const { container } = render(<CyberClickerGame />)
+      
+      // Check that no objects are being rendered as children
+      // React error #130 occurs when trying to render objects like {} or {key: value}
+      expect(consoleError).not.toHaveBeenCalledWith(
+        expect.stringContaining('Objects are not valid as a React child')
+      )
+      
+      // Ensure all displayed values are properly formatted as strings/numbers
+      const scoreElement = screen.getByText(/security points/i).previousElementSibling
+      expect(scoreElement?.textContent).toMatch(/^\d+(\.\d+)?[KMB]?$/) // Should be a formatted number string
+      
+      // Use more specific selector for click power stat (not upgrade descriptions)
+      const statsContainer = screen.getByText(/security points/i).closest('.grid')
+      const clickPowerElement = statsContainer?.querySelector('.text-green-400')
+      expect(clickPowerElement?.textContent).toMatch(/^\d+$/) // Should be a number string
+      
+      const levelElement = screen.getByText(/^level$/i).previousElementSibling
+      expect(levelElement?.textContent).toMatch(/^\d+$/) // Should be a number string
+      
+      consoleError.mockRestore()
+    })
+
+    test('should handle corrupted localStorage data without rendering objects (React error #130)', () => {
+      // RED PHASE: This test reproduces the actual error when revisiting with corrupted persistent state
+      const corruptedSaveData = JSON.stringify({
+        score: { value: 1000 }, // Object instead of number - causes React error #130
+        clickPower: { current: 5 }, // Object instead of number 
+        autoClickRate: { rate: 2.5 }, // Object instead of number
+        level: { current: 3 }, // Object instead of number
+        exp: { points: 150 }, // Object instead of number
+        upgradeStates: {
+          firewall: { 
+            id: 'firewall',
+            owned: { count: 2 } // Nested object causing issues
+          }
+        }
+      })
+      
+      localStorageMock.getItem.mockReturnValue(corruptedSaveData)
+      
+      // Mock console.error to catch React warnings
+      const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {})
+      
+      // This should NOT throw React error #130 even with corrupted data
+      const { container } = render(<CyberClickerGame />)
+      
+      // Verify no React object rendering errors occurred
+      expect(consoleError).not.toHaveBeenCalledWith(
+        expect.stringContaining('Objects are not valid as a React child')
+      )
+      expect(consoleError).not.toHaveBeenCalledWith(
+        expect.stringContaining('Error: Minified React error #130')
+      )
+      
+      // Ensure all displayed values are still valid primitives even with corrupted input
+      const scoreElement = screen.getByText(/security points/i).previousElementSibling
+      expect(scoreElement?.textContent).toMatch(/^\d+(\.\d+)?[KMB]?$/)
+      
+      const statsContainer = screen.getByText(/security points/i).closest('.grid')
+      const clickPowerElement = statsContainer?.querySelector('.text-green-400')
+      expect(clickPowerElement?.textContent).toMatch(/^\d+$/)
+      
+      consoleError.mockRestore()
+    })
+    
+  })
+  
   describe('Game Initialization and Persistence Loading', () => {
     
     test('should load default state when no save data exists', () => {

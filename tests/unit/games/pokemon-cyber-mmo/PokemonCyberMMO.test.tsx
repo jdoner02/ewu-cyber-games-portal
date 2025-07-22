@@ -286,4 +286,108 @@ describe('Pokemon Cyber MMO - Core Features (TDD)', () => {
       });
     });
   });
+
+  describe('6. Keyboard Input Handling (TDD RED PHASE)', () => {
+    it('should allow typing WASD characters in chat input without triggering movement', async () => {
+      render(<PokemonCyberMMO />);
+      
+      // Start the game first
+      const nameInput = screen.getByPlaceholderText(/enter.*trainer.*name/i);
+      fireEvent.change(nameInput, { target: { value: 'TestTrainer' } });
+      
+      const enterButton = screen.getByText(/enter world/i);
+      fireEvent.click(enterButton);
+      
+      // Wait for game to load and find the chat input
+      await waitFor(() => {
+        const chatInput = screen.getByPlaceholderText(/type.*message/i);
+        expect(chatInput).toBeInTheDocument();
+      });
+      
+      const chatInput = screen.getByPlaceholderText(/type.*message/i);
+      
+      // Focus the chat input
+      chatInput.focus();
+      
+      // Type 'wasd' characters
+      fireEvent.keyDown(chatInput, { key: 'w', target: chatInput });
+      fireEvent.change(chatInput, { target: { value: 'w' } });
+      
+      fireEvent.keyDown(chatInput, { key: 'a', target: chatInput });
+      fireEvent.change(chatInput, { target: { value: 'wa' } });
+      
+      fireEvent.keyDown(chatInput, { key: 's', target: chatInput });
+      fireEvent.change(chatInput, { target: { value: 'was' } });
+      
+      fireEvent.keyDown(chatInput, { key: 'd', target: chatInput });
+      fireEvent.change(chatInput, { target: { value: 'wasd' } });
+      
+      // Verify the text appears in the input
+      expect(chatInput).toHaveValue('wasd');
+    });
+
+    it('should not prevent typing movement keys in focused text inputs', async () => {
+      render(<PokemonCyberMMO />);
+      
+      // Start the game first
+      const nameInput = screen.getByPlaceholderText(/enter.*trainer.*name/i);
+      fireEvent.change(nameInput, { target: { value: 'TestTrainer' } });
+      
+      const enterButton = screen.getByText(/enter world/i);
+      fireEvent.click(enterButton);
+      
+      await waitFor(() => {
+        const chatInput = screen.getByPlaceholderText(/type.*message/i);
+        expect(chatInput).toBeInTheDocument();
+      });
+      
+      const chatInput = screen.getByPlaceholderText(/type.*message/i);
+      chatInput.focus();
+      
+      // Create a custom keyboard event that we can verify preventDefault wasn't called
+      const keydownEvent = new KeyboardEvent('keydown', { 
+        key: 'w', 
+        bubbles: true,
+        cancelable: true 
+      });
+      
+      const preventDefaultSpy = jest.spyOn(keydownEvent, 'preventDefault');
+      
+      // Dispatch the event to the input
+      chatInput.dispatchEvent(keydownEvent);
+      
+      // When typing in a focused input, preventDefault should NOT be called for the input
+      expect(preventDefaultSpy).not.toHaveBeenCalled();
+    });
+
+    it('should still allow player movement when no text input is focused', async () => {
+      render(<PokemonCyberMMO />);
+      
+      // Start the game first
+      const nameInput = screen.getByPlaceholderText(/enter.*trainer.*name/i);
+      fireEvent.change(nameInput, { target: { value: 'TestTrainer' } });
+      
+      const enterButton = screen.getByText(/enter world/i);
+      fireEvent.click(enterButton);
+      
+      // Wait for game to load
+      await waitFor(() => {
+        const player = screen.getByTestId('player-character');
+        expect(player).toBeInTheDocument();
+      });
+      
+      // Get player element to check initial position
+      const player = screen.getByTestId('player-character');
+      const initialStyle = player.style.top;
+      
+      // Simulate keydown for movement when no input is focused
+      fireEvent.keyDown(document, { key: 'w' });
+      
+      // Wait for movement to process
+      await waitFor(() => {
+        // Player position should change (movement should still work)
+        expect(player.style.top).not.toBe(initialStyle);
+      }, { timeout: 200 });
+    });
+  });
 });

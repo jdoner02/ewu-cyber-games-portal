@@ -227,7 +227,7 @@ export default function HomePage() {
       lastPlayed: gameProgress.find((g: any) => g.gameId === 'cyber-knowledge-snake')?.timeSpent || null,
       isNew: false,
       isFeatured: true,
-      isFinished: true,
+      isFinished: false,
       gradient: 'from-emerald-500 to-green-600',
       skillsLearned: ['Security+ Fundamentals', 'Concept Exploration', 'Knowledge Mapping', 'Single Player Focus', 'Region Discovery']
     },

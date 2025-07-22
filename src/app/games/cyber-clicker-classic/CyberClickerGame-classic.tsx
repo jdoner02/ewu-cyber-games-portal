@@ -113,25 +113,61 @@ export default function CyberClickerGameClassic() {
       const json = localStorage.getItem('CyberClickerClassicSave')
       if (json) {
         const saved = JSON.parse(json)
+        
+        // Robust data validation to prevent React error #130
+        // Ensure all numeric values are actual numbers, not objects
+        const safeScore = typeof saved.score === 'number' ? saved.score : 
+                         (typeof saved.score === 'object' && saved.score?.value) ? Number(saved.score.value) : 0
+        const safeClickPower = typeof saved.clickPower === 'number' ? saved.clickPower :
+                              (typeof saved.clickPower === 'object' && saved.clickPower?.current) ? Number(saved.clickPower.current) : 1
+        const safeAutoClickRate = typeof saved.autoClickRate === 'number' ? saved.autoClickRate :
+                                  (typeof saved.autoClickRate === 'object' && saved.autoClickRate?.rate) ? Number(saved.autoClickRate.rate) : 0
+        const safeLevel = typeof saved.level === 'number' ? saved.level :
+                         (typeof saved.level === 'object' && saved.level?.current) ? Number(saved.level.current) : 1
+        const safeExp = typeof saved.exp === 'number' ? saved.exp :
+                       (typeof saved.exp === 'object' && saved.exp?.points) ? Number(saved.exp.points) : 0
+        
+        // Validate and sanitize upgradeStates
+        let safeUpgradeStates: Record<string, ClickUpgrade> = upgrades.reduce(
+          (acc, upgrade) => ({ ...acc, [upgrade.id]: { ...upgrade } }),
+          {} as Record<string, ClickUpgrade>
+        )
+        
+        if (saved.upgradeStates && typeof saved.upgradeStates === 'object') {
+          Object.keys(saved.upgradeStates).forEach(key => {
+            const savedUpgrade = saved.upgradeStates[key]
+            if (savedUpgrade && typeof savedUpgrade === 'object') {
+              // Ensure the owned count is a number, not an object
+              const safeOwned = typeof savedUpgrade.owned === 'number' ? savedUpgrade.owned :
+                               (typeof savedUpgrade.owned === 'object' && savedUpgrade.owned?.count) ? Number(savedUpgrade.owned.count) : 0
+              
+              if (safeUpgradeStates[key]) {
+                safeUpgradeStates[key] = {
+                  ...safeUpgradeStates[key],
+                  owned: safeOwned
+                }
+              }
+            }
+          })
+        }
+        
         return {
-          score: saved.score || 0,
-          clickPower: saved.clickPower || 1,
-          autoClickRate: saved.autoClickRate || 0,
-          level: saved.level || 1,
-          exp: saved.exp || 0,
-          upgradeStates:
-            saved.upgradeStates ||
-            upgrades.reduce(
-              (acc, upgrade) => ({ ...acc, [upgrade.id]: { ...upgrade } }),
-              {}
-            ),
-          sessionId: saved.sessionId || `cyber_clicker_${Date.now()}`,
-          lastSave: saved.lastSave || new Date().toISOString()
+          score: safeScore,
+          clickPower: safeClickPower,
+          autoClickRate: safeAutoClickRate,
+          level: safeLevel,
+          exp: safeExp,
+          upgradeStates: safeUpgradeStates,
+          sessionId: typeof saved.sessionId === 'string' ? saved.sessionId : `cyber_clicker_${Date.now()}`,
+          lastSave: typeof saved.lastSave === 'string' ? saved.lastSave : new Date().toISOString()
         }
       }
-    } catch {
-      // ignore parse errors
+    } catch (error) {
+      // Log error for debugging but don't throw - gracefully handle corrupted data
+      console.warn('Failed to parse saved game data, using defaults:', error)
     }
+    
+    // Return safe default state
     return {
       score: 0,
       clickPower: 1,
