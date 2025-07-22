@@ -481,7 +481,7 @@ export default function HomePage() {
                   <p className="text-slate-300 mb-4 text-sm leading-relaxed">
                     Start your cybersecurity journey! Our games teach real skills through interactive adventures.
                   </p>
-                  <Link href="/student-resources/START-HERE" className="inline-block">
+                  <Link href="/learning" className="inline-block">
                     <motion.button
                       className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-6 py-3 rounded-lg font-semibold hover:from-cyan-600 hover:to-blue-600 transition-all duration-300"
                       whileHover={{ scale: 1.05 }}
@@ -535,7 +535,7 @@ export default function HomePage() {
                   <p className="text-slate-300 mb-4 text-sm leading-relaxed">
                     Integrate our games into your curriculum. Access lesson plans and classroom resources.
                   </p>
-                  <Link href="/educator-resources" className="inline-block">
+                  <Link href="/docs/LEARNING-SCIENCE" className="inline-block">
                     <motion.button
                       className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-3 rounded-lg font-semibold hover:from-green-600 hover:to-emerald-600 transition-all duration-300"
                       whileHover={{ scale: 1.05 }}
@@ -628,161 +628,6 @@ export default function HomePage() {
                 <p className="text-slate-300 text-sm">Pokemon Cyber MMO, Snake Knowledge Arena, CyberSilk Creative</p>
               </div>
             </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Learning Pathways - Structured Approach */}
-      <section className="relative z-10 py-8 px-4">
-        <div className="container mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-8"
-          >
-            <h2 className="text-3xl font-bold text-white mb-4">
-              🛤️ Choose Your Learning Path
-            </h2>
-            <p className="text-lg text-slate-300 max-w-2xl mx-auto">
-              Our games are organized into clear learning progressions. Start anywhere or follow our recommended paths for maximum learning impact.
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {/* Beginner Path */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 backdrop-blur-sm rounded-xl border border-green-400/30 p-6"
-            >
-              <div className="text-center mb-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-emerald-500 rounded-xl flex items-center justify-center mx-auto mb-3">
-                  <span className="text-2xl">🌱</span>
-                </div>
-                <h3 className="text-xl font-bold text-white">Beginner Path</h3>
-                <p className="text-green-300 text-sm">Perfect for newcomers</p>
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 text-sm text-slate-300">
-                  <span className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs">1</span>
-                  Password Fortress
-                </div>
-                <div className="flex items-center gap-2 text-sm text-slate-300">
-                  <span className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs">2</span>
-                  Cyber Clicker
-                </div>
-                <div className="flex items-center gap-2 text-sm text-slate-300">
-                  <span className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs">3</span>
-                  CyberSilk Creative
-                </div>
-              </div>
-              <Link href="/student-resources/LEARNING-PATHWAYS" className="block mt-4">
-                <button className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white py-2 rounded-lg font-semibold hover:from-green-600 hover:to-emerald-600 transition-all duration-300">
-                  Start Beginner Path
-                </button>
-              </Link>
-            </motion.div>
-
-            {/* Intermediate Path */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-              className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-sm rounded-xl border border-blue-400/30 p-6"
-            >
-              <div className="text-center mb-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-xl flex items-center justify-center mx-auto mb-3">
-                  <span className="text-2xl">🎯</span>
-                </div>
-                <h3 className="text-xl font-bold text-white">Intermediate Path</h3>
-                <p className="text-blue-300 text-sm">Build on fundamentals</p>
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 text-sm text-slate-300">
-                  <span className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs">1</span>
-                  Phishing Detective
-                </div>
-                <div className="flex items-center gap-2 text-sm text-slate-300">
-                  <span className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs">2</span>
-                  Encryption Escape Room
-                </div>
-                <div className="flex items-center gap-2 text-sm text-slate-300">
-                  <span className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs">3</span>
-                  Snake Knowledge Arena
-                </div>
-              </div>
-              <Link href="/student-resources/LEARNING-PATHWAYS" className="block mt-4">
-                <button className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-2 rounded-lg font-semibold hover:from-blue-600 hover:to-cyan-600 transition-all duration-300">
-                  Start Intermediate Path
-                </button>
-              </Link>
-            </motion.div>
-
-            {/* Advanced Path */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3 }}
-              className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-sm rounded-xl border border-purple-400/30 p-6"
-            >
-              <div className="text-center mb-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-500 rounded-xl flex items-center justify-center mx-auto mb-3">
-                  <span className="text-2xl">🚀</span>
-                </div>
-                <h3 className="text-xl font-bold text-white">Advanced Path</h3>
-                <p className="text-purple-300 text-sm">Master complex concepts</p>
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 text-sm text-slate-300">
-                  <span className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center text-white text-xs">1</span>
-                  Network Defense Tower
-                </div>
-                <div className="flex items-center gap-2 text-sm text-slate-300">
-                  <span className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center text-white text-xs">2</span>
-                  Quantum Mystery Room
-                </div>
-                <div className="flex items-center gap-2 text-sm text-slate-300">
-                  <span className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center text-white text-xs">3</span>
-                  Pokemon Cyber MMO
-                </div>
-              </div>
-              <Link href="/student-resources/LEARNING-PATHWAYS" className="block mt-4">
-                <button className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-2 rounded-lg font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300">
-                  Start Advanced Path
-                </button>
-              </Link>
-            </motion.div>
-          </div>
-
-          {/* Quick Access to Full Learning Guide */}
-          <motion.div
-            className="text-center"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.4 }}
-          >
-            <Link href="/student-resources/LEARNING-PATHWAYS">
-              <motion.div
-                className="inline-block bg-gradient-to-r from-indigo-500/20 to-purple-500/20 backdrop-blur-sm rounded-xl border border-indigo-400/30 p-6 hover:border-indigo-400/60 transition-all duration-300 cursor-pointer"
-                whileHover={{ scale: 1.05 }}
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-r from-indigo-400 to-purple-500 rounded-lg flex items-center justify-center">
-                    <Trophy className="w-6 h-6 text-white" />
-                  </div>
-                  <div className="text-left">
-                    <h3 className="text-xl font-bold text-white mb-1">📚 Complete Learning Guide</h3>
-                    <p className="text-indigo-200">View all pathways, prerequisites, and detailed learning objectives</p>
-                  </div>
-                </div>
-              </motion.div>
-            </Link>
           </motion.div>
         </div>
       </section>
