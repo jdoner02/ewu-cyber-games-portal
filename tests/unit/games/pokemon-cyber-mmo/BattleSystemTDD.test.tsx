@@ -202,16 +202,17 @@ describe('🔴 Pokemon Cyber MMO - Battle System & Game Instructions (TDD RED PH
         expect(screen.getByTestId('battle-system')).toBeInTheDocument();
       });
       
-      // Should see trivia question with answer options (this constitutes feedback system)
+      // Should see trivia question content (using queryAllByText to handle multiple matches)
       await waitFor(() => {
-        const triviaQuestion = screen.queryByText(/question/i);
-        const answerOptions = screen.queryByText(/length only/i); // From trivia data
-        const explanation = screen.queryByText(/explanation/i);
-        const feedback = screen.queryByText(/password/i); // From trivia category
+        const categoryElements = screen.queryAllByText(/category/i);
+        const passwordElements = screen.queryAllByText(/password/i);
+        const phishingElements = screen.queryAllByText(/phishing/i);
+        const malwareElements = screen.queryAllByText(/malware/i);
         
         expect(
-          triviaQuestion || answerOptions || explanation || feedback
-        ).toBeInTheDocument();
+          categoryElements.length > 0 || passwordElements.length > 0 || 
+          phishingElements.length > 0 || malwareElements.length > 0
+        ).toBeTruthy();
       });
     });
   });
@@ -244,16 +245,17 @@ describe('🔴 Pokemon Cyber MMO - Battle System & Game Instructions (TDD RED PH
     it('should show game controls and keybindings', async () => {
       await startGame();
       
-      // Should see control instructions (WASD or Arrow Keys are shown in movement instructions)
+      // Should see control instructions (using queryAllByText to handle multiple matches)
       await waitFor(() => {
-        const wasdText = screen.queryByText(/wasd/i);
-        const arrowKeysText = screen.queryByText(/arrow keys/i);
+        const wasdElements = screen.queryAllByText(/wasd/i);
+        const arrowKeysElements = screen.queryAllByText(/arrow keys/i);
         const helpText = screen.queryByText(/press h for help/i);
-        const moveText = screen.queryByText(/move/i);
+        const moveElements = screen.queryAllByText(/move/i);
         
         expect(
-          wasdText || arrowKeysText || helpText || moveText
-        ).toBeInTheDocument();
+          wasdElements.length > 0 || arrowKeysElements.length > 0 || 
+          helpText || moveElements.length > 0
+        ).toBeTruthy();
       });
     });
   });

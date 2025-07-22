@@ -563,16 +563,16 @@ export default function CyberClickerGame() {
     setAchievementsUnlocked(prev => [...prev, achievement.id])
     showNotification(`🏆 Achievement Unlocked: ${achievement.name}!`)
     
-    // Apply rewards safely
+    // Apply rewards safely with null checks
     if (achievement.reward?.sp) {
-      setSp(prev => prev + achievement.reward.sp!)
-      setTotalSpEarned(prev => prev + achievement.reward.sp!)
+      setSp(prev => prev + (achievement.reward?.sp || 0))
+      setTotalSpEarned(prev => prev + (achievement.reward?.sp || 0))
     }
     if (achievement.reward?.clickMultiplier) {
-      setClickValue(prev => prev * achievement.reward.clickMultiplier!)
+      setClickValue(prev => prev * (achievement.reward?.clickMultiplier || 1))
     }
     if (achievement.reward?.unlockRole) {
-      setUnlockedRoles(prev => new Set([...prev, achievement.reward.unlockRole!]))
+      setUnlockedRoles(prev => new Set([...prev, achievement.reward?.unlockRole!]))
     }
   }, [])
     // show a quick notification (+1) or animation if desired

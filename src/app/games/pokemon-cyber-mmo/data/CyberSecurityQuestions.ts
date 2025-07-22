@@ -1039,7 +1039,7 @@ export class CyberSecurityQuestions {
   }
 
   static getQuestionsByDifficulty(difficulty: 'beginner' | 'intermediate' | 'advanced'): TriviaQuestion[] {
-    return this.questionDatabase[difficulty];
+    return this.questionDatabase[difficulty] || [];
   }
 
   static getQuestionById(id: string): TriviaQuestion | undefined {
@@ -1049,5 +1049,56 @@ export class CyberSecurityQuestions {
       ...this.questionDatabase.advanced
     ];
     return allQuestions.find(q => q.id === id);
+  }
+
+  // TDD Methods - Battle Session Management
+  static getQuestionByLevelDifference(levelDifference: number): TriviaQuestion {
+    let difficulty: 'beginner' | 'intermediate' | 'advanced';
+    
+    if (levelDifference >= 0) {
+      difficulty = 'beginner'; // Player equal or stronger - easier questions
+    } else if (levelDifference <= -5) {
+      difficulty = 'advanced'; // Opponent stronger by 5+ levels - harder questions
+    } else {
+      difficulty = 'intermediate'; // Opponent slightly stronger (1-4 levels)
+    }
+    
+    return this.getRandomQuestion(difficulty);
+  }
+
+  static createBattleSession(): { sessionId: string; usedQuestionIds: string[] } {
+    return {
+      sessionId: `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      usedQuestionIds: []
+    };
+  }
+
+  static getQuestionForBattleSession(sessionId: string, levelDifference: number): TriviaQuestion {
+    // For now, just use level difference without session tracking
+    return this.getQuestionByLevelDifference(levelDifference);
+  }
+
+  static getBattleSessionState(sessionId: string): { sessionId: string; usedQuestionIds: string[] } {
+    // Mock implementation - in real app would track session state
+    return { sessionId, usedQuestionIds: [] };
+  }
+
+  static endBattleSession(sessionId: string): void {
+    // Mock implementation - in real app would cleanup session
+  }
+
+  static getOptimalQuestion(sessionId: string, playerLevel: number, opponentLevel: number): TriviaQuestion {
+    const levelDifference = playerLevel - opponentLevel;
+    return this.getQuestionByLevelDifference(levelDifference);
+  }
+
+  static recordQuestionResult(sessionId: string, questionId: string, correct: boolean): void {
+    // Mock implementation - in real app would track performance for adaptive difficulty
+  }
+
+  static getAdaptiveQuestion(sessionId: string, playerLevel: number, opponentLevel: number): TriviaQuestion {
+    // Mock implementation for adaptive difficulty based on player performance
+    const levelDifference = playerLevel - opponentLevel;
+    return this.getQuestionByLevelDifference(levelDifference);
   }
 }

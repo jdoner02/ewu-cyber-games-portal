@@ -168,7 +168,7 @@ interface GameState {
 
 export const useGameStore = create<GameState>()(
   persist(
-    (set, get) => ({
+    (set, get): GameState => ({
       // Initial state
       playerStats: {
         level: 1,
