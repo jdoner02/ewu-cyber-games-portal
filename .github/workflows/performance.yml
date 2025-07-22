@@ -8,66 +8,122 @@ on:
     - cron: '0 6 * * *'
 
 jobs:
+  # 🚀 OPTIMIZATION: Run performance tests in parallel with matrix strategy
   build-performance:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        test-type: [build-time, bundle-analysis]
     
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
       
-    - name: Setup Node.js
+    - name: Setup Node.js with Performance Optimization
       uses: actions/setup-node@v4
       with:
         node-version: '20'
         cache: 'npm'
+        cache-dependency-path: '**/package-lock.json'
         
-    - name: Install dependencies
-      run: npm ci
+    # 🚀 OPTIMIZATION: Advanced caching for performance tests
+    - name: Cache Performance Test Dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.npm
+          ${{ github.workspace }}/.next/cache
+          ${{ github.workspace }}/node_modules/.cache
+        key: ${{ runner.os }}-perf-${{ matrix.test-type }}-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-perf-${{ matrix.test-type }}-
+          ${{ runner.os }}-perf-
+        
+    - name: Install Dependencies (Performance Optimized)
+      run: |
+        echo "📦 Installing dependencies with performance optimization..."
+        npm ci --prefer-offline --no-audit --no-fund --silent
       
     - name: Build Performance Test
+      if: matrix.test-type == 'build-time'
       run: |
-        echo "⏱️ Testing build performance..."
+        echo "⏱️ Testing build performance with optimization..."
         
-        # Time the build process
+        # 🚀 OPTIMIZATION: Enhanced build performance monitoring
+        export NODE_OPTIONS="--max-old-space-size=4096"
+        export NEXT_TELEMETRY_DISABLED=1
+        
+        # Time the build process with detailed metrics
         start_time=$(date +%s)
+        start_memory=$(ps -o pid,vsz,rss,comm -p $$ | tail -1 | awk '{print $2}')
+        
         npm run build
+        
         end_time=$(date +%s)
+        end_memory=$(ps -o pid,vsz,rss,comm -p $$ | tail -1 | awk '{print $2}')
         
         build_duration=$((end_time - start_time))
-        echo "🏗️ Build completed in $build_duration seconds"
+        memory_usage=$(($end_memory - $start_memory))
         
-        # Check if build time is acceptable (under 5 minutes)
+        echo "🏗️ Build completed in $build_duration seconds"
+        echo "💾 Memory usage delta: $memory_usage KB"
+        
+        # 🚀 OPTIMIZATION: Performance benchmarks with alerts
         if [ $build_duration -gt 300 ]; then
-          echo "⚠️ Build time exceeded 5 minutes: ${build_duration}s"
+          echo "⚠️ BUILD PERFORMANCE ALERT: Build time exceeded 5 minutes: ${build_duration}s"
+          echo "::warning::Build performance degraded - investigate optimization opportunities"
+        elif [ $build_duration -gt 180 ]; then
+          echo "⚠️ Build time approaching threshold: ${build_duration}s (target: <180s)"
         else
-          echo "✅ Build time acceptable: ${build_duration}s"
+          echo "✅ Build time excellent: ${build_duration}s"
         fi
         
-    - name: Bundle Analysis
-      run: |
-        echo "📦 Analyzing bundle sizes..."
+        # Store performance metrics for trending
+        echo "build_duration=$build_duration" >> $GITHUB_OUTPUT
+        echo "memory_usage=$memory_usage" >> $GITHUB_OUTPUT
         
-        # Check total output size
+    - name: Bundle Analysis
+      if: matrix.test-type == 'bundle-analysis'
+      run: |
+        echo "📦 Advanced bundle analysis with optimization insights..."
+        
+        # Ensure build exists
+        npm run build
+        
+        # 🚀 OPTIMIZATION: Comprehensive bundle analysis
         total_size=$(du -sb out/ | cut -f1)
         total_mb=$((total_size / 1024 / 1024))
         
         echo "📊 Total build size: ${total_mb}MB"
         
-        # Check individual route sizes
-        echo "📄 Route sizes:"
+        # Detailed asset analysis
+        echo "📄 Route-by-route analysis:"
         find out -name "index.html" -exec dirname {} \; | while read dir; do
           size=$(du -sh "$dir" | cut -f1)
-          route=$(echo "$dir" | sed 's|out||')
+          route=$(echo "$dir" | sed 's|out||' | sed 's|^$|/|')
           echo "  $route: $size"
         done
         
-        # Alert if total size is too large (over 100MB)
-        if [ $total_mb -gt 100 ]; then
-          echo "⚠️ Build size is large: ${total_mb}MB > 100MB"
-        else
-          echo "✅ Build size acceptable: ${total_mb}MB"
+        # JavaScript bundle analysis
+        echo "📦 JavaScript bundle breakdown:"
+        if [ -d "out/_next/static/chunks" ]; then
+          find out/_next/static/chunks -name "*.js" -exec du -h {} + | sort -hr | head -10
         fi
         
+        # 🚀 OPTIMIZATION: Size optimization alerts
+        if [ $total_mb -gt 100 ]; then
+          echo "⚠️ BUNDLE SIZE ALERT: Build size is large: ${total_mb}MB > 100MB"
+          echo "::warning::Bundle size exceeded threshold - consider code splitting or asset optimization"
+        elif [ $total_mb -gt 50 ]; then
+          echo "⚠️ Bundle size approaching threshold: ${total_mb}MB (target: <50MB)"
+        else
+          echo "✅ Bundle size excellent: ${total_mb}MB"
+        fi
+        
+        # Store bundle metrics
+        echo "bundle_size_mb=$total_mb" >> $GITHUB_OUTPUT
+        
+  # 🚀 OPTIMIZATION: Enhanced dependency audit with intelligent caching
   dependency-audit:
     runs-on: ubuntu-latest
     
@@ -75,31 +131,79 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
       
-    - name: Setup Node.js
+    - name: Setup Node.js with Dependency Optimization
       uses: actions/setup-node@v4
       with:
         node-version: '20'
         cache: 'npm'
+        cache-dependency-path: '**/package-lock.json'
         
-    - name: Install dependencies
-      run: npm ci
-      
-    - name: Dependency Analysis
+    # 🚀 OPTIMIZATION: Cache dependency analysis results
+    - name: Cache Dependency Analysis
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.npm
+          .npm-audit-cache
+        key: ${{ runner.os }}-deps-${{ hashFiles('**/package-lock.json') }}-${{ github.run_number }}
+        restore-keys: |
+          ${{ runner.os }}-deps-${{ hashFiles('**/package-lock.json') }}-
+          ${{ runner.os }}-deps-
+        
+    - name: Install Dependencies (Audit Optimized)
       run: |
-        echo "📚 Analyzing dependencies..."
+        echo "📦 Installing dependencies for audit..."
+        npm ci --prefer-offline --no-fund --silent
+      
+    - name: Enhanced Dependency Analysis
+      run: |
+        echo "📚 Comprehensive dependency analysis..."
         
-        # Count dependencies
-        echo "📊 Dependency counts:"
-        npm list --depth=0 --json | jq '.dependencies | length' | xargs echo "Production dependencies:"
-        npm list --depth=0 --dev --json | jq '.devDependencies | length' | xargs echo "Development dependencies:"
+        # 🚀 OPTIMIZATION: Parallel dependency checks
+        (
+          echo "📊 Dependency counts:"
+          deps_prod=$(npm list --depth=0 --json 2>/dev/null | jq '.dependencies | length' 2>/dev/null || echo "0")
+          deps_dev=$(npm list --depth=0 --dev --json 2>/dev/null | jq '.devDependencies | length' 2>/dev/null || echo "0")
+          echo "Production dependencies: $deps_prod"
+          echo "Development dependencies: $deps_dev"
+          echo "Total dependencies: $((deps_prod + deps_dev))"
+        ) &
         
-        # Check for outdated packages
-        echo "📅 Checking for outdated packages..."
-        npm outdated || echo "Some packages may be outdated"
+        (
+          echo "📅 Checking for outdated packages..."
+          npm outdated --json > outdated.json 2>/dev/null || echo "{}" > outdated.json
+          outdated_count=$(cat outdated.json | jq 'length' 2>/dev/null || echo "0")
+          echo "Outdated packages: $outdated_count"
+          if [ "$outdated_count" -gt "0" ]; then
+            echo "::warning::$outdated_count packages are outdated - consider updating"
+          fi
+        ) &
         
-        # Security audit
-        echo "🔒 Security audit..."
-        npm audit --audit-level=low || echo "Security audit completed with issues"
+        (
+          echo "🔒 Enhanced security audit..."
+          npm audit --audit-level=low --json > audit.json 2>/dev/null || echo "{}" > audit.json
+          
+          # Parse audit results
+          critical=$(cat audit.json | jq '.metadata.vulnerabilities.critical // 0' 2>/dev/null || echo "0")
+          high=$(cat audit.json | jq '.metadata.vulnerabilities.high // 0' 2>/dev/null || echo "0")
+          moderate=$(cat audit.json | jq '.metadata.vulnerabilities.moderate // 0' 2>/dev/null || echo "0")
+          
+          echo "Security vulnerabilities:"
+          echo "  Critical: $critical"
+          echo "  High: $high"
+          echo "  Moderate: $moderate"
+          
+          if [ "$critical" -gt "0" ]; then
+            echo "::error::Critical security vulnerabilities found: $critical"
+          elif [ "$high" -gt "0" ]; then
+            echo "::warning::High security vulnerabilities found: $high"
+          fi
+        ) &
+        
+        # Wait for all background jobs
+        wait
+        
+        echo "✅ Dependency analysis completed"
         
   site-health-check:
     runs-on: ubuntu-latest

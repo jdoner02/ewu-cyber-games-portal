@@ -7,54 +7,148 @@ on:
     branches: [ main, develop ]
 
 jobs:
+  # 🚀 OPTIMIZATION: Parallel code quality analysis
   code-quality:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        analysis-type: [eslint, typescript, complexity, bundle-size]
+      fail-fast: false
     
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
       
-    - name: Setup Node.js
+    - name: Setup Node.js with Quality Optimization
       uses: actions/setup-node@v4
       with:
         node-version: '20'
         cache: 'npm'
+        cache-dependency-path: '**/package-lock.json'
         
-    - name: Install dependencies
-      run: npm ci
+    # 🚀 OPTIMIZATION: Matrix-specific caching
+    - name: Cache Quality Analysis
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.npm
+          ${{ github.workspace }}/.next/cache
+          ${{ github.workspace }}/.eslintcache
+          ${{ github.workspace }}/tsconfig.tsbuildinfo
+        key: ${{ runner.os }}-quality-${{ matrix.analysis-type }}-${{ hashFiles('**/package-lock.json', '**/*.ts', '**/*.tsx', '**/.eslintrc*', '**/tsconfig.json') }}
+        restore-keys: |
+          ${{ runner.os }}-quality-${{ matrix.analysis-type }}-
+          ${{ runner.os }}-quality-
+        
+    - name: Install Dependencies (Quality Optimized)
+      run: |
+        echo "📦 Installing dependencies for ${{ matrix.analysis-type }} analysis..."
+        npm ci --prefer-offline --no-audit --no-fund --silent
       
     - name: ESLint Analysis
+      if: matrix.analysis-type == 'eslint'
       run: |
-        echo "🔍 Running ESLint analysis..."
-        npm run lint -- --format=json --output-file=eslint-report.json || true
-        npm run lint || echo "ESLint found issues"
+        echo "🔍 Running optimized ESLint analysis..."
+        
+        # 🚀 OPTIMIZATION: Use ESLint cache for faster subsequent runs
+        npm run lint -- --cache --cache-location .eslintcache --format=json --output-file=eslint-report.json || true
+        
+        # Parse and report results
+        if [ -f "eslint-report.json" ]; then
+          error_count=$(cat eslint-report.json | jq '[.[] | .errorCount] | add // 0')
+          warning_count=$(cat eslint-report.json | jq '[.[] | .warningCount] | add // 0')
+          
+          echo "📊 ESLint results:"
+          echo "  Errors: $error_count"
+          echo "  Warnings: $warning_count"
+          
+          if [ "$error_count" -gt "0" ]; then
+            echo "::error::ESLint found $error_count errors"
+          fi
+          if [ "$warning_count" -gt "50" ]; then
+            echo "::warning::ESLint found many warnings: $warning_count"
+          fi
+        fi
+        
+        # Run with console output for readability
+        npm run lint || echo "ESLint found issues (reported above)"
         
     - name: TypeScript Compilation Check
+      if: matrix.analysis-type == 'typescript'
       run: |
-        echo "🔍 Checking TypeScript compilation..."
-        npm run type-check || echo "TypeScript compilation issues found"
+        echo "🔍 Running optimized TypeScript compilation check..."
         
-    - name: Security Vulnerability Assessment
-      run: |
-        echo "🔒 Running security assessment..."
-        npm audit --audit-level=moderate || echo "Security vulnerabilities detected"
+        # 🚀 OPTIMIZATION: Use incremental compilation
+        npm run type-check -- --incremental || echo "TypeScript compilation issues found"
+        
+        echo "✅ TypeScript analysis completed"
         
     - name: Code Complexity Analysis
+      if: matrix.analysis-type == 'complexity'
       run: |
-        echo "📊 Analyzing code complexity..."
-        # Add complexity analysis if tools are available
-        find src -name "*.ts" -o -name "*.tsx" | wc -l | xargs echo "TypeScript files:"
-        find src -name "*.js" -o -name "*.jsx" | wc -l | xargs echo "JavaScript files:"
+        echo "� Advanced code complexity analysis..."
+        
+        # File count analysis
+        ts_files=$(find src -name "*.ts" -o -name "*.tsx" | wc -l)
+        js_files=$(find src -name "*.js" -o -name "*.jsx" | wc -l)
+        total_files=$((ts_files + js_files))
+        
+        echo "📁 Source file analysis:"
+        echo "  TypeScript files: $ts_files"
+        echo "  JavaScript files: $js_files"
+        echo "  Total source files: $total_files"
+        
+        # 🚀 OPTIMIZATION: Parallel complexity analysis
+        (
+          echo "📏 Lines of code analysis:"
+          if command -v wc &> /dev/null; then
+            src_lines=$(find src -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" | xargs wc -l 2>/dev/null | tail -1 | awk '{print $1}' || echo "0")
+            echo "  Total lines of code: $src_lines"
+            
+            if [ "$src_lines" -gt "10000" ]; then
+              echo "::warning::Large codebase detected: $src_lines lines - consider modularization"
+            fi
+          fi
+        ) &
+        
+        (
+          echo "📦 Component analysis:"
+          component_count=$(find src -name "*.tsx" | grep -E "(Component|component)" | wc -l || echo "0")
+          echo "  React components: $component_count"
+        ) &
+        
+        wait
+        echo "✅ Complexity analysis completed"
         
     - name: Bundle Size Analysis
+      if: matrix.analysis-type == 'bundle-size'
       run: |
-        echo "📦 Analyzing bundle size..."
+        echo "📦 Advanced bundle size analysis..."
+        
+        # 🚀 OPTIMIZATION: Quick build for size analysis
+        export NODE_ENV=production
+        export NEXT_TELEMETRY_DISABLED=1
+        
         npm run build
+        
+        echo "📊 Bundle size breakdown:"
         echo "Build output size:"
         du -sh out/
-        echo "Static assets breakdown:"
-        find out/_next/static -name "*.js" -exec du -h {} + | sort -hr | head -10
         
+        echo "📄 Static assets analysis:"
+        if [ -d "out/_next/static" ]; then
+          find out/_next/static -name "*.js" -exec du -h {} + | sort -hr | head -10
+          
+          # Check for large bundles
+          large_bundles=$(find out/_next/static -name "*.js" -size +1M | wc -l)
+          if [ "$large_bundles" -gt "0" ]; then
+            echo "::warning::Found $large_bundles JavaScript bundles > 1MB - consider code splitting"
+          fi
+        fi
+        
+        echo "✅ Bundle analysis completed"
+        
+  # 🚀 OPTIMIZATION: Enhanced security scanning with intelligent caching
   security-scan:
     runs-on: ubuntu-latest
     
@@ -62,33 +156,87 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
       
-    - name: Setup Node.js
+    - name: Setup Node.js for Security Analysis
       uses: actions/setup-node@v4
       with:
         node-version: '20'
         cache: 'npm'
+        cache-dependency-path: '**/package-lock.json'
         
-    - name: Install dependencies
-      run: npm ci
+    # 🚀 OPTIMIZATION: Cache security scan results
+    - name: Cache Security Analysis
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.npm
+          .security-cache
+        key: ${{ runner.os }}-security-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('src/**/*.ts', 'src/**/*.tsx', 'src/**/*.js', 'src/**/*.jsx') }}
+        restore-keys: |
+          ${{ runner.os }}-security-${{ hashFiles('**/package-lock.json') }}-
+          ${{ runner.os }}-security-
+        
+    - name: Install Dependencies (Security Focused)
+      run: |
+        echo "📦 Installing dependencies for security analysis..."
+        npm ci --prefer-offline --audit=false --fund=false --silent
       
-    - name: Dependency Security Scan
+    - name: Enhanced Dependency Security Scan
       run: |
-        echo "🔍 Scanning dependencies for security vulnerabilities..."
-        npm audit --audit-level=high --json > audit-report.json || true
-        npm audit --audit-level=high || echo "High severity vulnerabilities found"
+        echo "🔍 Comprehensive dependency security scanning..."
         
-    - name: Source Code Security Analysis
-      run: |
-        echo "🔍 Analyzing source code for security patterns..."
-        # Check for common security anti-patterns
-        echo "Checking for console.log statements in production code:"
-        grep -r "console\.log" src/ || echo "No console.log found"
+        # 🚀 OPTIMIZATION: Parallel security checks
+        (
+          echo "🔒 NPM audit (high severity)..."
+          npm audit --audit-level=high --json > audit-high.json 2>/dev/null || echo "{}" > audit-high.json
+          high_vulns=$(cat audit-high.json | jq '.metadata.vulnerabilities.high // 0' 2>/dev/null || echo "0")
+          critical_vulns=$(cat audit-high.json | jq '.metadata.vulnerabilities.critical // 0' 2>/dev/null || echo "0")
+          
+          echo "High severity vulnerabilities: $high_vulns"
+          echo "Critical vulnerabilities: $critical_vulns"
+          
+          if [ "$critical_vulns" -gt "0" ]; then
+            echo "::error::Critical security vulnerabilities found: $critical_vulns"
+          elif [ "$high_vulns" -gt "0" ]; then
+            echo "::warning::High security vulnerabilities found: $high_vulns"
+          else
+            echo "✅ No high/critical vulnerabilities found"
+          fi
+        ) &
         
-        echo "Checking for hardcoded secrets patterns:"
-        grep -r -i "password\|secret\|key\|token" src/ --include="*.ts" --include="*.tsx" | grep -v "// " || echo "No obvious hardcoded secrets"
+        (
+          echo "🔍 Source code security patterns..."
+          
+          # Check for console.log in production
+          console_logs=$(grep -r "console\.log" src/ 2>/dev/null | wc -l || echo "0")
+          echo "Console.log statements: $console_logs"
+          if [ "$console_logs" -gt "0" ]; then
+            echo "::warning::Found $console_logs console.log statements - remove for production"
+          fi
+          
+          # Check for hardcoded secrets patterns
+          secret_patterns=$(grep -r -i "password\|secret\|key\|token" src/ --include="*.ts" --include="*.tsx" 2>/dev/null | grep -v "// " | grep -v "type\|interface\|const.*=.*''" | wc -l || echo "0")
+          echo "Potential secret patterns: $secret_patterns"
+          if [ "$secret_patterns" -gt "0" ]; then
+            echo "::warning::Found $secret_patterns potential hardcoded secrets - review carefully"
+          fi
+          
+          # Check for eval() usage
+          eval_usage=$(grep -r "eval(" src/ 2>/dev/null | wc -l || echo "0")
+          echo "Eval() usage: $eval_usage"
+          if [ "$eval_usage" -gt "0" ]; then
+            echo "::error::Found eval() usage - security risk"
+          fi
+          
+          # Check for dangerous innerHTML usage
+          innerhtml_usage=$(grep -r "innerHTML\|dangerouslySetInnerHTML" src/ 2>/dev/null | wc -l || echo "0")
+          echo "Potentially dangerous HTML injection points: $innerhtml_usage"
+          if [ "$innerhtml_usage" -gt "0" ]; then
+            echo "::warning::Found $innerhtml_usage potentially dangerous HTML injection points"
+          fi
+        ) &
         
-        echo "Checking for eval() usage:"
-        grep -r "eval(" src/ || echo "No eval() usage found"
+        wait
+        echo "✅ Security analysis completed"
         
   educational-compliance:
     runs-on: ubuntu-latest
