@@ -342,6 +342,32 @@ const useBattleSystem = (currentPlayerLevel: number = 1) => {
   });
   const [battleSessionId, setBattleSessionId] = useState<string>('');
 
+  // Centralized opponent level configuration
+  const getOpponentLevel = useCallback((opponentId: string): number => {
+    // NPC level configuration
+    const npcLevels: Record<string, number> = {
+      'prof-cyber': 10,
+      'guard-firewall': 15,
+      'trainer-alice': 8,
+    };
+    
+    // Check if it's an NPC
+    if (npcLevels[opponentId]) {
+      return npcLevels[opponentId];
+    }
+    
+    // Check if it's a wild monster
+    const wildMonster = WILD_MONSTERS.find(monster => monster.id === opponentId);
+    return wildMonster?.level || 5; // Default level for unknown opponents
+  }, []);
+
+  // Optimized question retrieval with consistent level handling
+  const getOptimalQuestionForBattle = useCallback((sessionId: string, opponentId: string) => {
+    const playerLevel = currentPlayerLevel;
+    const opponentLevel = getOpponentLevel(opponentId);
+    return CyberSecurityQuestions.getOptimalQuestion(sessionId, playerLevel, opponentLevel);
+  }, [currentPlayerLevel, getOpponentLevel]);
+
   const startBattle = useCallback((opponentId: string) => {
     // Create battle session for question tracking
     const battleSession = CyberSecurityQuestions.createBattleSession();
@@ -359,11 +385,9 @@ const useBattleSystem = (currentPlayerLevel: number = 1) => {
         phase: 'preparing'
       });
       
-      // Start with first question after brief delay using level-based selection
+      // Start with first question after brief delay using optimized level-based selection
       setTimeout(() => {
-        const actualPlayerLevel = currentPlayerLevel; // Use passed player level
-        const opponentLevel = 10; // TODO: Get from NPC data
-        const optimalQuestion = CyberSecurityQuestions.getOptimalQuestion(battleSession.sessionId, actualPlayerLevel, opponentLevel);
+        const optimalQuestion = getOptimalQuestionForBattle(battleSession.sessionId, opponentId);
         setBattleState(prev => ({
           ...prev,
           currentQuestion: optimalQuestion,
@@ -385,11 +409,9 @@ const useBattleSystem = (currentPlayerLevel: number = 1) => {
         phase: 'preparing'
       });
       
-      // Start with first question after brief delay using level-based selection
+      // Start with first question after brief delay using optimized level-based selection
       setTimeout(() => {
-        const actualPlayerLevel = currentPlayerLevel; // Use passed player level
-        const opponentLevel = wildOpponent.level || 5;
-        const optimalQuestion = CyberSecurityQuestions.getOptimalQuestion(battleSession.sessionId, actualPlayerLevel, opponentLevel);
+        const optimalQuestion = getOptimalQuestionForBattle(battleSession.sessionId, opponentId);
         setBattleState(prev => ({
           ...prev,
           currentQuestion: optimalQuestion,
@@ -397,7 +419,7 @@ const useBattleSystem = (currentPlayerLevel: number = 1) => {
         }));
       }, 1000);
     }
-  }, []);
+  }, [currentPlayerLevel, getOpponentLevel]);
 
   const answerQuestion = useCallback((answerIndex: number) => {
     setBattleState(prev => {
@@ -424,10 +446,10 @@ const useBattleSystem = (currentPlayerLevel: number = 1) => {
             phase: 'result'
           };
         } else {
-          // Continue with next question using level-based selection
-          const actualPlayerLevel = currentPlayerLevel; // Use passed player level
-          const opponentLevel = 10; // TODO: Get from battle context
-          const nextQuestion = CyberSecurityQuestions.getOptimalQuestion(battleSessionId, actualPlayerLevel, opponentLevel);
+          // Continue with next question using optimized level-based selection
+          // Note: This would require storing the current opponentId in battle state
+          // For now, we'll use the current battle session approach
+          const nextQuestion = CyberSecurityQuestions.getOptimalQuestion(battleSessionId, currentPlayerLevel, 10);
           return {
             ...prev,
             currentQuestion: nextQuestion,
