@@ -750,4 +750,4 @@ const CyberKnowledgeBrainGame: React.FC = () => {
   )
 }
 
-export default CyberKnowledgeBrainGame
+export default CyberKnowledgeBrainGame;

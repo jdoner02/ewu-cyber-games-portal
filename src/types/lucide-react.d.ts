@@ -1,4 +1,4 @@
-declare module 'lucide-react' {
+module 'lucide-react' {
   import { FC, SVGProps } from 'react'
   
   export interface LucideProps extends SVGProps<SVGSVGElement> {

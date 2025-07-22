@@ -164,6 +164,23 @@ export default function HomePage() {
       skillsLearned: ['Security Fundamentals', 'Resource Management', 'Incremental Strategy']
     },
     {
+      id: 'cyber-clicker-classic',
+      title: 'Cyber Clicker Classic',
+      description: '📺 RETRO! The original cyber defense clicker experience! Simple, focused gameplay with basic upgrades and classic cybersecurity fundamentals.',
+      icon: '🖱️',
+      difficulty: 'All Levels',
+      category: 'Classic',
+      estimatedTime: '10+ min',
+      rating: 4.6,
+      plays: gameProgress.find((g: any) => g.gameId === 'cyber-clicker-classic')?.attempts || 0,
+      lastPlayed: gameProgress.find((g: any) => g.gameId === 'cyber-clicker-classic')?.timeSpent || null,
+      isNew: false,
+      isFeatured: false,
+      isFinished: true,
+      gradient: 'from-gray-500 to-slate-600',
+      skillsLearned: ['Basic Security', 'Simple Upgrades', 'Classic Gameplay', 'Retro Experience']
+    },
+    {
       id: 'cybersilk',
       title: 'CyberFlow Silk',
       description: '🆕 ENHANCED! Create beautiful silk art while learning network protocols. Draw flowing patterns with WeavesilK.com-inspired mechanics and discover cybersecurity through creative expression.',
@@ -196,6 +213,23 @@ export default function HomePage() {
       isFinished: false,
       gradient: 'from-green-500 to-teal-600',
       skillsLearned: ['Knowledge Integration', 'Specialization Paths', 'Multiplayer Learning', 'Skill Building']
+    },
+    {
+      id: 'cyber-knowledge-snake',
+      title: 'Cyber Knowledge Snake Explorer',
+      description: '🗺️ CLASSIC! Single-player snake adventure with fog-of-war exploration! Navigate themed cybersecurity regions, collect knowledge orbs, and unlock concepts through immersive gameplay.',
+      icon: '🐍',
+      difficulty: 'Beginner',
+      category: 'Exploration',
+      estimatedTime: '15-25 min',
+      rating: 4.8,
+      plays: gameProgress.find((g: any) => g.gameId === 'cyber-knowledge-snake')?.attempts || 0,
+      lastPlayed: gameProgress.find((g: any) => g.gameId === 'cyber-knowledge-snake')?.timeSpent || null,
+      isNew: false,
+      isFeatured: true,
+      isFinished: true,
+      gradient: 'from-emerald-500 to-green-600',
+      skillsLearned: ['Security+ Fundamentals', 'Concept Exploration', 'Knowledge Mapping', 'Single Player Focus', 'Region Discovery']
     },
     {
       id: 'phishing-detective',

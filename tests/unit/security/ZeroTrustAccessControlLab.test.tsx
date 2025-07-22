@@ -163,11 +163,18 @@ describe('🔐 ZeroTrustAccessControlLab - Educational Security Tool', () => {
       expect(screen.getByText(/Always ask a teacher if unsure/i)).toBeInTheDocument();
     });
 
-    test('demonstrates real-world applications appropriately', () => {
+    test('demonstrates real-world applications appropriately', async () => {
+      const user = userEvent.setup();
       render(<ZeroTrustAccessControlLab />);
       
-      // Career-focused, inspirational examples
-      expect(screen.getByText(/work from home, coffee shops/i)).toBeInTheDocument();
+      // Click on the learning tab to access career-focused content
+      const learningTab = screen.getByRole('tab', { name: /🎓 Learn More/i });
+      await user.click(learningTab);
+      
+      // Wait for content to load and check for career-focused, inspirational examples
+      await waitFor(() => {
+        expect(screen.getByText(/work from home, coffee shops/i)).toBeInTheDocument();
+      });
       expect(screen.getByText(/mobile, cloud-connected world/i)).toBeInTheDocument();
       expect(screen.queryByText(/classified/i)).not.toBeInTheDocument();
       expect(screen.queryByText(/military/i)).not.toBeInTheDocument();

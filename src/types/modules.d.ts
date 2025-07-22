@@ -1,2 +1,2 @@
-declare module 'lucide-react';
-declare module 'sonner';
+module 'lucide-react';
+module 'sonner';
