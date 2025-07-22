@@ -13,14 +13,93 @@ import { motion, AnimatePresence } from 'framer-motion' // for smooth animations
 // ----------------------------------------
 
 // Define a Role in the company with properties for game logic and educational content
+// Game State interface for complete game state
+interface GameState {
+  sp: number
+  totalEarned: number
+  roles: { [key: string]: number }
+  achievements: string[]
+  lastSaved: number
+  clickValue: number
+  passiveIncome: number
+  newsItems: string[]
+  codex: { [key: string]: boolean }
+  threatEvents: ThreatEvent[]
+  learningScenarios: LearningScenario[]
+  statisticsTracking: {
+    totalClicks: number
+    totalSpent: number
+    timePlayedSeconds: number
+    threatsDetected: number
+    scenariosCompleted: number
+  }
+}
+
+// Base interface for career progression
 interface CareerRole {
-  id: string               // unique key for this role
-  name: string             // display name of the role (e.g. "SOC Analyst I")
-  tier: number             // career tier (1=entry, 2=mid, 3=advanced)
-  baseCost: number         // SP cost to hire one of these
-  baseProd: number         // SP/sec production per hired unit
-  description: string      // brief tooltip description of the real-world job
-  nextRoleId?: string      // id of the role this can be promoted to
+  id: string
+  name: string
+  tier: number
+  baseCost: number
+  baseProd: number
+  description: string
+  nextRoleId?: string
+  level?: number
+  costSP?: number
+  spPerSecond?: number
+  count?: number
+  maxLevel?: number
+  requirements?: {
+    totalSP?: number
+    roles?: Array<{id: string, level: number}>
+  }
+}
+
+// Achievement interface for gamification
+interface Achievement {
+  id: string
+  title: string
+  name: string
+  description: string
+  icon: string
+  unlocked: boolean
+  condition: {
+    type: 'clicks' | 'sp_earned' | 'roles_hired' | 'threats_detected' | 'scenarios_completed'
+    target: number
+    roleId?: string
+  }
+  reward?: {
+    clickMultiplier?: number
+    spBonus?: number
+    sp?: number
+    unlockRole?: string
+  }
+}
+
+// Threat event interface for interactive scenarios  
+interface ThreatEvent {
+  id: string
+  title: string
+  description: string
+  severity: 'low' | 'medium' | 'high' | 'critical'
+  active: boolean
+  timeRemaining: number
+  requiredRole?: string
+  spReward: number
+  learningOutcome: string
+}
+
+// Learning scenario interface for educational content
+interface LearningScenario {
+  id: string
+  title: string
+  content: string
+  difficulty: 'beginner' | 'intermediate' | 'advanced'
+  category: 'technical' | 'management' | 'compliance' | 'incident-response'
+  completed: boolean
+  spReward: number
+  prerequisites?: string[]
+  learningObjectives: string[]
 }
 
 // Define a NewsItem for the ticker
