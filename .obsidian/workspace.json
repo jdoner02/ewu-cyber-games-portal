@@ -163,6 +163,7 @@
   },
   "active": "b0cd1ed31288fd14",
   "lastOpenFiles": [
+    "_Test_Guardian_Homebase/logs/pokemon-tdd-progress.md",
     "tests/unit/games/pokemon-cyber-mmo/BattleSystem-LevelBasedQuestions-TDD.test.tsx",
     "_Test_Guardian_Homebase/logs/pokemon-mmo-movement-system-completion.md",
     "_Test_Guardian_Homebase/logs/pokemon-mmo-tdd-progress.md",
@@ -175,7 +176,6 @@
     "out/games/cyber-knowledge-brain/index.txt",
     "out/games/cyber-defense-simulator/index.txt",
     "out/games/cyber-clicker-classic/index.txt",
-    "out/docs/LEARNING-SCIENCE/index.txt",
     "node_modules/tailwindcss/CHANGELOG.md",
     "node_modules/postcss-selector-parser/README.md",
     "node_modules/postcss-selector-parser/CHANGELOG.md",

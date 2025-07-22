@@ -331,7 +331,7 @@ const useMovementSystem = (initialX: number, initialY: number, gameMap: GameMap,
 };
 
 // ===== BATTLE SYSTEM =====
-const useBattleSystem = () => {
+const useBattleSystem = (currentPlayerLevel: number = 1) => {
   const [battleState, setBattleState] = useState<BattleState>({
     isActive: false,
     opponent: null,
@@ -361,9 +361,9 @@ const useBattleSystem = () => {
       
       // Start with first question after brief delay using level-based selection
       setTimeout(() => {
-        const playerLevel = 1; // TODO: Get from actual player state
+        const actualPlayerLevel = currentPlayerLevel; // Use passed player level
         const opponentLevel = 10; // TODO: Get from NPC data
-        const optimalQuestion = CyberSecurityQuestions.getOptimalQuestion(battleSession.sessionId, playerLevel, opponentLevel);
+        const optimalQuestion = CyberSecurityQuestions.getOptimalQuestion(battleSession.sessionId, actualPlayerLevel, opponentLevel);
         setBattleState(prev => ({
           ...prev,
           currentQuestion: optimalQuestion,
@@ -387,9 +387,9 @@ const useBattleSystem = () => {
       
       // Start with first question after brief delay using level-based selection
       setTimeout(() => {
-        const playerLevel = 1; // TODO: Get from actual player state
+        const actualPlayerLevel = currentPlayerLevel; // Use passed player level
         const opponentLevel = wildOpponent.level || 5;
-        const optimalQuestion = CyberSecurityQuestions.getOptimalQuestion(battleSession.sessionId, playerLevel, opponentLevel);
+        const optimalQuestion = CyberSecurityQuestions.getOptimalQuestion(battleSession.sessionId, actualPlayerLevel, opponentLevel);
         setBattleState(prev => ({
           ...prev,
           currentQuestion: optimalQuestion,
@@ -425,9 +425,9 @@ const useBattleSystem = () => {
           };
         } else {
           // Continue with next question using level-based selection
-          const playerLevel = 1; // TODO: Get from actual player state
+          const actualPlayerLevel = currentPlayerLevel; // Use passed player level
           const opponentLevel = 10; // TODO: Get from battle context
-          const nextQuestion = CyberSecurityQuestions.getOptimalQuestion(battleSessionId, playerLevel, opponentLevel);
+          const nextQuestion = CyberSecurityQuestions.getOptimalQuestion(battleSessionId, actualPlayerLevel, opponentLevel);
           return {
             ...prev,
             currentQuestion: nextQuestion,
@@ -641,7 +641,7 @@ const PokemonCyberMMO: React.FC = () => {
   // Systems
   const { position, isMoving } = useMovementSystem(10, 7, CYBER_REGION_MAP, websocket);
   const { messages, newMessage, setNewMessage, sendMessage } = useChatSystem(playerId, playerName, websocket);
-  const { battleState, startBattle, answerQuestion, endBattle, throwCyberBall } = useBattleSystem();
+  const { battleState, startBattle, answerQuestion, endBattle, throwCyberBall } = useBattleSystem(playerLevel);
   const { showTutorial, tutorialStep, tutorialSteps, startTutorial, nextTutorialStep, skipTutorial } = useTutorialSystem();
   
   // Other players simulation
