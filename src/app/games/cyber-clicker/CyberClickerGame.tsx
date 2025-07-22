@@ -63,52 +63,118 @@ const NEWS_HEADLINES: NewsItem[] = [
 // --- MAIN GAME COMPONENT ---
 // ----------------------------------------
 
-export default function CareerClickerGame() {
-  // --- GAME STATE HOOKS ---
-  // Security Points currency
-  const [sp, setSp] = useState<number>(0)
-  // SP generated per click (base=1)
+export default function CyberClickerGame() {
+  // --- ENHANCED GAME STATE HOOKS ---
+  // Core game mechanics
+  const [sp, setSp] = useState<number>(() => loadState().sp)
+  const [totalSpEarned, setTotalSpEarned] = useState<number>(() => loadState().totalSpEarned)
+  const [totalClicks, setTotalClicks] = useState<number>(() => loadState().totalClicks)
   const [clickValue, setClickValue] = useState<number>(1)
-  // SP per second from employees
   const [spPerSec, setSpPerSec] = useState<number>(0)
-  // Hired counts of each role { roleId: count }
+  
+  // Employee and progression
   const [hired, setHired] = useState<Record<string, number>>(() => loadState().hired)
-  // Current news index for ticker rotation
-  const [newsIndex, setNewsIndex] = useState<number>(0)
-  // Notification messages (purchase, promotion, events)
+  const [unlockedRoles, setUnlockedRoles] = useState<Set<string>>(new Set(['soc1', 'sup_spec', 'vuln1', 'auditor']))
+  
+  // UI and interaction
   const [notifications, setNotifications] = useState<string[]>([])
-  // Codex entries unlocked (roleId => unlocked?)
+  const [newsIndex, setNewsIndex] = useState<number>(0)
+  const [showTutorial, setShowTutorial] = useState<boolean>(false)
+  const [learnMode, setLearnMode] = useState<boolean>(false)
+  
+  // Achievement and progression tracking
+  const [achievementsUnlocked, setAchievementsUnlocked] = useState<string[]>(() => loadState().achievements)
+  const [scenariosCompleted, setScenariosCompleted] = useState<string[]>(() => loadState().scenarios)
+  const [dayStreak, setDayStreak] = useState<number>(() => loadState().dayStreak)
+  const [playerLevel, setPlayerLevel] = useState<number>(() => loadState().playerLevel)
+  
+  // Active events and interactions
+  const [activeThreats, setActiveThreats] = useState<ThreatEvent[]>([])
+  const [selectedScenario, setSelectedScenario] = useState<LearningScenario | null>(null)
+  const [clickParticles, setClickParticles] = useState<{id: number, x: number, y: number}[]>([])
+  
+  // Educational features
   const [codex, setCodex] = useState<Record<string, boolean>>(() => loadState().codex)
+  const [educationalPopup, setEducationalPopup] = useState<{role: CareerRole, show: boolean}>({role: ROLE_DEFINITIONS[0], show: false})
 
   // ----------------------------------------
-  // --- PERSISTENCE: LOAD & SAVE STATE ---
+  // --- ENHANCED PERSISTENCE: LOAD & SAVE STATE ---
   // ----------------------------------------
   
-  // Define shape of saved state in localStorage
-  interface SaveState { sp: number, hired: Record<string, number>, codex: Record<string, boolean> }
-  const STORAGE_KEY = 'CareerClickerSave'
+  // Define enhanced shape of saved state in localStorage
+  interface SaveState { 
+    sp: number
+    totalSpEarned: number
+    totalClicks: number
+    hired: Record<string, number>
+    codex: Record<string, boolean>
+    achievements: string[]
+    scenarios: string[]
+    dayStreak: number
+    playerLevel: number
+    lastPlayDate: string
+  }
+  
+  const STORAGE_KEY = 'CyberClickerSave'
 
   // Load saved state or use defaults
   function loadState(): SaveState {
     try {
       const json = localStorage.getItem(STORAGE_KEY)
-      if (json) return JSON.parse(json)
+      if (json) {
+        const saved = JSON.parse(json)
+        // Check if it's a new day for streak tracking
+        const today = new Date().toDateString()
+        const lastPlay = saved.lastPlayDate
+        if (lastPlay !== today) {
+          // Reset or increment streak based on consecutive days
+          const yesterday = new Date()
+          yesterday.setDate(yesterday.getDate() - 1)
+          saved.dayStreak = lastPlay === yesterday.toDateString() ? saved.dayStreak + 1 : 1
+          saved.lastPlayDate = today
+        }
+        return saved
+      }
     } catch {
       /* ignore errors */
     }
-    // default state: no SP, no hires, codex unlocked for tier1 maybe
+    
+    // Default state: starter SP, no hires, basic codex unlocked
     const defaultHired: Record<string, number> = {}
     ROLE_DEFINITIONS.forEach(r => defaultHired[r.id] = 0)
+    
     const defaultCodex: Record<string, boolean> = {}
     ROLE_DEFINITIONS.forEach(r => defaultCodex[r.id] = r.tier === 1)
-    return { sp: 0, hired: defaultHired, codex: defaultCodex }
+    
+    return { 
+      sp: 10, 
+      totalSpEarned: 0,
+      totalClicks: 0,
+      hired: defaultHired, 
+      codex: defaultCodex,
+      achievements: [],
+      scenarios: [],
+      dayStreak: 1,
+      playerLevel: 1,
+      lastPlayDate: new Date().toDateString()
+    }
   }
-
-  // Save key parts of state to localStorage whenever sp, hired, or codex change
+  // Save enhanced state to localStorage whenever key values change
   useEffect(() => {
-    const save: SaveState = { sp, hired, codex }
+    const save: SaveState = { 
+      sp, 
+      totalSpEarned, 
+      totalClicks, 
+      hired, 
+      codex, 
+      achievements: achievementsUnlocked,
+      scenarios: scenariosCompleted,
+      dayStreak,
+      playerLevel,
+      lastPlayDate: new Date().toDateString()
+    }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(save))
-  }, [sp, hired, codex])
+  }, [sp, totalSpEarned, totalClicks, hired, codex, achievementsUnlocked, scenariosCompleted, dayStreak, playerLevel])
 
   // ----------------------------------------
   // --- SP PRODUCTION LOOP (AUTO IDLE) ---
@@ -130,14 +196,72 @@ export default function CareerClickerGame() {
   }, [hired])
 
   // ----------------------------------------
-  // --- CLICK HANDLER ---
+  // --- ENHANCED CLICK HANDLER WITH VISUAL FEEDBACK ---
   // ----------------------------------------
-  const handleClick = useCallback(() => {
-    // when user clicks the main button, add clickValue SP
+  const handleClick = useCallback((event?: React.MouseEvent) => {
+    // Add SP and track statistics
     setSp(prev => prev + clickValue)
+    setTotalSpEarned(prev => prev + clickValue)
+    setTotalClicks(prev => prev + 1)
+    
+    // Create particle effect at click location
+    if (event) {
+      const rect = event.currentTarget.getBoundingClientRect()
+      const x = event.clientX - rect.left
+      const y = event.clientY - rect.top
+      const particleId = Date.now() + Math.random()
+      
+      setClickParticles(prev => [...prev, { id: particleId, x, y }])
+      
+      // Remove particle after animation
+      setTimeout(() => {
+        setClickParticles(prev => prev.filter(p => p.id !== particleId))
+      }, 1000)
+    }
+    
+    // Check for click-based achievements
+    checkAchievements()
+  }, [clickValue])
+  
+  // Achievement checking system
+  const checkAchievements = useCallback(() => {
+    const gameState: GameState = {
+      sp,
+      totalSpEarned,
+      totalClicks,
+      hired,
+      dayStreak,
+      achievementsUnlocked,
+      scenariosCompleted
+    }
+    
+    // Check each achievement
+    ACHIEVEMENT_DEFINITIONS.forEach(achievement => {
+      if (!achievementsUnlocked.includes(achievement.id) && achievement.condition(gameState)) {
+        unlockAchievement(achievement)
+      }
+    })
+  }, [sp, totalSpEarned, totalClicks, hired, dayStreak, achievementsUnlocked, scenariosCompleted])
+  
+  // Unlock achievement with rewards
+  const unlockAchievement = useCallback((achievement: Achievement) => {
+    setAchievementsUnlocked(prev => [...prev, achievement.id])
+    showNotification(`🏆 Achievement Unlocked: ${achievement.name}!`)
+    
+    // Apply rewards
+    if (achievement.reward.sp) {
+      setSp(prev => prev + achievement.reward.sp!)
+      setTotalSpEarned(prev => prev + achievement.reward.sp!)
+    }
+    if (achievement.reward.clickMultiplier) {
+      setClickValue(prev => prev * achievement.reward.clickMultiplier!)
+    }
+    if (achievement.reward.unlockRole) {
+      setUnlockedRoles(prev => new Set([...prev, achievement.reward.unlockRole!]))
+    }
+  }, [])
     // show a quick notification (+1) or animation if desired
     // (omitted for brevity)
-  }, [clickValue])
 
   // ----------------------------------------
   // --- HIRING AND PROMOTION LOGIC ---

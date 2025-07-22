@@ -511,7 +511,7 @@ export default function EncryptionEscapeRoom() {
       }))
       
       filteredAchievements.forEach(achievement => {
-        toast.success(`🏆 Achievement: ${ACHIEVEMENTS[achievement].name}!`)
+        toast.success(`🏆 Achievement: ${ACHIEVEMENTS[achievement as keyof typeof ACHIEVEMENTS].name}!`)
       })
     }
   }

@@ -35,7 +35,8 @@ import {
   EyeIcon,
   Code,
   Users,
-  Globe
+  Globe,
+  LucideIcon
 } from 'lucide-react'
 
 interface ConceptConnection {
@@ -43,7 +44,7 @@ interface ConceptConnection {
   title: string
   type: 'prerequisite' | 'related' | 'advanced'
   description: string
-  icon: typeof LockIcon
+  icon: LucideIcon
   difficulty: 'beginner' | 'intermediate' | 'advanced'
 }
 
@@ -76,7 +77,7 @@ const CYBERSECURITY_CONCEPTS: AtomicConcept[] = [
         title: 'Authentication Fundamentals',
         type: 'prerequisite',
         description: 'Basic concepts of proving identity in computer systems',
-        icon: Lock,
+        icon: LockIcon,
         difficulty: 'beginner'
       },
       {

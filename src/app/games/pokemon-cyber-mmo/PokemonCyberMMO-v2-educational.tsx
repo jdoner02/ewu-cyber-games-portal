@@ -910,7 +910,7 @@ const PokemonCyberMMO: React.FC = () => {
             <p>Current state: {gameState}</p>
             <p>Day {currentDay} of GenCyber Camp</p>
             
-            {gameState === 'intro' && (
+            {(gameState as any) === 'intro' && (
               <div className="mt-8">
                 <button
                   onClick={() => setGameState('world')}

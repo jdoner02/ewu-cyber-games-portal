@@ -375,7 +375,7 @@ export default function STRIDEThreatModeler() {
    * These functions help students systematically analyze threats.
    */
   const startThreatAnalysis = (systemType: string) => {
-    const system = EDUCATIONAL_SYSTEMS[systemType]
+    const system = EDUCATIONAL_SYSTEMS[systemType as keyof typeof EDUCATIONAL_SYSTEMS]
     if (!system) return
 
     const newAnalysis: ThreatModel = {

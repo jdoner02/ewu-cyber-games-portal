@@ -284,7 +284,9 @@ export default function CyberClickerGame() {
                     onClick={() => canAfford && buyUpgrade(upgrade.id)}
                   >
                     <div className="flex items-center gap-3 mb-2">
-                      <IconComponent size={24} className="text-blue-400" />
+                      <div className="text-blue-400">
+                        <IconComponent size={24} />
+                      </div>
                       <div className="flex-1">
                         <div className="font-bold">{upgrade.name}</div>
                         <div className="text-sm text-gray-400">Owned: {upgrade.owned}</div>

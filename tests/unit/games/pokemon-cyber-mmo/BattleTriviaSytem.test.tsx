@@ -54,7 +54,7 @@ const mockTriviaQuestion = {
     'Cybersecurity Implementation Architecture'
   ],
   correctAnswer: 1,
-  difficulty: 'beginner',
+  difficulty: 'beginner' as const,
   category: 'fundamentals',
   explanation: 'CIA Triad represents the three core principles of information security.',
   damageMultiplier: 1.0

@@ -825,14 +825,16 @@ const CyberKnowledgeSnakeGame: React.FC = () => {
         </div>
 
         {/* Knowledge Orbs (for testing) */}
-        {regions.flatMap(region => 
-          region.orbs.map(orb => (
-            <div
-              key={orb.id}
-              data-testid={`knowledge-orb-${orb.id}`}
-            />
-          ))
-        )}
+        {regions
+          .filter(region => region.name === gameState.currentRegion)
+          .flatMap(region => 
+            region.orbs.map(orb => (
+              <div
+                key={orb.id}
+                data-testid={`knowledge-orb-${orb.id}`}
+              />
+            ))
+          )}
 
         {/* Knowledge Map Nodes (for testing) */}
         {gameState.collectedConcepts.map(conceptId => {

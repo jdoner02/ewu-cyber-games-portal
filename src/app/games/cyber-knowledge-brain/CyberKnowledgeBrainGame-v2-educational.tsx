@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Brain, Network, Zap, Shield, Code, Users, Eye, Target, Star, BookOpen, Trophy, Lock, Monitor } from 'lucide-react';
-import useGameStore from '../../stores/gameStore';
+import useGameStore from '../../../stores/gameStore';
 
 /**
  * 🧠 Cyber Knowledge Brain - Central Learning Visualization Hub

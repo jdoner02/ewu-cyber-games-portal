@@ -97,6 +97,15 @@ describe('CyberKnowledgeSnakeGame - Core Game Mechanics', () => {
       render(<CyberKnowledgeSnakeGame />);
       
       const canvas = screen.getByTestId('snake-game-canvas');
+      
+      // First move up (from initial 'right' direction) to allow left movement
+      fireEvent.keyDown(canvas, { key: 'ArrowUp' });
+      await waitFor(() => {
+        const direction = screen.getByTestId('snake-direction');
+        expect(direction).toHaveTextContent('up');
+      });
+      
+      // Now move left (valid from 'up' direction)
       fireEvent.keyDown(canvas, { key: 'ArrowLeft' });
       
       await waitFor(() => {
@@ -182,17 +191,10 @@ describe('CyberKnowledgeSnakeGame - Core Game Mechanics', () => {
     });
 
     it('should award XP when collecting knowledge orb', async () => {
-      const mockAddXP = jest.fn();
-      jest.doMock('../../src/stores/gameStore', () => ({
-        __esModule: true,
-        default: () => ({
-          playerStats: { level: 1, totalXP: 0 },
-          addXP: mockAddXP,
-          updateSkillProgress: jest.fn(),
-          unlockAchievement: jest.fn(),
-          gameProgress: []
-        })
-      }));
+      // Get the mocked addXP function from the global mock
+      const useGameStore = require('../../src/stores/gameStore').default;
+      const mockStore = useGameStore();
+      const mockAddXP = mockStore.addXP as jest.Mock;
       
       render(<CyberKnowledgeSnakeGame />);
       
