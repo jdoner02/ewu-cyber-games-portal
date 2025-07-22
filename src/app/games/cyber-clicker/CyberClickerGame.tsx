@@ -1,354 +1,317 @@
+// CareerClickerGame.tsx
+// An educational idle/clicker game for teaching cybersecurity careers to curious middle schoolers.
+// Players build a virtual cybersecurity company, hire and promote roles, and learn career pathways.
+// The code is heavily commented to explain both what each piece does and why it matters!
+
 'use client'
 
 import React, { useState, useEffect, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Shield, Zap, Server, Wifi, Lock, Unlock, AlertTriangle, CheckCircle } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion' // for smooth animations
 
-interface ClickUpgrade {
-  id: string
-  name: string
-  cost: number
-  multiplier: number
-  owned: number
-  icon: React.ComponentType<{ size?: number }>
-  description: string
+// ----------------------------------------
+// --- DATA TYPES AND CONFIGURATION ---
+// ----------------------------------------
+
+// Define a Role in the company with properties for game logic and educational content
+interface CareerRole {
+  id: string               // unique key for this role
+  name: string             // display name of the role (e.g. "SOC Analyst I")
+  tier: number             // career tier (1=entry, 2=mid, 3=advanced)
+  baseCost: number         // SP cost to hire one of these
+  baseProd: number         // SP/sec production per hired unit
+  description: string      // brief tooltip description of the real-world job
+  nextRoleId?: string      // id of the role this can be promoted to
 }
 
-export default function CyberClickerGame() {
-  const [score, setScore] = useState(0)
-  const [clickPower, setClickPower] = useState(1)
-  const [autoClickRate, setAutoClickRate] = useState(0)
-  const [level, setLevel] = useState(1)
-  const [exp, setExp] = useState(0)
-  const [clickAnimation, setClickAnimation] = useState(false)
-  const [notifications, setNotifications] = useState<Array<{id: string, message: string, type: 'success' | 'upgrade' | 'level'}>>([])
+// Define a NewsItem for the ticker
+interface NewsItem {
+  id: string               // unique key
+  text: string             // headline text
+}
 
-  const [upgrades] = useState<ClickUpgrade[]>([
-    {
-      id: 'firewall',
-      name: 'Firewall',
-      cost: 10,
-      multiplier: 1.2,
-      owned: 0,
-      icon: Shield,
-      description: 'Basic network protection (+1.2x click power)'
-    },
-    {
-      id: 'antivirus',
-      name: 'Antivirus',
-      cost: 50,
-      multiplier: 2,
-      owned: 0,
-      icon: Zap,
-      description: 'Advanced malware detection (+2x click power)'
-    },
-    {
-      id: 'encryption',
-      name: 'Encryption',
-      cost: 200,
-      multiplier: 3,
-      owned: 0,
-      icon: Lock,
-      description: 'Military-grade encryption (+3x click power)'
-    },
-    {
-      id: 'ai-defender',
-      name: 'AI Defender',
-      cost: 1000,
-      multiplier: 5,
-      owned: 0,
-      icon: Server,
-      description: 'AI-powered security system (+5x click power)'
-    },
-    {
-      id: 'quantum-shield',
-      name: 'Quantum Shield',
-      cost: 5000,
-      multiplier: 10,
-      owned: 0,
-      icon: Wifi,
-      description: 'Quantum-encrypted protection (+10x click power)'
+// Static list of career roles derived from real cyber career pathways
+const ROLE_DEFINITIONS: CareerRole[] = [
+  { id: 'soc1', name: 'SOC Analyst I',     tier: 1, baseCost:  50, baseProd:   1, description: 'Monitors security alerts and investigates basic incidents.', nextRoleId: 'soc2' },
+  { id: 'sup_spec', name: 'Support Specialist', tier: 1, baseCost:  30, baseProd:   0.5, description: 'Handles helpdesk tickets and basic troubleshooting.', nextRoleId: 'forensics' },
+  { id: 'vuln1',   name: 'Vulnerability Analyst', tier: 1, baseCost:  80, baseProd:   1.2, description: 'Runs scans to find security weaknesses.', nextRoleId: 'pentest' },
+  { id: 'auditor', name: 'IT Auditor',        tier: 1, baseCost:  70, baseProd:   0.8, description: 'Assesses systems for compliance and controls.', nextRoleId: 'risk_ana' },
+
+  { id: 'soc2',    name: 'SOC Analyst II',    tier: 2, baseCost: 300, baseProd:   5, description: 'Handles complex incidents and fine-tunes defenses.', nextRoleId: 'threat_hunter' },
+  { id: 'forensics', name: 'Digital Forensics Analyst', tier: 2, baseCost: 250, baseProd:   4, description: 'Investigates breaches by analyzing evidence.' , nextRoleId: 'ir_lead' },
+  { id: 'pentest', name: 'Penetration Tester', tier: 2, baseCost: 400, baseProd:   6, description: 'Simulates attacks to find vulnerabilities.' , nextRoleId: 'redteam' },
+  { id: 'risk_ana', name: 'Risk Analyst',      tier: 2, baseCost: 200, baseProd:   3, description: 'Analyzes and mitigates organizational risks.' , nextRoleId: 'sec_mgr' },
+
+  { id: 'threat_hunter', name: 'Threat Hunter',   tier: 3, baseCost:2000, baseProd:  20, description: 'Proactively searches for hidden threats.' , nextRoleId: 'ciso' },
+  { id: 'ir_lead', name: 'Incident Response Lead', tier: 3, baseCost:1800, baseProd:  18, description: 'Leads response to major security incidents.' },
+  { id: 'redteam', name: 'Red Team Lead',    tier: 3, baseCost:2200, baseProd:  22, description: 'Leads adversary simulation exercises.' },
+  { id: 'sec_mgr', name: 'Security Manager', tier: 3, baseCost:1500, baseProd:  15, description: 'Coordinates teams and security programs.' },
+
+  { id: 'ciso',    name: 'CISO',              tier: 4, baseCost: 0,    baseProd:   0, description: 'Chief Information Security Officer: sets strategy and policies.' }
+]
+
+// Simple news headlines for the ticker (learn terms casually)
+const NEWS_HEADLINES: NewsItem[] = [
+  { id: 'n1', text: 'New zero-day exploit discovered – companies rush to patch!' },
+  { id: 'n2', text: 'SOC Analysts detect unusual traffic spike.' },
+  { id: 'n3', text: 'Pen Testers break into test network – fun exercise!' },
+  { id: 'n4', text: 'Risk Analyst identifies critical compliance gap.' },
+  { id: 'n5', text: 'Threat Hunter uncovers hidden malware in logs.' },
+  { id: 'n6', text: 'Major breach averted by rapid IR team response.' }
+]
+
+// ----------------------------------------
+// --- MAIN GAME COMPONENT ---
+// ----------------------------------------
+
+export default function CareerClickerGame() {
+  // --- GAME STATE HOOKS ---
+  // Security Points currency
+  const [sp, setSp] = useState<number>(0)
+  // SP generated per click (base=1)
+  const [clickValue, setClickValue] = useState<number>(1)
+  // SP per second from employees
+  const [spPerSec, setSpPerSec] = useState<number>(0)
+  // Hired counts of each role { roleId: count }
+  const [hired, setHired] = useState<Record<string, number>>(() => loadState().hired)
+  // Current news index for ticker rotation
+  const [newsIndex, setNewsIndex] = useState<number>(0)
+  // Notification messages (purchase, promotion, events)
+  const [notifications, setNotifications] = useState<string[]>([])
+  // Codex entries unlocked (roleId => unlocked?)
+  const [codex, setCodex] = useState<Record<string, boolean>>(() => loadState().codex)
+
+  // ----------------------------------------
+  // --- PERSISTENCE: LOAD & SAVE STATE ---
+  // ----------------------------------------
+  
+  // Define shape of saved state in localStorage
+  interface SaveState { sp: number, hired: Record<string, number>, codex: Record<string, boolean> }
+  const STORAGE_KEY = 'CareerClickerSave'
+
+  // Load saved state or use defaults
+  function loadState(): SaveState {
+    try {
+      const json = localStorage.getItem(STORAGE_KEY)
+      if (json) return JSON.parse(json)
+    } catch {
+      /* ignore errors */
     }
-  ])
+    // default state: no SP, no hires, codex unlocked for tier1 maybe
+    const defaultHired: Record<string, number> = {}
+    ROLE_DEFINITIONS.forEach(r => defaultHired[r.id] = 0)
+    const defaultCodex: Record<string, boolean> = {}
+    ROLE_DEFINITIONS.forEach(r => defaultCodex[r.id] = r.tier === 1)
+    return { sp: 0, hired: defaultHired, codex: defaultCodex }
+  }
 
-  const [upgradeStates, setUpgradeStates] = useState<Record<string, ClickUpgrade>>(
-    upgrades.reduce((acc, upgrade) => ({
-      ...acc,
-      [upgrade.id]: { ...upgrade }
-    }), {})
-  )
-
-  // Auto-clicking effect
+  // Save key parts of state to localStorage whenever sp, hired, or codex change
   useEffect(() => {
-    if (autoClickRate > 0) {
-      const interval = setInterval(() => {
-        setScore(prev => prev + autoClickRate)
-        setExp(prev => prev + autoClickRate * 0.1)
-      }, 1000)
-      return () => clearInterval(interval)
-    }
-  }, [autoClickRate])
+    const save: SaveState = { sp, hired, codex }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(save))
+  }, [sp, hired, codex])
 
-  // Level up calculation
+  // ----------------------------------------
+  // --- SP PRODUCTION LOOP (AUTO IDLE) ---
+  // ----------------------------------------
   useEffect(() => {
-    const expRequired = level * 100
-    if (exp >= expRequired) {
-      setLevel(prev => prev + 1)
-      setExp(prev => prev - expRequired)
-      setClickPower(prev => prev + 1)
-      showNotification(`Level Up! Now Level ${level + 1}`, 'level')
-    }
-  }, [exp, level])
+    // calculate total SP/sec whenever hired counts change
+    let total = 0
+    ROLE_DEFINITIONS.forEach(role => {
+      const count = hired[role.id] || 0
+      total += role.baseProd * count
+    })
+    setSpPerSec(total)
 
+    // set up interval to add auto SP
+    const interval = setInterval(() => {
+      setSp(prev => prev + total)
+    }, 1000) // each second
+    return () => clearInterval(interval)
+  }, [hired])
+
+  // ----------------------------------------
+  // --- CLICK HANDLER ---
+  // ----------------------------------------
   const handleClick = useCallback(() => {
-    const points = clickPower
-    setScore(prev => prev + points)
-    setExp(prev => prev + points * 0.1)
-    setClickAnimation(true)
-    setTimeout(() => setClickAnimation(false), 200)
-  }, [clickPower])
+    // when user clicks the main button, add clickValue SP
+    setSp(prev => prev + clickValue)
+    // show a quick notification (+1) or animation if desired
+    // (omitted for brevity)
+  }, [clickValue])
 
-  const showNotification = (message: string, type: 'success' | 'upgrade' | 'level') => {
-    const id = Date.now().toString()
-    setNotifications(prev => [...prev, { id, message, type }])
+  // ----------------------------------------
+  // --- HIRING AND PROMOTION LOGIC ---
+  // ----------------------------------------
+  
+  // hireRole: buy one unit of an entry-level role
+  function hireRole(role: CareerRole) {
+    const cost = Math.floor(role.baseCost * Math.pow(1.15, hired[role.id]))
+    if (sp < cost) return // not enough SP
+    setSp(prev => prev - cost)
+    setHired(prev => ({ ...prev, [role.id]: prev[role.id] + 1 }))
+    showNotification(`Hired 1 ${role.name}!`)
+    unlockCodex(role.id)
+  }
+
+  // promoteRole: convert one unit of role into next tier
+  function promoteRole(role: CareerRole) {
+    if (!role.nextRoleId) return // can't promote further
+    if (hired[role.id] < 1) return // none to promote
+    const cost = Math.floor(role.baseCost * 2 * role.tier) // promotion cost heuristic
+    if (sp < cost) return
+    setSp(prev => prev - cost)
+    // decrement old and increment new
+    setHired(prev => ({
+      ...prev,
+      [role.id]: prev[role.id] - 1,
+      [role.nextRoleId!]: prev[role.nextRoleId!] + 1
+    }))
+    showNotification(`Promoted 1 ${role.name} → ${getRole(role.nextRoleId!).name}!`)
+    unlockCodex(role.nextRoleId!)
+  }
+
+  // unlockCodex: mark a role's codex entry as unlocked
+  function unlockCodex(roleId: string) {
+    setCodex(prev => ({ ...prev, [roleId]: true }))
+  }
+
+  // getRole helper by id
+  function getRole(id: string) {
+    return ROLE_DEFINITIONS.find(r => r.id === id)!
+  }
+
+  // ----------------------------------------
+  // --- NEWS TICKER LOGIC ---
+  // ----------------------------------------
+  useEffect(() => {
+    // rotate headline every 5 seconds
+    const timeout = setTimeout(() => {
+      setNewsIndex((i) => (i + 1) % NEWS_HEADLINES.length)
+    }, 5000)
+    return () => clearTimeout(timeout)
+  }, [newsIndex])
+
+  // ----------------------------------------
+  // --- NOTIFICATIONS (TOASTS) ---
+  // ----------------------------------------
+  function showNotification(msg: string) {
+    setNotifications(prev => [...prev, msg])
+    // remove after 3s
     setTimeout(() => {
-      setNotifications(prev => prev.filter(n => n.id !== id))
+      setNotifications(prev => prev.slice(1))
     }, 3000)
   }
 
-  const buyUpgrade = (upgradeId: string) => {
-    const upgrade = upgradeStates[upgradeId]
-    const cost = Math.floor(upgrade.cost * Math.pow(1.15, upgrade.owned))
-    
-    if (score >= cost) {
-      setScore(prev => prev - cost)
-      setUpgradeStates(prev => ({
-        ...prev,
-        [upgradeId]: {
-          ...prev[upgradeId],
-          owned: prev[upgradeId].owned + 1
-        }
-      }))
-      
-      // Update click power or auto-click rate
-      if (upgradeId === 'firewall' || upgradeId === 'antivirus') {
-        setClickPower(prev => prev + upgrade.multiplier)
-      } else {
-        setAutoClickRate(prev => prev + upgrade.multiplier)
-      }
-      
-      showNotification(`Purchased ${upgrade.name}!`, 'upgrade')
-    }
-  }
-
-  const formatNumber = (num: number) => {
-    if (num >= 1e9) return (num / 1e9).toFixed(1) + 'B'
-    if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M'
-    if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K'
-    return Math.floor(num).toString()
-  }
-
+  // ----------------------------------------
+  // --- RENDERING UI SECTIONS ---
+  // ----------------------------------------
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 text-white">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-8"
-        >
-          <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-            Cyber Clicker
-          </h1>
-          <p className="text-lg text-gray-300">
-            Build your cyber defense empire one click at a time!
-          </p>
-        </motion.div>
+    <div className="min-h-screen bg-gray-900 text-white">
+      {/* Header with game title */}
+      <header className="p-4 bg-blue-800 text-center">
+        <h1 className="text-3xl font-bold">Cybersecurity Career Clicker</h1>
+        <p className="text-sm">Build your cyber firm and explore career paths!</p>
+      </header>
 
-        {/* Notifications */}
+      {/* Notifications (simple stack) */}
+      <div className="fixed top-4 right-4 space-y-2">
         <AnimatePresence>
-          {notifications.map(notification => (
+          {notifications.map((msg, idx) => (
             <motion.div
-              key={notification.id}
-              initial={{ opacity: 0, x: 300 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 300 }}
-              className={`fixed top-4 right-4 z-50 px-4 py-2 rounded-lg shadow-lg ${
-                notification.type === 'level' ? 'bg-purple-600' :
-                notification.type === 'upgrade' ? 'bg-green-600' :
-                'bg-blue-600'
-              }`}
-            >
-              {notification.message}
-            </motion.div>
+              key={idx}
+              initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 50 }}
+              className="bg-green-500 text-black px-4 py-2 rounded shadow"
+            >{msg}</motion.div>
           ))}
         </AnimatePresence>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Clicker Area */}
-          <div className="lg:col-span-2">
-            {/* Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <div className="bg-black/30 rounded-lg p-4 text-center">
-                <div className="text-2xl font-bold text-blue-400">{formatNumber(score)}</div>
-                <div className="text-sm text-gray-400">Security Points</div>
-              </div>
-              <div className="bg-black/30 rounded-lg p-4 text-center">
-                <div className="text-2xl font-bold text-green-400">{clickPower}</div>
-                <div className="text-sm text-gray-400">Click Power</div>
-              </div>
-              <div className="bg-black/30 rounded-lg p-4 text-center">
-                <div className="text-2xl font-bold text-purple-400">{level}</div>
-                <div className="text-sm text-gray-400">Level</div>
-              </div>
-              <div className="bg-black/30 rounded-lg p-4 text-center">
-                <div className="text-2xl font-bold text-yellow-400">{formatNumber(autoClickRate)}/s</div>
-                <div className="text-sm text-gray-400">Auto Defense</div>
-              </div>
+      {/* Main content grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 p-4">
+        {/* Left: Clicker Button and Stats */}
+        <div className="col-span-2 space-y-4">
+          {/* Stats panel */}
+          <div className="bg-gray-800 p-4 rounded grid grid-cols-2 gap-4">
+            {/* SP display */}
+            <div className="text-center">
+              <div className="text-2xl font-bold">{Math.floor(sp)}</div>
+              <div className="text-sm">Security Points (SP)</div>
             </div>
-
-            {/* EXP Bar */}
-            <div className="bg-black/30 rounded-lg p-4 mb-6">
-              <div className="flex justify-between text-sm mb-2">
-                <span>Level {level}</span>
-                <span>{Math.floor(exp)}/{level * 100} EXP</span>
-              </div>
-              <div className="w-full bg-gray-700 rounded-full h-2">
-                <div 
-                  className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${(exp / (level * 100)) * 100}%` }}
-                ></div>
-              </div>
-            </div>
-
-            {/* Main Clicker Button */}
-            <div className="flex justify-center mb-6">
-              <motion.button
-                onClick={handleClick}
-                className="relative"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                animate={clickAnimation ? { scale: [1, 1.1, 1] } : {}}
-              >
-                <div className="w-64 h-64 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full shadow-2xl flex items-center justify-center relative overflow-hidden">
-                  {/* Pulse effect */}
-                  <motion.div
-                    className="absolute inset-0 bg-white/20 rounded-full"
-                    animate={clickAnimation ? { scale: [1, 1.5], opacity: [1, 0] } : {}}
-                    transition={{ duration: 0.3 }}
-                  />
-                  
-                  <Shield size={80} className="text-white drop-shadow-lg" />
-                  
-                  {/* Click value indicator */}
-                  <AnimatePresence>
-                    {clickAnimation && (
-                      <motion.div
-                        initial={{ opacity: 1, y: 0 }}
-                        animate={{ opacity: 0, y: -50 }}
-                        exit={{ opacity: 0 }}
-                        className="absolute text-2xl font-bold text-yellow-300"
-                      >
-                        +{clickPower}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-                <div className="text-center mt-4">
-                  <div className="text-lg font-bold">Cyber Defense Core</div>
-                  <div className="text-sm text-gray-400">Click to strengthen defenses!</div>
-                </div>
-              </motion.button>
+            {/* SP/sec display */}
+            <div className="text-center">
+              <div className="text-2xl font-bold">{spPerSec.toFixed(1)}</div>
+              <div className="text-sm">SP per sec</div>
             </div>
           </div>
 
-          {/* Upgrades Panel */}
-          <div className="bg-black/30 rounded-lg p-6">
-            <h2 className="text-2xl font-bold mb-6 text-center">Security Upgrades</h2>
-            
-            <div className="space-y-4">
-              {Object.values(upgradeStates).map((upgrade) => {
-                const cost = Math.floor(upgrade.cost * Math.pow(1.15, upgrade.owned))
-                const canAfford = score >= cost
-                const IconComponent = upgrade.icon
-                
-                return (
-                  <motion.div
-                    key={upgrade.id}
-                    whileHover={{ scale: 1.02 }}
-                    className={`p-4 rounded-lg border-2 transition-all ${
-                      canAfford 
-                        ? 'border-green-500 bg-green-500/10 cursor-pointer' 
-                        : 'border-gray-600 bg-gray-600/10 cursor-not-allowed opacity-60'
-                    }`}
-                    onClick={() => canAfford && buyUpgrade(upgrade.id)}
-                  >
-                    <div className="flex items-center gap-3 mb-2">
-                      <IconComponent size={24} className="text-blue-400" />
-                      <div className="flex-1">
-                        <div className="font-bold">{upgrade.name}</div>
-                        <div className="text-sm text-gray-400">Owned: {upgrade.owned}</div>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-bold text-yellow-400">{formatNumber(cost)}</div>
-                        <div className="text-xs text-gray-400">SP</div>
-                      </div>
-                    </div>
-                    <div className="text-sm text-gray-300">{upgrade.description}</div>
-                  </motion.div>
-                )
-              })}
-            </div>
+          {/* Clicker button */}
+          <button
+            onClick={handleClick}
+            className="w-full bg-blue-600 hover:bg-blue-700 transition py-8 rounded text-2xl font-bold shadow-lg"
+          >
+            DEFEND (+{clickValue} SP)
+          </button>
 
-            {/* Achievement Section */}
-            <div className="mt-8">
-              <h3 className="text-xl font-bold mb-4">Achievements</h3>
-              <div className="space-y-2">
-                <div className={`flex items-center gap-2 p-2 rounded ${score >= 100 ? 'bg-green-600/20 text-green-400' : 'bg-gray-600/20 text-gray-400'}`}>
-                  {score >= 100 ? <CheckCircle size={16} /> : <Lock size={16} />}
-                  First Defense (100 SP)
-                </div>
-                <div className={`flex items-center gap-2 p-2 rounded ${score >= 1000 ? 'bg-green-600/20 text-green-400' : 'bg-gray-600/20 text-gray-400'}`}>
-                  {score >= 1000 ? <CheckCircle size={16} /> : <Lock size={16} />}
-                  Security Expert (1K SP)
-                </div>
-                <div className={`flex items-center gap-2 p-2 rounded ${level >= 10 ? 'bg-green-600/20 text-green-400' : 'bg-gray-600/20 text-gray-400'}`}>
-                  {level >= 10 ? <CheckCircle size={16} /> : <Lock size={16} />}
-                  Level 10 Defender
-                </div>
-              </div>
-            </div>
+          {/* News ticker */}
+          <div className="bg-gray-800 p-2 rounded">
+            <span className="font-semibold">News:</span> {NEWS_HEADLINES[newsIndex].text}
           </div>
         </div>
 
-        {/* Learning Panel */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-black/30 rounded-lg p-6 mt-8"
-        >
-          <h3 className="text-xl font-bold mb-4">Learning Objectives</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h4 className="font-bold text-blue-400 mb-2">Cybersecurity Fundamentals</h4>
-              <ul className="text-sm text-gray-300 space-y-1">
-                <li>• Understand layered security defense</li>
-                <li>• Learn about different security tools</li>
-                <li>• Explore automation in cybersecurity</li>
-                <li>• Discover resource management principles</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-bold text-purple-400 mb-2">Game Mechanics as Learning</h4>
-              <ul className="text-sm text-gray-300 space-y-1">
-                <li>• Incremental improvement mirrors security hardening</li>
-                <li>• Upgrades represent real security investments</li>
-                <li>• Auto-defense simulates automated security tools</li>
-                <li>• Level progression shows skill development</li>
-              </ul>
+        {/* Right: Roles and Codex Tabs */}
+        <div className="space-y-4">
+          {/* Hire / Promote Panel */}
+          <div className="bg-gray-800 p-4 rounded">
+            <h2 className="font-bold mb-2">Hire & Promote</h2>
+            <div className="space-y-2 max-h-96 overflow-y-auto">
+              {ROLE_DEFINITIONS.map(role => {
+                // only show entry roles or unlocked by codex
+                if (role.tier > 1 && !codex[role.id]) return null
+                const count = hired[role.id] || 0
+                const cost = Math.floor(role.baseCost * Math.pow(1.15, count))
+                return (
+                  <div key={role.id} className="flex justify-between items-center">
+                    {/* Role info */}
+                    <div>
+                      <div className="font-semibold">{role.name} (x{count})</div>
+                      <div className="text-xs">{role.description}</div>
+                    </div>
+                    {/* Hire vs Promote */}
+                    <div className="space-x-2">
+                      {/* Hire button for tier1 */}
+                      {role.tier === 1 && (
+                        <button
+                          onClick={() => hireRole(role)}
+                          disabled={sp < cost}
+                          className="px-2 py-1 bg-green-600 rounded disabled:opacity-50"
+                        >Hire {cost} SP</button>
+                      )}
+                      {/* Promote button if nextRole exists */}
+                      {role.nextRoleId && count > 0 && (
+                        <button
+                          onClick={() => promoteRole(role)}
+                          className="px-2 py-1 bg-yellow-600 rounded"
+                        >Promote</button>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           </div>
-        </motion.div>
+
+          {/* Codex / Career Library */}
+          <div className="bg-gray-800 p-4 rounded max-h-64 overflow-y-auto">
+            <h2 className="font-bold mb-2">Career Codex</h2>
+            {ROLE_DEFINITIONS.map(role => codex[role.id] && (
+              <div key={role.id} className="mb-2 border-b border-gray-600 pb-1">
+                <div className="font-semibold">{role.name}</div>
+                <div className="text-xs">Level {role.tier} career</div>
+                <div className="text-xs italic">{role.description}</div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   )
