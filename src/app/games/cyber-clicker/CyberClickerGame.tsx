@@ -7,6 +7,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion' // for smooth animations
+import useEnterprisePersistence, { validateGameState, safeDataSanitization } from '../../../hooks/useEnterprisePersistence'
 
 // ----------------------------------------
 // --- DATA TYPES AND CONFIGURATION ---
@@ -186,6 +187,12 @@ const ACHIEVEMENT_DEFINITIONS: Achievement[] = [
 // ----------------------------------------
 
 export default function CyberClickerGame() {
+  // --- CONSTANTS ---
+  const STORAGE_KEY = 'CyberClickerSave'
+
+  // --- ENTERPRISE PERSISTENCE INTEGRATION ---
+  const { persistenceManager, isLoading: persistenceLoading, error: persistenceError } = useEnterprisePersistence()
+
   // --- ENHANCED GAME STATE HOOKS ---
   // Core game mechanics
   const [sp, setSp] = useState<number>(() => loadState().sp)
@@ -237,14 +244,21 @@ export default function CyberClickerGame() {
     lastPlayDate: string
   }
   
-  const STORAGE_KEY = 'CyberClickerSave'
-
   // Load saved state or use defaults
   function loadState(): SaveState {
     try {
       const json = localStorage.getItem(STORAGE_KEY)
       if (json) {
         const saved = JSON.parse(json)
+        
+        // 🔍 Validate data integrity before using
+        const validation = validateGameState(saved)
+        if (!validation.isValid) {
+          console.warn('Game state validation failed:', validation.errors)
+          // Return default state if validation fails
+          return getDefaultState()
+        }
+        
         // Check if it's a new day for streak tracking
         const today = new Date().toDateString()
         const lastPlay = saved.lastPlayDate
@@ -257,10 +271,15 @@ export default function CyberClickerGame() {
         }
         return saved
       }
-    } catch {
-      /* ignore errors */
+    } catch (error) {
+      console.warn('Failed to load game state from localStorage:', error)
     }
     
+    return getDefaultState()
+  }
+
+  // Extract default state creation to separate function
+  function getDefaultState(): SaveState {
     // Default state: starter SP, no hires, basic codex unlocked
     const defaultHired: Record<string, number> = {}
     ROLE_DEFINITIONS.forEach(r => defaultHired[r.id] = 0)
@@ -281,22 +300,173 @@ export default function CyberClickerGame() {
       lastPlayDate: new Date().toDateString()
     }
   }
+
+  // --- ENTERPRISE PERSISTENCE LOADING ---
+  // Load from enterprise persistence asynchronously on mount
+  useEffect(() => {
+    const loadFromEnterprisePersistence = async () => {
+      try {
+        // Check if persistence manager is available
+        if (!persistenceManager || 
+            !persistenceManager.loadGameState || 
+            typeof persistenceManager.loadGameState !== 'function') {
+          console.warn('Failed to load from enterprise persistence: persistence manager not available')
+          return
+        }
+
+        const result = await persistenceManager.loadGameState()
+        if (result.gameState) {
+          const cyberClickerProgress = result.gameState.gameProgress?.find(
+            (game) => game.gameId === 'cyber-clicker'
+          )
+          
+          if (cyberClickerProgress && cyberClickerProgress.completedAt) {
+            // Load from both enterprise persistence and localStorage
+            const json = localStorage.getItem(STORAGE_KEY)
+            if (json) {
+              const saved = JSON.parse(json) as SaveState
+              
+              // Validate the data
+              const validation = validateGameState(saved)
+              if (validation.isValid) {
+                setSp(saved.sp || cyberClickerProgress.highScore || 0)
+                setTotalSpEarned(saved.totalSpEarned || 0)
+                setTotalClicks(saved.totalClicks || 0)
+                setPlayerLevel(saved.playerLevel || result.gameState.playerStats.level || 1)
+                setHired(saved.hired || {})
+                setAchievementsUnlocked(saved.achievements || [])
+                setScenariosCompleted(saved.scenarios || [])
+                setDayStreak(saved.dayStreak || 1)
+                setCodex(saved.codex || {})
+                
+                console.log('Successfully loaded game state from enterprise persistence + localStorage')
+              } else {
+                console.warn('Loaded data failed validation:', validation.errors)
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.warn('Failed to load from enterprise persistence:', error)
+      }
+    }
+
+    // Only load if persistence manager is ready
+    if (!persistenceLoading && persistenceManager) {
+      loadFromEnterprisePersistence()
+    }
+  }, [persistenceManager, persistenceLoading])
+
+  // --- ENHANCED SAVE WITH ENTERPRISE PERSISTENCE ---
   // Save enhanced state to localStorage whenever key values change
   useEffect(() => {
-    const save: SaveState = { 
-      sp, 
-      totalSpEarned, 
-      totalClicks, 
-      hired, 
-      codex, 
-      achievements: achievementsUnlocked,
-      scenarios: scenariosCompleted,
-      dayStreak,
-      playerLevel,
-      lastPlayDate: new Date().toDateString()
+    const saveState = async () => {
+      try {
+        const save: SaveState = { 
+          sp, 
+          totalSpEarned, 
+          totalClicks, 
+          hired, 
+          codex, 
+          achievements: achievementsUnlocked,
+          scenarios: scenariosCompleted,
+          dayStreak,
+          playerLevel,
+          lastPlayDate: new Date().toDateString()
+        }
+
+        // 🧹 Sanitize data before saving
+        const sanitizedSave = safeDataSanitization(save)
+        
+        // Add metadata to indicate sanitization
+        const enrichedSave = {
+          ...sanitizedSave,
+          _metadata: {
+            sanitized: true,
+            savedAt: new Date().toISOString(),
+            version: '1.0.0'
+          }
+        }
+
+        // Save to localStorage (always)
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(enrichedSave))
+
+        // Save to enterprise persistence if available
+        if (persistenceManager && 
+            persistenceManager.saveGameState && 
+            typeof persistenceManager.saveGameState === 'function') {
+          
+          const gameState = {
+            playerStats: {
+              level: playerLevel,
+              totalXP: totalSpEarned,
+              gamesCompleted: Math.floor(sp / 1000),
+              achievementsUnlocked: achievementsUnlocked.length,
+              streakDays: dayStreak,
+              lastVisit: new Date().toISOString(),
+              timeSpent: 0
+            },
+            achievements: [], // Empty array for now, will be populated with proper achievement objects later
+            gameProgress: [
+              {
+                gameId: 'cyber-clicker',
+                completed: playerLevel >= 10,
+                highScore: sp,
+                timeSpent: 0,
+                attempts: 1,
+                hintsUsed: 0,
+                completedAt: playerLevel >= 10 ? new Date().toISOString() : undefined
+              }
+            ],
+            skillProgress: {
+              cryptography: Math.min(100, playerLevel * 10),
+              passwordSecurity: Math.min(100, Object.values(hired).reduce((acc, count) => acc + count, 0) * 5),
+              phishingDetection: 0,
+              socialEngineering: 0,
+              networkSecurity: Math.min(100, spPerSec * 2),
+              incidentResponse: Math.min(100, clickValue * 5)
+            },
+            preferences: {
+              soundEnabled: true,
+              difficulty: 'normal',
+              theme: 'cyber'
+            },
+            sessionInfo: {
+              sessionId: `cyber_clicker_${Date.now()}`,
+              startTime: new Date().toISOString(),
+              lastActivity: new Date().toISOString()
+            }
+          }
+
+          await persistenceManager.saveGameState(gameState)
+        } else {
+          console.warn('Enterprise persistence not available, using localStorage only')
+        }
+      } catch (error) {
+        console.warn('Failed to save game state:', error)
+        // Fallback to basic localStorage save
+        try {
+          const basicSave: SaveState = { 
+            sp, 
+            totalSpEarned, 
+            totalClicks, 
+            hired, 
+            codex, 
+            achievements: achievementsUnlocked,
+            scenarios: scenariosCompleted,
+            dayStreak,
+            playerLevel,
+            lastPlayDate: new Date().toDateString()
+          }
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(basicSave))
+        } catch (fallbackError) {
+          console.error('All persistence mechanisms failed:', fallbackError)
+        }
+      }
     }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(save))
-  }, [sp, totalSpEarned, totalClicks, hired, codex, achievementsUnlocked, scenariosCompleted, dayStreak, playerLevel])
+
+    saveState()
+  }, [sp, totalSpEarned, totalClicks, hired, codex, achievementsUnlocked, scenariosCompleted, dayStreak, playerLevel, persistenceManager, spPerSec, clickValue])
 
   // ----------------------------------------
   // --- SP PRODUCTION LOOP (AUTO IDLE) ---

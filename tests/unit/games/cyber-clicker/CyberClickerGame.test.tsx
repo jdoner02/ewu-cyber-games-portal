@@ -10,7 +10,7 @@
  * 3. REFACTOR: Clean up implementation
  */
 
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
 
 // Mock localStorage before importing the component
@@ -232,7 +232,8 @@ describe('CyberClickerGame Component', () => {
     
     // Should warn about data validation failure (this will FAIL initially)
     expect(mockConsoleWarn).toHaveBeenCalledWith(
-      expect.stringContaining('validation')
+      'Game state validation failed:',
+      expect.any(Array)
     )
     
     mockConsoleWarn.mockRestore()
