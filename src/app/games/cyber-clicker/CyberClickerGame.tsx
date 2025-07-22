@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion' // for smooth animations
-import useEnterprisePersistence, { validateGameState, safeDataSanitization } from '../../../hooks/useEnterprisePersistence'
+import { useEnterprisePersistence, validateGameState, safeDataSanitization } from '../../../hooks/useEnterprisePersistence'
 
 // ----------------------------------------
 // --- DATA TYPES AND CONFIGURATION ---

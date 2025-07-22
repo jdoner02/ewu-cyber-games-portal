@@ -13,13 +13,19 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
 
-// Mock the enterprise persistence hook
+// Mock the enterprise persistence hook with default implementation
 jest.mock('../../../../src/hooks/useEnterprisePersistence', () => ({
-  __esModule: true,
-  default: jest.fn(),
-  validateGameState: jest.fn(),
-  safeDataSanitization: jest.fn()
+  useEnterprisePersistence: jest.fn(() => ({
+    persistenceManager: null,
+    isLoading: false,
+    error: null
+  })),
+  validateGameState: jest.fn((data) => true),
+  safeDataSanitization: jest.fn((data) => ({ ...data, _metadata: { sanitized: true } }))
 }))
+
+// Get the mocked hook for test customization
+const { useEnterprisePersistence } = jest.requireMock('../../../../src/hooks/useEnterprisePersistence')
 
 // Mock localStorage before importing the component
 const localStorageMock = {
@@ -149,10 +155,9 @@ describe('CyberClickerGame Component', () => {
       })
     }
 
-    // Mock the enterprise persistence hook
-    const useEnterprisePersistence = require('../../../../src/hooks/useEnterprisePersistence').default
+    // Use the global mock
     useEnterprisePersistence.mockReturnValue({
-      persistenceManager: mockPersistenceManager,
+      persistenceManager: mockPersistenceManager as any,
       isLoading: false,
       error: null
     })
@@ -179,8 +184,7 @@ describe('CyberClickerGame Component', () => {
       _metadata: { sanitized: true }
     })
     
-    // Mock the hook to return no persistence manager (localStorage only)
-    const useEnterprisePersistence = require('../../../../src/hooks/useEnterprisePersistence').default
+    // Use the global mock for localStorage only
     useEnterprisePersistence.mockReturnValue({
       persistenceManager: null,
       isLoading: false,
@@ -223,12 +227,11 @@ describe('CyberClickerGame Component', () => {
       loadGameState: jest.fn().mockRejectedValue(new Error('Storage corrupted'))
     }
     
-    // Mock the hook to return failing persistence manager
-    const useEnterprisePersistence = require('../../../../src/hooks/useEnterprisePersistence').default
+    // Use the global mock with failing persistence
     useEnterprisePersistence.mockReturnValue({
-      persistenceManager: mockFailingPersistence,
+      persistenceManager: mockFailingPersistence as any,
       isLoading: false,
-      error: 'Network error'
+      error: 'Network error' as any
     })
     
     // Mock console.warn to capture fallback warnings
@@ -262,8 +265,7 @@ describe('CyberClickerGame Component', () => {
       errors: ['Invalid sp: must be a valid number']
     })
     
-    // Mock the hook
-    const useEnterprisePersistence = require('../../../../src/hooks/useEnterprisePersistence').default
+    // Use the global mock for validation test
     useEnterprisePersistence.mockReturnValue({
       persistenceManager: null,
       isLoading: false,
