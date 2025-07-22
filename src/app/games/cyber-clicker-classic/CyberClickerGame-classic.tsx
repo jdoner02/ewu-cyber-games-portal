@@ -15,13 +15,17 @@ interface ClickUpgrade {
 }
 
 export default function CyberClickerGame() {
-  const [score, setScore] = useState(0)
-  const [clickPower, setClickPower] = useState(1)
-  const [autoClickRate, setAutoClickRate] = useState(0)
-  const [level, setLevel] = useState(1)
-  const [exp, setExp] = useState(0)
-  const [clickAnimation, setClickAnimation] = useState(false)
-  const [notifications, setNotifications] = useState<Array<{id: string, message: string, type: 'success' | 'upgrade' | 'level'}>>([])
+  // --- ENHANCED PERSISTENCE: LOAD & SAVE STATE ---
+  interface SaveState {
+    score: number
+    clickPower: number
+    autoClickRate: number
+    level: number
+    exp: number
+    upgradeStates: Record<string, ClickUpgrade>
+  }
+
+  const STORAGE_KEY = 'CyberClickerClassicSave'
 
   const [upgrades] = useState<ClickUpgrade[]>([
     {
@@ -71,12 +75,67 @@ export default function CyberClickerGame() {
     }
   ])
 
-  const [upgradeStates, setUpgradeStates] = useState<Record<string, ClickUpgrade>>(
-    upgrades.reduce((acc, upgrade) => ({
-      ...acc,
-      [upgrade.id]: { ...upgrade }
-    }), {})
-  )
+  function loadState(): SaveState {
+    try {
+      const json = localStorage.getItem(STORAGE_KEY)
+      if (json) {
+        const saved = JSON.parse(json)
+        // Ensure all required fields exist with proper defaults
+        return {
+          score: saved.score || 0,
+          clickPower: saved.clickPower || 1,
+          autoClickRate: saved.autoClickRate || 0,
+          level: saved.level || 1,
+          exp: saved.exp || 0,
+          upgradeStates: saved.upgradeStates || upgrades.reduce((acc, upgrade) => ({ ...acc, [upgrade.id]: { ...upgrade } }), {})
+        }
+      }
+    } catch {
+      /* ignore errors */
+    }
+    // Defaults
+    return {
+      score: 0,
+      clickPower: 1,
+      autoClickRate: 0,
+      level: 1,
+      exp: 0,
+      upgradeStates: upgrades.reduce((acc, upgrade) => ({ ...acc, [upgrade.id]: { ...upgrade } }), {})
+    }
+  }
+
+  const [score, setScore] = useState(() => loadState().score)
+  const [clickPower, setClickPower] = useState(() => loadState().clickPower)
+  const [autoClickRate, setAutoClickRate] = useState(() => loadState().autoClickRate)
+  const [level, setLevel] = useState(() => loadState().level)
+  const [exp, setExp] = useState(() => loadState().exp)
+  const [clickAnimation, setClickAnimation] = useState(false)
+  const [notifications, setNotifications] = useState<Array<{id: string, message: string, type: 'success' | 'upgrade' | 'level'}>>([])
+
+  const [upgradeStates, setUpgradeStates] = useState<Record<string, ClickUpgrade>>(() => {
+    const loaded = loadState()
+    // Ensure all upgrades exist in the state, merge with defaults if missing
+    const defaultStates = upgrades.reduce((acc, upgrade) => ({ ...acc, [upgrade.id]: { ...upgrade } }), {})
+    return { ...defaultStates, ...loaded.upgradeStates }
+  })
+
+  // Save state to localStorage whenever key values change
+  useEffect(() => {
+    try {
+      const save: SaveState = {
+        score,
+        clickPower,
+        autoClickRate,
+        level,
+        exp,
+        upgradeStates
+      }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(save))
+    } catch (error) {
+      // Handle localStorage errors gracefully (quota exceeded, etc.)
+      console.warn('Failed to save game state:', error)
+    }
+  }, [score, clickPower, autoClickRate, level, exp, upgradeStates])
 
   // Auto-clicking effect
   useEffect(() => {
@@ -143,7 +202,7 @@ export default function CyberClickerGame() {
 
   const formatNumber = (num: number) => {
     if (num >= 1e9) return (num / 1e9).toFixed(1) + 'B'
-    if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M'
+    if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M' 
     if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K'
     return Math.floor(num).toString()
   }
