@@ -187,11 +187,27 @@ const useMovementSystem = (initialX: number, initialY: number, gameMap: GameMap)
   }, [isValidPosition, gameMap.width, gameMap.height]);
 
   useEffect(() => {
+    // Define movement keys as a constant for better maintainability
+    const MOVEMENT_KEYS = ['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'];
+
+    // Helper function to check if a text input is currently focused
+    const isTextInputFocused = (): boolean => {
+      const activeElement = document.activeElement;
+      return activeElement !== null && (
+        activeElement.tagName === 'INPUT' || 
+        activeElement.tagName === 'TEXTAREA' ||
+        (activeElement as HTMLElement).contentEditable === 'true'
+      );
+    };
+
     const handleKeyDown = (event: KeyboardEvent) => {
       const key = event.key.toLowerCase();
-      if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) {
-        event.preventDefault();
-        keysPressed.current.add(key);
+      if (MOVEMENT_KEYS.includes(key)) {
+        // Only prevent default and handle movement if no text input is focused
+        if (!isTextInputFocused()) {
+          event.preventDefault();
+          keysPressed.current.add(key);
+        }
       }
     };
 

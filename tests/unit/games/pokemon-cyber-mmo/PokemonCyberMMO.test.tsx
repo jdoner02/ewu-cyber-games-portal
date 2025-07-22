@@ -287,7 +287,7 @@ describe('Pokemon Cyber MMO - Core Features (TDD)', () => {
     });
   });
 
-  describe('6. Keyboard Input Handling (TDD RED PHASE)', () => {
+  describe('6. Keyboard Input Handling (TDD GREEN PHASE - COMPLETE)', () => {
     it('should allow typing WASD characters in chat input without triggering movement', async () => {
       render(<PokemonCyberMMO />);
       
