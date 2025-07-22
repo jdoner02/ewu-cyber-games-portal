@@ -37,16 +37,24 @@ export default function CyberClickerGameClassic() {
     lastSave: string
   }
 
-  // Initialize persistence manager with error handling
+  // Initialize persistence manager with robust error handling
   const [persistenceManager] = useState(() => {
     try {
-      return new GameStatePersistenceManager()
+      const manager = new GameStatePersistenceManager()
+      // Verify the manager has required methods
+      if (manager && typeof manager.loadGameState === 'function' && typeof manager.saveGameState === 'function') {
+        return manager
+      } else {
+        throw new Error('GameStatePersistenceManager does not have required methods')
+      }
     } catch (error) {
       console.warn('Failed to initialize GameStatePersistenceManager, using fallback:', error)
-      // Return a fallback object with the expected interface
+      // Return a robust fallback object with the expected interface
       return {
         loadGameState: async () => ({ gameState: null, error: null, metrics: null }),
-        saveGameState: async () => ({ success: true, error: null, metrics: null })
+        saveGameState: async () => ({ success: true, error: null, metrics: null }),
+        // Ensure we have the proper type signature to pass runtime checks
+        __isFallback: true
       }
     }
   })
@@ -166,8 +174,10 @@ export default function CyberClickerGameClassic() {
   useEffect(() => {
     const loadFromEnterprisePersistence = async () => {
       try {
-        // Check if the persistence manager has the expected methods
-        if (!persistenceManager.loadGameState || typeof persistenceManager.loadGameState !== 'function') {
+        // More robust check for persistence manager methods
+        if (!persistenceManager || 
+            !persistenceManager.loadGameState || 
+            typeof persistenceManager.loadGameState !== 'function') {
           console.warn('Persistence manager not properly initialized, skipping enterprise persistence load')
           return
         }
@@ -275,8 +285,10 @@ export default function CyberClickerGameClassic() {
           }
         }
 
-        // Check if the persistence manager has the expected methods before using
-        if (persistenceManager.saveGameState && typeof persistenceManager.saveGameState === 'function') {
+        // More robust check for persistence manager methods before using
+        if (persistenceManager && 
+            persistenceManager.saveGameState && 
+            typeof persistenceManager.saveGameState === 'function') {
           await persistenceManager.saveGameState(gameState)
         } else {
           console.warn('Persistence manager not properly initialized, skipping enterprise persistence save')
