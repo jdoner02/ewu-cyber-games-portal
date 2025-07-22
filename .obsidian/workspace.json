@@ -163,6 +163,7 @@
   },
   "active": "b0cd1ed31288fd14",
   "lastOpenFiles": [
+    "tests/unit/games/pokemon-cyber-mmo/BattleSystem-LevelBasedQuestions-TDD.test.tsx",
     "_Test_Guardian_Homebase/logs/pokemon-mmo-movement-system-completion.md",
     "_Test_Guardian_Homebase/logs/pokemon-mmo-tdd-progress.md",
     "debug-pokemon-test.js",
@@ -197,7 +198,6 @@
     "node_modules/path-scurry/node_modules/lru-cache/README.md",
     "node_modules/path-scurry/README.md",
     "node_modules/path-scurry/LICENSE.md",
-    "node_modules/string-width-cjs/node_modules/emoji-regex/README.md",
-    "node_modules/string-width-cjs/readme.md"
+    "node_modules/string-width-cjs/node_modules/emoji-regex/README.md"
   ]
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { CyberSecurityQuestions } from './data/CyberSecurityQuestions';
 
 // ===== ADDITIONAL TYPES =====
 interface BattleState {
@@ -19,7 +20,7 @@ interface TriviaQuestion {
   options: string[];
   correctAnswer: number;
   explanation: string;
-  difficulty: 'easy' | 'medium' | 'hard';
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
 }
 
 interface GameObjectives {
@@ -112,7 +113,7 @@ const TRIVIA_QUESTIONS: TriviaQuestion[] = [
     options: ['Length only', 'Complexity only', 'Length + Complexity + Uniqueness', 'Using your name'],
     correctAnswer: 2,
     explanation: 'Strong passwords combine length (12+ characters), complexity (mixed case, numbers, symbols), and uniqueness (different for each account).',
-    difficulty: 'easy'
+    difficulty: 'beginner'
   },
   {
     id: '2',
@@ -121,7 +122,7 @@ const TRIVIA_QUESTIONS: TriviaQuestion[] = [
     options: ['Professional formatting', 'Urgent action required', 'Correct spelling', 'Known sender'],
     correctAnswer: 1,
     explanation: 'Phishing emails often create false urgency to pressure victims into acting quickly without thinking.',
-    difficulty: 'easy'
+    difficulty: 'beginner'
   },
   {
     id: '3',
@@ -130,7 +131,7 @@ const TRIVIA_QUESTIONS: TriviaQuestion[] = [
     options: ['Free software', 'Antivirus program', 'Malware that encrypts files for money', 'Operating system'],
     correctAnswer: 2,
     explanation: 'Ransomware encrypts victim files and demands payment (ransom) for the decryption key.',
-    difficulty: 'medium'
+    difficulty: 'intermediate'
   }
 ];
 
@@ -339,8 +340,13 @@ const useBattleSystem = () => {
     currentQuestion: null,
     phase: 'preparing'
   });
+  const [battleSessionId, setBattleSessionId] = useState<string>('');
 
   const startBattle = useCallback((opponentId: string) => {
+    // Create battle session for question tracking
+    const battleSession = CyberSecurityQuestions.createBattleSession();
+    setBattleSessionId(battleSession.sessionId);
+
     // Check for NPCs first
     const npcOpponent = CYBER_REGION_MAP.npcs.find(npc => npc.id === opponentId);
     if (npcOpponent) {
@@ -353,12 +359,14 @@ const useBattleSystem = () => {
         phase: 'preparing'
       });
       
-      // Start with first question after brief delay
+      // Start with first question after brief delay using level-based selection
       setTimeout(() => {
-        const randomQuestion = TRIVIA_QUESTIONS[Math.floor(Math.random() * TRIVIA_QUESTIONS.length)];
+        const playerLevel = 1; // TODO: Get from actual player state
+        const opponentLevel = 10; // TODO: Get from NPC data
+        const optimalQuestion = CyberSecurityQuestions.getOptimalQuestion(battleSession.sessionId, playerLevel, opponentLevel);
         setBattleState(prev => ({
           ...prev,
-          currentQuestion: randomQuestion,
+          currentQuestion: optimalQuestion,
           phase: 'question'
         }));
       }, 1000);
@@ -377,12 +385,14 @@ const useBattleSystem = () => {
         phase: 'preparing'
       });
       
-      // Start with first question after brief delay
+      // Start with first question after brief delay using level-based selection
       setTimeout(() => {
-        const randomQuestion = TRIVIA_QUESTIONS[Math.floor(Math.random() * TRIVIA_QUESTIONS.length)];
+        const playerLevel = 1; // TODO: Get from actual player state
+        const opponentLevel = wildOpponent.level || 5;
+        const optimalQuestion = CyberSecurityQuestions.getOptimalQuestion(battleSession.sessionId, playerLevel, opponentLevel);
         setBattleState(prev => ({
           ...prev,
-          currentQuestion: randomQuestion,
+          currentQuestion: optimalQuestion,
           phase: 'question'
         }));
       }, 1000);
@@ -414,17 +424,19 @@ const useBattleSystem = () => {
             phase: 'result'
           };
         } else {
-          // Continue with next question
-          const randomQuestion = TRIVIA_QUESTIONS[Math.floor(Math.random() * TRIVIA_QUESTIONS.length)];
+          // Continue with next question using level-based selection
+          const playerLevel = 1; // TODO: Get from actual player state
+          const opponentLevel = 10; // TODO: Get from battle context
+          const nextQuestion = CyberSecurityQuestions.getOptimalQuestion(battleSessionId, playerLevel, opponentLevel);
           return {
             ...prev,
-            currentQuestion: randomQuestion,
+            currentQuestion: nextQuestion,
             phase: 'question'
           };
         }
       });
     }, 3000);
-  }, []);
+  }, [battleSessionId]);
 
   const throwCyberBall = useCallback(() => {
     setBattleState(prev => ({ ...prev, phase: 'catch' }));
