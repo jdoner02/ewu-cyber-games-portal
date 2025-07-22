@@ -81,7 +81,7 @@ export default function HomePage() {
     {
       id: 'pokemon-cyber-mmo',
       title: 'Pokemon Cyber MMO',
-      description: 'Embark on a Pokemon-style adventure learning Day 1 GenCyber concepts! Meet teammates, explore cyber careers, and master computer basics.',
+      description: '🔥 NEW: Battle System! Embark on a Pokemon-style adventure with real-time multiplayer battles using Kahoot-style trivia! Challenge friends, answer cybersecurity questions, and master GenCyber concepts through competitive learning.',
       icon: '🐉',
       difficulty: 'Beginner',
       category: 'MMO',
@@ -89,11 +89,11 @@ export default function HomePage() {
       rating: 4.9,
       plays: gameProgress.find((g: any) => g.gameId === 'pokemon-cyber-mmo')?.attempts || 0,
       lastPlayed: gameProgress.find((g: any) => g.gameId === 'pokemon-cyber-mmo')?.timeSpent || null,
-      isNew: true,
+      isNew: false,
       isFeatured: true,
-      isFinished: false,
+      isFinished: true,
       gradient: 'from-purple-500 to-indigo-600',
-      skillsLearned: ['Cyber Careers', 'Computer Basics', 'Team Building', 'Cyber Ethics']
+      skillsLearned: ['Cyber Careers', 'Computer Basics', 'Team Building', 'Cyber Ethics', 'Monster Catching', 'Multiplayer Gaming', 'Battle Strategy', 'Trivia Mastery']
     },
     {
       id: 'cyber-knowledge-brain',
