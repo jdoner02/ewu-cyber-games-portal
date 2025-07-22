@@ -132,10 +132,53 @@ const ROLE_DEFINITIONS: CareerRole[] = [
 const NEWS_HEADLINES: NewsItem[] = [
   { id: 'n1', text: 'New zero-day exploit discovered – companies rush to patch!' },
   { id: 'n2', text: 'SOC Analysts detect unusual traffic spike.' },
-  { id: 'n3', text: 'Pen Testers break into test network – fun exercise!' },
+  { id: 'n3', text: 'Pen Testers break into test network – fun exercises!' },
   { id: 'n4', text: 'Risk Analyst identifies critical compliance gap.' },
   { id: 'n5', text: 'Threat Hunter uncovers hidden malware in logs.' },
   { id: 'n6', text: 'Major breach averted by rapid IR team response.' }
+]
+
+// Achievement definitions for gamification system
+const ACHIEVEMENT_DEFINITIONS: Achievement[] = [
+  {
+    id: 'first_click',
+    title: 'First Click',
+    name: 'First Click',
+    description: 'Click the defend button for the first time',
+    icon: '👆',
+    unlocked: false,
+    condition: {
+      type: 'clicks',
+      target: 1
+    },
+    reward: { sp: 5 }
+  },
+  {
+    id: 'click_master',
+    title: 'Click Master',
+    name: 'Click Master', 
+    description: 'Click the defend button 100 times',
+    icon: '🖱️',
+    unlocked: false,
+    condition: {
+      type: 'clicks',
+      target: 100
+    },
+    reward: { sp: 50 }
+  },
+  {
+    id: 'sp_collector',
+    title: 'SP Collector',
+    name: 'SP Collector',
+    description: 'Earn 1000 total Security Points',
+    icon: '💰',
+    unlocked: false,
+    condition: {
+      type: 'sp_earned',
+      target: 1000
+    },
+    reward: { sp: 100 }
+  }
 ]
 
 // ----------------------------------------
@@ -304,7 +347,8 @@ export default function CyberClickerGame() {
   
   // Achievement checking system
   const checkAchievements = useCallback(() => {
-    const gameState: GameState = {
+    // Create simplified gameState for achievement checking
+    const gameState = {
       sp,
       totalSpEarned,
       totalClicks,
@@ -316,7 +360,28 @@ export default function CyberClickerGame() {
     
     // Check each achievement
     ACHIEVEMENT_DEFINITIONS.forEach(achievement => {
-      if (!achievementsUnlocked.includes(achievement.id) && achievement.condition(gameState)) {
+      let conditionMet = false
+      
+      // Evaluate condition based on type
+      switch (achievement.condition.type) {
+        case 'clicks':
+          conditionMet = gameState.totalClicks >= achievement.condition.target
+          break
+        case 'sp_earned':
+          conditionMet = gameState.totalSpEarned >= achievement.condition.target
+          break
+        case 'roles_hired':
+          const totalHired = Object.values(gameState.hired).reduce((sum, count) => sum + count, 0)
+          conditionMet = totalHired >= achievement.condition.target
+          break
+        case 'scenarios_completed':
+          conditionMet = gameState.scenariosCompleted.length >= achievement.condition.target
+          break
+        default:
+          conditionMet = false
+      }
+      
+      if (!gameState.achievementsUnlocked.includes(achievement.id) && conditionMet) {
         unlockAchievement(achievement)
       }
     })
@@ -327,15 +392,15 @@ export default function CyberClickerGame() {
     setAchievementsUnlocked(prev => [...prev, achievement.id])
     showNotification(`🏆 Achievement Unlocked: ${achievement.name}!`)
     
-    // Apply rewards
-    if (achievement.reward.sp) {
+    // Apply rewards safely
+    if (achievement.reward?.sp) {
       setSp(prev => prev + achievement.reward.sp!)
       setTotalSpEarned(prev => prev + achievement.reward.sp!)
     }
-    if (achievement.reward.clickMultiplier) {
+    if (achievement.reward?.clickMultiplier) {
       setClickValue(prev => prev * achievement.reward.clickMultiplier!)
     }
-    if (achievement.reward.unlockRole) {
+    if (achievement.reward?.unlockRole) {
       setUnlockedRoles(prev => new Set([...prev, achievement.reward.unlockRole!]))
     }
   }, [])
