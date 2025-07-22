@@ -191,7 +191,7 @@ describe('SecurityMonitoringDashboard - Strategic Coverage Enhancement', () => {
       expect(screen.getByText('🔍 Incident Response')).toBeInTheDocument()
       
       fireEvent.click(screen.getByText('📈 Threat Analytics'))
-      expect(screen.getByText('� Threat Analytics')).toBeInTheDocument()
+      expect(screen.getByText(/Threat Analytics/)).toBeInTheDocument()
       
       fireEvent.click(screen.getByText(/SOC Training/))
       expect(screen.getByText(/SOC Training/)).toBeInTheDocument()

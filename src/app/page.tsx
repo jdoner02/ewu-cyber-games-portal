@@ -74,7 +74,7 @@ export default function HomePage() {
       lastPlayed: gameProgress.find((g: any) => g.gameId === 'password-fortress')?.timeSpent || null,
       isNew: false,
       isFeatured: true,
-      isFinished: true,
+      isFinished: false,
       gradient: 'from-cyan-500 to-blue-600',
       skillsLearned: ['Password Security', 'Authentication']
     },
@@ -244,7 +244,7 @@ export default function HomePage() {
       lastPlayed: gameProgress.find((g: any) => g.gameId === 'phishing-detective')?.timeSpent || null,
       isNew: true,
       isFeatured: true,
-      isFinished: false,
+      isFinished: true,
       gradient: 'from-red-500 to-orange-600',
       skillsLearned: ['Phishing Detection', 'Social Engineering', 'Email Security']
     },
@@ -278,7 +278,7 @@ export default function HomePage() {
       lastPlayed: gameProgress.find((g: any) => g.gameId === 'encryption-escape')?.timeSpent || null,
       isNew: true,
       isFeatured: true,
-      isFinished: false,
+      isFinished: true,
       gradient: 'from-yellow-500 to-amber-600',
       skillsLearned: ['Cryptography', 'Data Protection', 'Mathematical Security']
     },
@@ -498,90 +498,6 @@ export default function HomePage() {
               </p>
             </div>
 
-            {/* Progressive Disclosure - Clear Entry Points */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-              {/* For Students */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="bg-gradient-to-br from-cyan-500/10 to-blue-500/10 backdrop-blur-sm rounded-xl border border-cyan-400/30 p-6 hover:border-cyan-400/60 transition-all duration-300"
-              >
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-xl flex items-center justify-center mx-auto mb-4">
-                    <Play className="w-8 h-8 text-white" />
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-3">🎯 For Students</h3>
-                  <p className="text-slate-300 mb-4 text-sm leading-relaxed">
-                    Start your cybersecurity journey! Our games teach real skills through interactive adventures.
-                  </p>
-                  <Link href="/learning" className="inline-block">
-                    <motion.button
-                      className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-6 py-3 rounded-lg font-semibold hover:from-cyan-600 hover:to-blue-600 transition-all duration-300"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      🚀 Start Learning!
-                    </motion.button>
-                  </Link>
-                </div>
-              </motion.div>
-
-              {/* For Parents */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-sm rounded-xl border border-purple-400/30 p-6 hover:border-purple-400/60 transition-all duration-300"
-              >
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-r from-purple-400 to-pink-500 rounded-xl flex items-center justify-center mx-auto mb-4">
-                    <Heart className="w-8 h-8 text-white" />
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-3">👨‍👩‍👧‍👦 For Parents</h3>
-                  <p className="text-slate-300 mb-4 text-sm leading-relaxed">
-                    Discover how your child learns cybersecurity safely. See our educational approach and safety measures.
-                  </p>
-                  <Link href="/student-resources/PARENT-GUIDE" className="inline-block">
-                    <motion.button
-                      className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-lg font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      📖 Parent Guide
-                    </motion.button>
-                  </Link>
-                </div>
-              </motion.div>
-
-              {/* For Educators */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 backdrop-blur-sm rounded-xl border border-green-400/30 p-6 hover:border-green-400/60 transition-all duration-300"
-              >
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-r from-green-400 to-emerald-500 rounded-xl flex items-center justify-center mx-auto mb-4">
-                    <Users className="w-8 h-8 text-white" />
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-3">🎓 For Educators</h3>
-                  <p className="text-slate-300 mb-4 text-sm leading-relaxed">
-                    Integrate our games into your curriculum. Access lesson plans and classroom resources.
-                  </p>
-                  <Link href="/docs/LEARNING-SCIENCE" className="inline-block">
-                    <motion.button
-                      className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-3 rounded-lg font-semibold hover:from-green-600 hover:to-emerald-600 transition-all duration-300"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      🏫 Teach With Games
-                    </motion.button>
-                  </Link>
-                </div>
-              </motion.div>
-            </div>
-
             {/* Quick Start for Returning Users */}
             {playerStats.gamesCompleted > 0 && (
               <motion.div
@@ -597,155 +513,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Showcase Our Complete Games Collection */}
-      <section className="relative z-10 py-8 px-4">
-        <div className="container mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 backdrop-blur-sm rounded-2xl border border-indigo-400/20 p-8 mb-8"
-          >
-            <div className="text-center mb-6">
-              <h2 className="text-3xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent mb-4">
-                🎮 12 Complete Educational Games Ready to Play!
-              </h2>
-              <p className="text-lg text-slate-300 max-w-3xl mx-auto leading-relaxed">
-                Each game is fully developed with epic gameplay, engaging challenges, and real cybersecurity learning objectives. 
-                No demos here - these are complete, playable educational experiences that make you a cyber hero!
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              {/* Stats Grid */}
-              <div className="bg-black/30 rounded-xl p-4 text-center border border-cyan-500/20">
-                <div className="text-2xl font-bold text-cyan-400">🚀 Epic</div>
-                <div className="text-sm text-slate-400">Adventures</div>
-              </div>
-              <div className="bg-black/30 rounded-xl p-4 text-center border border-purple-500/20">
-                <div className="text-2xl font-bold text-purple-400">12</div>
-                <div className="text-sm text-slate-400">Complete Games</div>
-              </div>
-              <div className="bg-black/30 rounded-xl p-4 text-center border border-green-500/20">
-                <div className="text-2xl font-bold text-green-400">100%</div>
-                <div className="text-sm text-slate-400">Functional</div>
-              </div>
-              <div className="bg-black/30 rounded-xl p-4 text-center border border-yellow-500/20">
-                <div className="text-2xl font-bold text-yellow-400">🏆 Hero</div>
-                <div className="text-sm text-slate-400">Level Fun</div>
-              </div>
-            </div>
-
-            {/* Quick Preview of Game Types */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-black/30 rounded-xl p-4 border border-blue-500/20">
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="text-2xl">🏰</span>
-                  <h4 className="text-lg font-semibold text-white">Strategy Games</h4>
-                </div>
-                <p className="text-slate-300 text-sm">Password Fortress, Network Defense Tower, Cyber Defense Simulator</p>
-              </div>
-              
-              <div className="bg-black/30 rounded-xl p-4 border border-purple-500/20">
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="text-2xl">🔍</span>
-                  <h4 className="text-lg font-semibold text-white">Investigation & Puzzles</h4>
-                </div>
-                <p className="text-slate-300 text-sm">Phishing Detective, Encryption Escape Room, Quantum Mystery Room</p>
-              </div>
-              
-              <div className="bg-black/30 rounded-xl p-4 border border-green-500/20">
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="text-2xl">🎯</span>
-                  <h4 className="text-lg font-semibold text-white">Action & Adventure</h4>
-                </div>
-                <p className="text-slate-300 text-sm">Pokemon Cyber MMO, Snake Knowledge Arena, CyberSilk Creative</p>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* What's New Section */}
-      <section className="relative z-10 py-8 px-4">
-        <div className="container mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="bg-gradient-to-r from-emerald-500/10 via-cyan-500/10 to-purple-500/10 backdrop-blur-sm rounded-2xl border border-emerald-400/20 p-6 mb-8"
-          >
-            <div className="flex items-center gap-3 mb-4">
-              <motion.div
-                animate={{ rotate: [0, 360] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                className="w-8 h-8 bg-gradient-to-r from-emerald-400 to-cyan-400 rounded-full flex items-center justify-center"
-              >
-                ✨
-              </motion.div>
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-                What's New & Exciting!
-              </h2>
-            </div>
-            
-            <div className="grid md:grid-cols-3 gap-6">
-              <div className="bg-black/30 rounded-xl p-4 border border-purple-500/20">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-2xl">⚛️</span>
-                  <div>
-                    <h3 className="text-lg font-semibold text-white">Quantum Escape Room!</h3>
-                    <span className="text-xs bg-gradient-to-r from-violet-400 to-indigo-400 text-black px-2 py-1 rounded-full font-bold">BRAND NEW</span>
-                  </div>
-                </div>
-                <p className="text-slate-300 text-sm leading-relaxed">
-                  Experience "Dr. Quantum's Time-Lock Laboratory" - a thrilling escape room adventure! Learn quantum physics, wave-particle duality, entanglement, and quantum cryptography while solving temporal puzzles across 4 immersive chambers.
-                </p>
-                <div className="flex flex-wrap gap-2 mt-3">
-                  <span className="text-xs bg-violet-500/20 text-violet-300 px-2 py-1 rounded">Escape Room</span>
-                  <span className="text-xs bg-indigo-500/20 text-indigo-300 px-2 py-1 rounded">Quantum Physics</span>
-                  <span className="text-xs bg-purple-500/20 text-purple-300 px-2 py-1 rounded">Problem Solving</span>
-                </div>
-              </div>
-
-              <div className="bg-black/30 rounded-xl p-4 border border-cyan-500/20">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-2xl">🧠</span>
-                  <div>
-                    <h3 className="text-lg font-semibold text-white">Knowledge Brain Restored!</h3>
-                    <span className="text-xs bg-gradient-to-r from-cyan-400 to-purple-400 text-black px-2 py-1 rounded-full font-bold">ENHANCED</span>
-                  </div>
-                </div>
-                <p className="text-slate-300 text-sm leading-relaxed">
-                  The beloved Cyber Knowledge Brain is back with beautiful weave silk mechanics! Watch your learning create stunning visual patterns as you master cybersecurity concepts and build connections between ideas.
-                </p>
-                <div className="flex flex-wrap gap-2 mt-3">
-                  <span className="text-xs bg-cyan-500/20 text-cyan-300 px-2 py-1 rounded">Knowledge Mapping</span>
-                  <span className="text-xs bg-purple-500/20 text-purple-300 px-2 py-1 rounded">Visual Learning</span>
-                  <span className="text-xs bg-pink-500/20 text-pink-300 px-2 py-1 rounded">Progress Tracking</span>
-                </div>
-              </div>
-              
-              <div className="bg-black/30 rounded-xl p-4 border border-green-500/20">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-2xl">�</span>
-                  <div>
-                    <h3 className="text-lg font-semibold text-white">Snake Knowledge Arena!</h3>
-                    <span className="text-xs bg-gradient-to-r from-green-400 to-teal-400 text-black px-2 py-1 rounded-full font-bold">NEW GAME</span>
-                  </div>
-                </div>
-                <p className="text-slate-300 text-sm leading-relaxed">
-                  Multiplayer snake.io gameplay meets cybersecurity education! Consume knowledge orbs to grow your snake, specialize in different cyber domains, and compete with other students in real-time learning battles.
-                </p>
-                <div className="flex flex-wrap gap-2 mt-3">
-                  <span className="text-xs bg-green-500/20 text-green-300 px-2 py-1 rounded">Multiplayer</span>
-                  <span className="text-xs bg-teal-500/20 text-teal-300 px-2 py-1 rounded">Competition</span>
-                  <span className="text-xs bg-emerald-500/20 text-emerald-300 px-2 py-1 rounded">Skill Building</span>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      </section>
 
       {/* Category Filter */}
       <section className="relative z-10 px-4 mb-8">

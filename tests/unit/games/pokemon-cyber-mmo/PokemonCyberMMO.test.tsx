@@ -5,7 +5,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import PokemonCyberMMO from '@/app/games/pokemon-cyber-mmo/PokemonCyberMMO-v2-educational';
+import PokemonCyberMMO from '@/app/games/pokemon-cyber-mmo/PokemonCyberMMO';
 
 // Mock WebSocket for multiplayer testing
 const mockWebSocket = {
@@ -30,7 +30,7 @@ jest.mock('framer-motion', () => ({
   AnimatePresence: ({ children }: any) => children,
 }));
 
-describe.skip('Pokemon Cyber MMO - Multiplayer Core Features', () => {
+describe('Pokemon Cyber MMO - Core Features (TDD)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });

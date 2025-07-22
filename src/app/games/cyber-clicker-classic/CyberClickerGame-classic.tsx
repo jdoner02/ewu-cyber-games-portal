@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Shield, Zap, Server, Wifi, Lock, Unlock, AlertTriangle, CheckCircle } from 'lucide-react'
+import { GameStatePersistenceManager } from '@/utils/persistence/GameStatePersistence'
 
 interface ClickUpgrade {
   id: string
@@ -15,17 +16,21 @@ interface ClickUpgrade {
 }
 
 export default function CyberClickerGame() {
-  // --- ENHANCED PERSISTENCE: LOAD & SAVE STATE ---
-  interface SaveState {
+  // --- ENHANCED ENTERPRISE PERSISTENCE: LOAD & SAVE STATE ---
+  interface CyberClickerSaveState {
     score: number
     clickPower: number
     autoClickRate: number
     level: number
     exp: number
     upgradeStates: Record<string, ClickUpgrade>
+    sessionId: string
+    lastSave: string
   }
 
-  const STORAGE_KEY = 'CyberClickerClassicSave'
+  // Initialize persistence manager
+  const [persistenceManager] = useState(() => new GameStatePersistenceManager())
+  const GAME_KEY = 'cyber_clicker_classic'
 
   const [upgrades] = useState<ClickUpgrade[]>([
     {
@@ -75,9 +80,11 @@ export default function CyberClickerGame() {
     }
   ])
 
-  function loadState(): SaveState {
+  function loadState(): CyberClickerSaveState {
     try {
-      const json = localStorage.getItem(STORAGE_KEY)
+      // For immediate synchronous loading, use localStorage
+      // TODO: Implement async loading from enterprise persistence on component mount
+      const json = localStorage.getItem('CyberClickerClassicSave')
       if (json) {
         const saved = JSON.parse(json)
         // Ensure all required fields exist with proper defaults
@@ -87,7 +94,9 @@ export default function CyberClickerGame() {
           autoClickRate: saved.autoClickRate || 0,
           level: saved.level || 1,
           exp: saved.exp || 0,
-          upgradeStates: saved.upgradeStates || upgrades.reduce((acc, upgrade) => ({ ...acc, [upgrade.id]: { ...upgrade } }), {})
+          upgradeStates: saved.upgradeStates || upgrades.reduce((acc, upgrade) => ({ ...acc, [upgrade.id]: { ...upgrade } }), {}),
+          sessionId: saved.sessionId || `cyber_clicker_${Date.now()}`,
+          lastSave: saved.lastSave || new Date().toISOString()
         }
       }
     } catch {
@@ -100,7 +109,9 @@ export default function CyberClickerGame() {
       autoClickRate: 0,
       level: 1,
       exp: 0,
-      upgradeStates: upgrades.reduce((acc, upgrade) => ({ ...acc, [upgrade.id]: { ...upgrade } }), {})
+      upgradeStates: upgrades.reduce((acc, upgrade) => ({ ...acc, [upgrade.id]: { ...upgrade } }), {}),
+      sessionId: `cyber_clicker_${Date.now()}`,
+      lastSave: new Date().toISOString()
     }
   }
 
@@ -119,23 +130,127 @@ export default function CyberClickerGame() {
     return { ...defaultStates, ...loaded.upgradeStates }
   })
 
-  // Save state to localStorage whenever key values change
+  // Load from enterprise persistence asynchronously on mount
   useEffect(() => {
-    try {
-      const save: SaveState = {
-        score,
-        clickPower,
-        autoClickRate,
-        level,
-        exp,
-        upgradeStates
+    const loadFromEnterprisePersistence = async () => {
+      try {
+        const result = await persistenceManager.loadGameState()
+        if (result.gameState) {
+          // Look for cyber clicker game progress
+          const cyberClickerProgress = result.gameState.gameProgress?.find(game => game.gameId === GAME_KEY)
+          if (cyberClickerProgress && cyberClickerProgress.completedAt) {
+            // Try to extract data from localStorage as the enterprise system doesn't store detailed game state
+            const json = localStorage.getItem('CyberClickerClassicSave')
+            if (json) {
+              const saved = JSON.parse(json) as CyberClickerSaveState
+              
+              // Update state with loaded data
+              setScore(saved.score || cyberClickerProgress.highScore || 0)
+              setClickPower(saved.clickPower || 1)
+              setAutoClickRate(saved.autoClickRate || 0)
+              setLevel(saved.level || result.gameState.playerStats.level || 1)
+              setExp(saved.exp || 0)
+              
+              // Merge upgrade states with defaults
+              const defaultStates = upgrades.reduce((acc, upgrade) => ({ ...acc, [upgrade.id]: { ...upgrade } }), {})
+              setUpgradeStates({ ...defaultStates, ...saved.upgradeStates })
+              
+              console.log('Successfully loaded game state from enterprise persistence + localStorage')
+            }
+          }
+        }
+      } catch (error) {
+        console.warn('Failed to load from enterprise persistence:', error)
       }
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(save))
-    } catch (error) {
-      // Handle localStorage errors gracefully (quota exceeded, etc.)
-      console.warn('Failed to save game state:', error)
     }
-  }, [score, clickPower, autoClickRate, level, exp, upgradeStates])
+
+    loadFromEnterprisePersistence()
+  }, [persistenceManager])
+
+  // Save state to enterprise persistence whenever key values change
+  useEffect(() => {
+    const saveState = async () => {
+      try {
+        const save: CyberClickerSaveState = {
+          score,
+          clickPower,
+          autoClickRate,
+          level,
+          exp,
+          upgradeStates,
+          sessionId: `cyber_clicker_${Date.now()}`,
+          lastSave: new Date().toISOString()
+        }
+
+        // Save to enterprise persistence system
+        const gameState = {
+          playerStats: {
+            level,
+            totalXP: exp,
+            gamesCompleted: Math.floor(score / 1000), // Estimate based on score
+            achievementsUnlocked: Object.values(upgradeStates).reduce((acc, upgrade) => acc + (upgrade.owned > 0 ? 1 : 0), 0),
+            streakDays: 1,
+            lastVisit: new Date().toISOString(),
+            timeSpent: Date.now() - parseInt(save.sessionId.split('_')[2] || '0')
+          },
+          achievements: [] as any[], // Empty for now
+          gameProgress: [{
+            gameId: GAME_KEY,
+            completed: level >= 10,
+            highScore: score,
+            timeSpent: Date.now() - parseInt(save.sessionId.split('_')[2] || '0'),
+            attempts: 1,
+            hintsUsed: 0,
+            completedAt: level >= 10 ? new Date().toISOString() : undefined
+          }],
+          skillProgress: {
+            cryptography: Math.min(100, level * 10),
+            passwordSecurity: Math.min(100, Object.values(upgradeStates).reduce((acc, upgrade) => acc + upgrade.owned, 0) * 5),
+            phishingDetection: 0,
+            socialEngineering: 0,
+            networkSecurity: Math.min(100, autoClickRate * 2),
+            incidentResponse: Math.min(100, clickPower * 5)
+          },
+          preferences: {
+            soundEnabled: true,
+            difficulty: 'normal',
+            theme: 'cyber'
+          },
+          sessionInfo: {
+            sessionId: save.sessionId,
+            startTime: save.lastSave,
+            lastActivity: new Date().toISOString()
+          }
+        }
+
+        await persistenceManager.saveGameState(gameState)
+        
+        // Also save to localStorage as fallback
+        localStorage.setItem('CyberClickerClassicSave', JSON.stringify(save))
+      } catch (error) {
+        // Handle persistence errors gracefully (quota exceeded, etc.)
+        console.warn('Failed to save game state:', error)
+        // Fallback to localStorage only
+        try {
+          const save: CyberClickerSaveState = {
+            score,
+            clickPower,
+            autoClickRate,
+            level,
+            exp,
+            upgradeStates,
+            sessionId: `cyber_clicker_${Date.now()}`,
+            lastSave: new Date().toISOString()
+          }
+          localStorage.setItem('CyberClickerClassicSave', JSON.stringify(save))
+        } catch (fallbackError) {
+          console.error('All persistence mechanisms failed:', fallbackError)
+        }
+      }
+    }
+
+    saveState()
+  }, [score, clickPower, autoClickRate, level, exp, upgradeStates, persistenceManager])
 
   // Auto-clicking effect
   useEffect(() => {

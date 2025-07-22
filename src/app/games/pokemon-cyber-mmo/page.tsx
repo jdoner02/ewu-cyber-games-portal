@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic'
 import { Suspense } from 'react'
 
 const PokemonCyberMMO = dynamic(
-  () => import('./PokemonCyberMMO-v2-educational'),
+  () => import('./PokemonCyberMMO'),
   { 
     ssr: false,
     loading: () => (

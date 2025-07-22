@@ -61,6 +61,34 @@ const FEATURED_GAMES = [
     rating: '4.5',
     tags: ['Clicker', 'Strategy', 'Resource Management', 'Upgrades'],
     category: 'Strategy & Management'
+  },
+  {
+    id: 'pokemon-cyber-mmo',
+    title: '🐾 Pokemon Cyber MMO',
+    description: 'Explore the Cyber Region! Pokemon-style MMO with movement, chat, and cybersecurity learning adventures.',
+    href: '/games/pokemon-cyber-mmo',
+    difficulty: 'Beginner-Intermediate',
+    duration: '30-90 min',
+    players: 'Multiplayer',
+    rating: '4.8',
+    tags: ['Pokemon', 'MMO', 'Movement', 'Chat', 'Adventure', 'Cybersecurity'],
+    category: 'MMO Adventure',
+    hot: true,
+    new: true,
+    features: [
+      'Smooth character movement (WASD)',
+      'Real-time chat system',
+      'Pokemon-style encounters',
+      'Educational cybersecurity content',
+      'Multiplayer interactions',
+      'Clean, modern interface'
+    ],
+    learningOutcomes: [
+      'Learn cybersecurity fundamentals',
+      'Practice team communication',
+      'Understand MMO game mechanics',
+      'Apply security principles in gaming'
+    ]
   }
 ]
 

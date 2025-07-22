@@ -5,70 +5,7 @@
 
 'use client'
 
-import React, { useState, useCallback, useEffect } from 'react'
-import { Shield, Zap, Target, Lock, Eye, AlertTriangle, Trophy, Star, Unlock } from 'lucide-react'
-
-// Emergency deployment types - inline to resolve import issues
-interface ThreatEvent {
-  id: string;
-  type: string;
-  severity: string;
-  description: string;
-  timestamp: number;
-  resolved: boolean;
-}
-
-interface LearningScenario {
-  id: string;
-  title: string;
-  description: string;
-  difficulty: string;
-  category: string;
-}
-
-interface Achievement {
-  id: string;
-  title: string;
-  name: string;
-  description: string;
-  icon: string;
-  category: string;
-  condition: (gameState: any) => boolean;
-  reward: {
-    sp?: number;
-    clickMultiplier?: number;
-    unlockRole?: string;
-  };
-  unlocked: boolean;
-}
-
-interface GameState {
-  score: number;
-  level: number;
-  experience: number;
-  currency: number;
-  sp: number;
-  achievements: Achievement[];
-  stats: {
-    totalClicks: number;
-    threatsDefended: number;
-    lessonsCompleted: number;
-  };
-}
-
-const ACHIEVEMENT_DEFINITIONS: Achievement[] = [
-  {
-    id: 'first_click',
-    title: 'First Click',
-    name: 'First Click',
-    description: 'Click your first cyber defense button',
-    icon: '🖱️',
-    category: 'engagement',
-    condition: (gameState: any) => gameState.stats.totalClicks >= 1,
-    reward: { sp: 10 },
-    unlocked: false
-  }
-];
+import React, { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion' // for smooth animations
 
 // ----------------------------------------
