@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { 
   Shield, 
-  Trophy,
+  Award as Trophy,
   Star,
   Gift,
   Zap, 
@@ -76,28 +76,28 @@ const FEATURED_GAMES = [
     hot: true
   },
   {
-    id: 'phishing-detective',
-    title: 'Phishing Detective',
-    description: 'Spot fake emails and protect innocent users!',
-    difficulty: 'Medium',
-    duration: '5-20 min',
-    players: '6.2k playing',
-    rating: 4.7,
-    image: '/games/phishing-detective.png',
-    tags: ['Detective', 'Email', 'Critical Thinking'],
-    color: 'from-orange-500 to-red-600'
-  },
-  {
-    id: 'network-defense',
-    title: 'Network Defense Tower',
+    id: 'cyber-defense-simulator',
+    title: 'Cyber Defense Simulator',
     description: 'Defend your network from waves of cyber attacks!',
     difficulty: 'Hard',
     duration: '15-30 min',
     players: '4.1k playing', 
     rating: 4.6,
-    image: '/games/network-defense.png',
+    image: '/games/cyber-defense-simulator.png',
     tags: ['Tower Defense', 'Strategy', 'Real-time'],
     color: 'from-purple-500 to-pink-600'
+  },
+  {
+    id: 'cyber-knowledge-brain',
+    title: 'Cyber Knowledge Brain',
+    description: 'Test your cybersecurity knowledge and learn new concepts!',
+    difficulty: 'Medium',
+    duration: '5-20 min',
+    players: '6.2k playing',
+    rating: 4.7,
+    image: '/games/cyber-knowledge-brain.png',
+    tags: ['Quiz', 'Learning', 'Critical Thinking'],
+    color: 'from-orange-500 to-red-600'
   }
 ]
 
@@ -338,7 +338,7 @@ export default function HomePage() {
                 transition={{ delay: index * 0.1 }}
                 className="group"
               >
-                <Link href={`/games/${game.id}` as `/games/${string}`}>
+                <Link href={`/games/${game.id}`}>
                   <div className={`bg-gradient-to-br ${game.color} p-1 rounded-xl hover:scale-105 transition-all duration-300 cursor-pointer`}>
                     <div className="bg-slate-900 rounded-lg p-6 h-full">
                       <div className="flex items-start justify-between mb-4">
