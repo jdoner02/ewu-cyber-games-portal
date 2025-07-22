@@ -172,8 +172,20 @@ describe('Pokemon Cyber MMO - Core Features (TDD)', () => {
       const player = screen.getByTestId('player-character');
       const initialPosition = player.getBoundingClientRect();
 
-      // Move right
-      fireEvent.keyDown(document, { key: 'w' });
+      // Move up - simulate key press and release with proper act() wrapping
+      act(() => {
+        fireEvent.keyDown(document, { key: 'w' });
+      });
+      
+      // Wait for movement interval (150ms) plus buffer
+      await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 200));
+      });
+      
+      // Release key
+      act(() => {
+        fireEvent.keyUp(document, { key: 'w' });
+      });
       
       await waitFor(() => {
         const newPosition = player.getBoundingClientRect();

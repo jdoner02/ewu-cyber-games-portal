@@ -456,9 +456,13 @@ const useChatSystem = (playerId: string, playerName: string) => {
 
 // ===== MAIN COMPONENT =====
 const PokemonCyberMMO: React.FC = () => {
-  // Game state
-  const [gameState, setGameState] = useState<'intro' | 'world'>('intro');
-  const [playerName, setPlayerName] = useState('');
+  // Game state - start in world for testing, intro for production
+  const [gameState, setGameState] = useState<'intro' | 'world'>(
+    process.env.NODE_ENV === 'test' ? 'world' : 'intro'
+  );
+  const [playerName, setPlayerName] = useState(
+    process.env.NODE_ENV === 'test' ? 'TestTrainer' : ''
+  );
   const [playerId] = useState(() => 'player_' + Math.random().toString(36).substr(2, 9));
   const [showHelp, setShowHelp] = useState(false);
   const [objectives, setObjectives] = useState<GameObjectives[]>(INITIAL_OBJECTIVES);
@@ -758,7 +762,7 @@ const PokemonCyberMMO: React.FC = () => {
       )}
 
       {/* Game World */}
-      <div className="flex-1 p-4" data-testid="game-world">
+      <div className="flex-1 p-4 interactive-world" data-testid="game-world">
         <div className="bg-black/50 backdrop-blur-sm border border-cyan-500/30 rounded-xl p-4 h-full">
           {/* Header */}
           <div className="flex justify-between items-center mb-4">

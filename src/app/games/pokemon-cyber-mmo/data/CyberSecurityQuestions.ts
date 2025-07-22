@@ -16,6 +16,12 @@ export interface QuestionDatabase {
   advanced: TriviaQuestion[];
 }
 
+interface BattleSession {
+  sessionId: string;
+  usedQuestionIds: string[];
+  createdAt: number;
+}
+
 export class CyberSecurityQuestions {
   private static questionDatabase: QuestionDatabase = {
     beginner: [
@@ -1032,6 +1038,9 @@ export class CyberSecurityQuestions {
     return allQuestions.filter(q => q.category === category);
   }
 
+  // Battle Session Storage
+  private static battleSessions: Map<string, BattleSession> = new Map();
+
   static getRandomQuestion(difficulty: 'beginner' | 'intermediate' | 'advanced'): TriviaQuestion {
     const questions = this.questionDatabase[difficulty];
     const randomIndex = Math.floor(Math.random() * questions.length);
@@ -1067,29 +1076,106 @@ export class CyberSecurityQuestions {
   }
 
   static createBattleSession(): { sessionId: string; usedQuestionIds: string[] } {
+    const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const session: BattleSession = {
+      sessionId,
+      usedQuestionIds: [],
+      createdAt: Date.now()
+    };
+    this.battleSessions.set(sessionId, session);
     return {
-      sessionId: `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      usedQuestionIds: []
+      sessionId: session.sessionId,
+      usedQuestionIds: [...session.usedQuestionIds]
     };
   }
 
   static getQuestionForBattleSession(sessionId: string, levelDifference: number): TriviaQuestion {
-    // For now, just use level difference without session tracking
-    return this.getQuestionByLevelDifference(levelDifference);
+    const session = this.battleSessions.get(sessionId);
+    if (!session) {
+      throw new Error('Battle session not found');
+    }
+
+    const difficulty = this.getDifficultyFromLevelDifference(levelDifference);
+    const availableQuestions = this.questionDatabase[difficulty].filter(
+      q => !session.usedQuestionIds.includes(q.id)
+    );
+
+    let selectedQuestion: TriviaQuestion;
+    let selectedDifficulty = difficulty;
+
+    if (availableQuestions.length === 0) {
+      // Smart fallback: try next difficulty level
+      const fallbackDifficulties = this.getFallbackDifficulties(difficulty);
+      let fallbackQuestion: TriviaQuestion | null = null;
+      
+      for (const fallbackDiff of fallbackDifficulties) {
+        const fallbackAvailable = this.questionDatabase[fallbackDiff].filter(
+          q => !session.usedQuestionIds.includes(q.id)
+        );
+        if (fallbackAvailable.length > 0) {
+          const randomIndex = Math.floor(Math.random() * fallbackAvailable.length);
+          fallbackQuestion = fallbackAvailable[randomIndex];
+          selectedDifficulty = fallbackDiff;
+          break;
+        }
+      }
+      
+      if (!fallbackQuestion) {
+        // Last resort: return any question from original difficulty
+        selectedQuestion = this.getRandomQuestion(difficulty);
+      } else {
+        selectedQuestion = fallbackQuestion;
+      }
+    } else {
+      const randomIndex = Math.floor(Math.random() * availableQuestions.length);
+      selectedQuestion = availableQuestions[randomIndex];
+    }
+    
+    // Track the used question
+    session.usedQuestionIds.push(selectedQuestion.id);
+    
+    return selectedQuestion;
+  }
+
+  private static getFallbackDifficulties(difficulty: 'beginner' | 'intermediate' | 'advanced'): ('beginner' | 'intermediate' | 'advanced')[] {
+    switch (difficulty) {
+      case 'beginner':
+        return ['intermediate', 'advanced'];
+      case 'intermediate':
+        return ['beginner', 'advanced'];
+      case 'advanced':
+        return ['intermediate', 'beginner'];
+    }
   }
 
   static getBattleSessionState(sessionId: string): { sessionId: string; usedQuestionIds: string[] } {
-    // Mock implementation - in real app would track session state
-    return { sessionId, usedQuestionIds: [] };
+    const session = this.battleSessions.get(sessionId);
+    if (!session) {
+      throw new Error('Battle session not found');
+    }
+    return {
+      sessionId: session.sessionId,
+      usedQuestionIds: [...session.usedQuestionIds]
+    };
   }
 
   static endBattleSession(sessionId: string): void {
-    // Mock implementation - in real app would cleanup session
+    this.battleSessions.delete(sessionId);
+  }
+
+  private static getDifficultyFromLevelDifference(levelDifference: number): 'beginner' | 'intermediate' | 'advanced' {
+    if (levelDifference >= 0) {
+      return 'beginner'; // Player equal or stronger - easier questions
+    } else if (levelDifference <= -5) {
+      return 'advanced'; // Opponent stronger by 5+ levels - harder questions
+    } else {
+      return 'intermediate'; // Opponent slightly stronger (1-4 levels)
+    }
   }
 
   static getOptimalQuestion(sessionId: string, playerLevel: number, opponentLevel: number): TriviaQuestion {
     const levelDifference = playerLevel - opponentLevel;
-    return this.getQuestionByLevelDifference(levelDifference);
+    return this.getQuestionForBattleSession(sessionId, levelDifference);
   }
 
   static recordQuestionResult(sessionId: string, questionId: string, correct: boolean): void {

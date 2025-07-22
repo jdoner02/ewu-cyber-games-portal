@@ -489,33 +489,27 @@ export default function CyberClickerGame() {
   }, [hired])
 
   // ----------------------------------------
-  // --- ENHANCED CLICK HANDLER WITH VISUAL FEEDBACK ---
+  // --- ACHIEVEMENT SYSTEM ---
   // ----------------------------------------
-  const handleClick = useCallback((event?: React.MouseEvent) => {
-    // Add SP and track statistics
-    setSp(prev => prev + clickValue)
-    setTotalSpEarned(prev => prev + clickValue)
-    setTotalClicks(prev => prev + 1)
-    
-    // Create particle effect at click location
-    if (event) {
-      const rect = event.currentTarget.getBoundingClientRect()
-      const x = event.clientX - rect.left
-      const y = event.clientY - rect.top
-      const particleId = Date.now() + Math.random()
-      
-      setClickParticles(prev => [...prev, { id: particleId, x, y }])
-      
-      // Remove particle after animation
-      setTimeout(() => {
-        setClickParticles(prev => prev.filter(p => p.id !== particleId))
-      }, 1000)
-    }
-    
-    // Check for click-based achievements
-    checkAchievements()
-  }, [clickValue])
   
+  // Unlock achievement with rewards
+  const unlockAchievement = useCallback((achievement: Achievement) => {
+    setAchievementsUnlocked(prev => [...prev, achievement.id])
+    showNotification(`🏆 Achievement Unlocked: ${achievement.name}!`)
+    
+    // Apply rewards safely with null checks
+    if (achievement.reward?.sp) {
+      setSp(prev => prev + (achievement.reward?.sp || 0))
+      setTotalSpEarned(prev => prev + (achievement.reward?.sp || 0))
+    }
+    if (achievement.reward?.clickMultiplier) {
+      setClickValue(prev => prev * (achievement.reward?.clickMultiplier || 1))
+    }
+    if (achievement.reward?.unlockRole) {
+      setUnlockedRoles(prev => new Set([...prev, achievement.reward?.unlockRole!]))
+    }
+  }, [])
+
   // Achievement checking system
   const checkAchievements = useCallback(() => {
     // Create simplified gameState for achievement checking
@@ -557,24 +551,35 @@ export default function CyberClickerGame() {
       }
     })
   }, [sp, totalSpEarned, totalClicks, hired, dayStreak, achievementsUnlocked, scenariosCompleted])
-  
-  // Unlock achievement with rewards
-  const unlockAchievement = useCallback((achievement: Achievement) => {
-    setAchievementsUnlocked(prev => [...prev, achievement.id])
-    showNotification(`🏆 Achievement Unlocked: ${achievement.name}!`)
+
+  // ----------------------------------------
+  // --- ENHANCED CLICK HANDLER WITH VISUAL FEEDBACK ---
+  // ----------------------------------------
+  const handleClick = useCallback((event?: React.MouseEvent) => {
+    // Add SP and track statistics
+    setSp(prev => prev + clickValue)
+    setTotalSpEarned(prev => prev + clickValue)
+    setTotalClicks(prev => prev + 1)
     
-    // Apply rewards safely with null checks
-    if (achievement.reward?.sp) {
-      setSp(prev => prev + (achievement.reward?.sp || 0))
-      setTotalSpEarned(prev => prev + (achievement.reward?.sp || 0))
+    // Create particle effect at click location
+    if (event) {
+      const rect = event.currentTarget.getBoundingClientRect()
+      const x = event.clientX - rect.left
+      const y = event.clientY - rect.top
+      const particleId = Date.now() + Math.random()
+      
+      setClickParticles(prev => [...prev, { id: particleId, x, y }])
+      
+      // Remove particle after animation
+      setTimeout(() => {
+        setClickParticles(prev => prev.filter(p => p.id !== particleId))
+      }, 1000)
     }
-    if (achievement.reward?.clickMultiplier) {
-      setClickValue(prev => prev * (achievement.reward?.clickMultiplier || 1))
-    }
-    if (achievement.reward?.unlockRole) {
-      setUnlockedRoles(prev => new Set([...prev, achievement.reward?.unlockRole!]))
-    }
-  }, [])
+    
+    // Check for click-based achievements
+    checkAchievements()
+  }, [clickValue, checkAchievements]) // 🔧 FIX: Added checkAchievements to dependency array to prevent stale closure
+  
     // show a quick notification (+1) or animation if desired
     // (omitted for brevity)
 
