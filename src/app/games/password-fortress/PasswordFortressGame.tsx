@@ -1,3 +1,5 @@
+'use client';
+
 // PasswordFortressGame.tsx
 // A fun, interactive tower-defense-style game where you defend your digital fortress
 // by building password-based defenses against waves of attackers.  
