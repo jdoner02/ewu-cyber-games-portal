@@ -494,11 +494,22 @@ export default function CyberClickerGame() {
   
   // Unlock achievement with rewards
   const unlockAchievement = useCallback((achievement: Achievement) => {
-    setAchievementsUnlocked(prev => [...prev, achievement.id])
-    showNotification(`🏆 Achievement Unlocked: ${achievement.name}!`)
+    console.log('🏆 unlockAchievement called for:', achievement.id)
+    
+    setAchievementsUnlocked(prev => {
+      console.log('🏆 Previous achievements:', prev)
+      const newAchievements = [...prev, achievement.id]
+      console.log('🏆 New achievements:', newAchievements)
+      return newAchievements
+    })
+    
+    const notificationMsg = `🏆 Achievement Unlocked: ${achievement.name}!`
+    console.log('🏆 Showing notification:', notificationMsg)
+    showNotification(notificationMsg)
     
     // Apply rewards safely with null checks
     if (achievement.reward?.sp) {
+      console.log('🏆 Applying SP reward:', achievement.reward.sp)
       setSp(prev => prev + (achievement.reward?.sp || 0))
       setTotalSpEarned(prev => prev + (achievement.reward?.sp || 0))
     }
@@ -512,6 +523,8 @@ export default function CyberClickerGame() {
 
   // Achievement checking system
   const checkAchievements = useCallback(() => {
+    console.log('🔍 checkAchievements called')
+    
     // Create simplified gameState for achievement checking
     const gameState = {
       sp,
@@ -523,6 +536,11 @@ export default function CyberClickerGame() {
       scenariosCompleted
     }
     
+    console.log('🔍 gameState:', { 
+      totalClicks: gameState.totalClicks, 
+      achievementsUnlocked: gameState.achievementsUnlocked 
+    })
+    
     // Check each achievement
     ACHIEVEMENT_DEFINITIONS.forEach(achievement => {
       let conditionMet = false
@@ -531,6 +549,7 @@ export default function CyberClickerGame() {
       switch (achievement.condition.type) {
         case 'clicks':
           conditionMet = gameState.totalClicks >= achievement.condition.target
+          console.log(`🔍 ${achievement.id}: clicks ${gameState.totalClicks} >= ${achievement.condition.target} = ${conditionMet}`)
           break
         case 'sp_earned':
           conditionMet = gameState.totalSpEarned >= achievement.condition.target
@@ -546,20 +565,33 @@ export default function CyberClickerGame() {
           conditionMet = false
       }
       
-      if (!gameState.achievementsUnlocked.includes(achievement.id) && conditionMet) {
+      const alreadyUnlocked = gameState.achievementsUnlocked.includes(achievement.id)
+      console.log(`🔍 ${achievement.id}: already unlocked = ${alreadyUnlocked}, condition met = ${conditionMet}`)
+      
+      if (!alreadyUnlocked && conditionMet) {
+        console.log(`🔍 Unlocking achievement: ${achievement.id}`)
         unlockAchievement(achievement)
       }
     })
-  }, [sp, totalSpEarned, totalClicks, hired, dayStreak, achievementsUnlocked, scenariosCompleted])
+  }, [sp, totalSpEarned, totalClicks, hired, dayStreak, achievementsUnlocked, scenariosCompleted, unlockAchievement])
 
   // ----------------------------------------
   // --- ENHANCED CLICK HANDLER WITH VISUAL FEEDBACK ---
   // ----------------------------------------
   const handleClick = useCallback((event?: React.MouseEvent) => {
+    console.log('🖱️ handleClick called')
+    
     // Add SP and track statistics
-    setSp(prev => prev + clickValue)
+    setSp(prev => {
+      console.log('🖱️ SP changing from', prev, 'to', prev + clickValue)
+      return prev + clickValue
+    })
     setTotalSpEarned(prev => prev + clickValue)
-    setTotalClicks(prev => prev + 1)
+    setTotalClicks(prev => {
+      const newTotalClicks = prev + 1
+      console.log('🖱️ totalClicks changing from', prev, 'to', newTotalClicks)
+      return newTotalClicks
+    })
     
     // Create particle effect at click location
     if (event) {
@@ -575,10 +607,15 @@ export default function CyberClickerGame() {
         setClickParticles(prev => prev.filter(p => p.id !== particleId))
       }, 1000)
     }
-    
-    // Check for click-based achievements
-    checkAchievements()
-  }, [clickValue, checkAchievements]) // 🔧 FIX: Added checkAchievements to dependency array to prevent stale closure
+  }, [clickValue])
+
+  // 🔧 GREEN PHASE FIX: Check achievements whenever totalClicks changes
+  useEffect(() => {
+    console.log('🔍 useEffect triggered by totalClicks change:', totalClicks)
+    if (totalClicks > 0) { // Only check if we have clicks (avoid initial render)
+      checkAchievements()
+    }
+  }, [totalClicks, checkAchievements])
   
     // show a quick notification (+1) or animation if desired
     // (omitted for brevity)
