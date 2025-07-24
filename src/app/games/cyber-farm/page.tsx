@@ -93,6 +93,94 @@ interface SaveState {
   zoomLevel: number;
   prestigeLevel: number;
   globalRank: number;
+  // Cybersecurity Educational Enhancement State
+  nistFramework: {
+    currentPhase: 'identify' | 'protect' | 'detect' | 'respond' | 'recover';
+    identifyProgress: number;
+    protectProgress: number;
+    detectProgress: number;
+    respondProgress: number;
+    recoverProgress: number;
+    completedTasks: string[];
+  };
+  riskAssessment: {
+    threats: Array<{
+      id: string;
+      name: string;
+      likelihood: number;
+      impact: number;
+      riskScore: number;
+      treatment: 'accept' | 'mitigate' | 'transfer' | 'avoid';
+      status: 'identified' | 'in-progress' | 'mitigated' | 'accepted';
+    }>;
+    businessImpact: {
+      rto: number; // Recovery Time Objective (hours)
+      rpo: number; // Recovery Point Objective (hours)
+      downtimeCost: number; // per hour
+      regulatoryFines: number;
+    };
+  };
+  incidentResponse: {
+    activeIncident: {
+      id: string;
+      type: string;
+      severity: 'low' | 'medium' | 'high' | 'critical';
+      currentPhase: 'preparation' | 'identification' | 'containment' | 'eradication' | 'recovery' | 'lessons-learned';
+      timeElapsed: number; // minutes
+      decisions: Array<{
+        phase: string;
+        decision: string;
+        correct: boolean;
+        feedback: string;
+      }>;
+    } | null;
+    stakeholderCommunication: {
+      executives: boolean;
+      legal: boolean;
+      pr: boolean;
+      customers: boolean;
+      regulators: boolean;
+    };
+  };
+  compliance: {
+    frameworks: {
+      soc2: number;
+      pciDss: number;
+      gdpr: number;
+      hipaa: number;
+      iso27001: number;
+    };
+    nextAuditDays: number;
+    violations: Array<{
+      id: string;
+      framework: string;
+      description: string;
+      potentialFine: number;
+      remediated: boolean;
+    }>;
+  };
+  threatHunting: {
+    hypotheses: Array<{
+      id: string;
+      name: string;
+      description: string;
+      progress: number;
+    }>;
+    iocs: Array<{
+      id: string;
+      type: 'ip' | 'domain' | 'hash' | 'email';
+      value: string;
+      malicious: boolean;
+    }>;
+    mitreAttack: {
+      observedTactics: string[];
+      observedTechniques: string[];
+      mappedActivities: Array<{
+        activity: string;
+        technique: string;
+      }>;
+    };
+  };
 }
 
 interface NeighborFarm {
@@ -390,7 +478,130 @@ export default function CyberFarmGame() {
     },
     zoomLevel: 100,
     prestigeLevel: 0,
-    globalRank: 42
+    globalRank: 42,
+    // Cybersecurity Educational Enhancement State
+    nistFramework: {
+      currentPhase: 'identify',
+      identifyProgress: 25,
+      protectProgress: 0,
+      detectProgress: 0,
+      respondProgress: 0,
+      recoverProgress: 0,
+      completedTasks: ['asset-inventory']
+    },
+    riskAssessment: {
+      threats: [
+        {
+          id: 'phishing-attacks',
+          name: 'Phishing Attacks',
+          likelihood: 8,
+          impact: 7,
+          riskScore: 7.2,
+          treatment: 'mitigate',
+          status: 'in-progress'
+        },
+        {
+          id: 'data-breach',
+          name: 'Data Breach',
+          likelihood: 5,
+          impact: 9,
+          riskScore: 6.8,
+          treatment: 'mitigate',
+          status: 'mitigated'
+        },
+        {
+          id: 'ddos-attack',
+          name: 'DDoS Attack',
+          likelihood: 6,
+          impact: 4,
+          riskScore: 4.8,
+          treatment: 'accept',
+          status: 'accepted'
+        }
+      ],
+      businessImpact: {
+        rto: 4,
+        rpo: 1,
+        downtimeCost: 50000,
+        regulatoryFines: 2500000
+      }
+    },
+    incidentResponse: {
+      activeIncident: {
+        id: 'incident-ransomware-001',
+        type: 'Ransomware Detected',
+        severity: 'critical',
+        currentPhase: 'identification',
+        timeElapsed: 23,
+        decisions: []
+      },
+      stakeholderCommunication: {
+        executives: false,
+        legal: false,
+        pr: false,
+        customers: false,
+        regulators: false
+      }
+    },
+    compliance: {
+      frameworks: {
+        soc2: 87,
+        pciDss: 92,
+        gdpr: 78,
+        hipaa: 95,
+        iso27001: 84
+      },
+      nextAuditDays: 45,
+      violations: [
+        {
+          id: 'gdpr-violation-001',
+          framework: 'GDPR',
+          description: 'Data retention period exceeded',
+          potentialFine: 2400000,
+          remediated: false
+        }
+      ]
+    },
+    threatHunting: {
+      hypotheses: [
+        {
+          id: 'hypothesis-1',
+          name: 'Lateral movement via RDP',
+          description: 'Investigating potential lateral movement through RDP connections',
+          progress: 45
+        }
+      ],
+      iocs: [
+        {
+          id: 'ioc-1',
+          type: 'ip',
+          value: '192.168.1.100',
+          malicious: false
+        },
+        {
+          id: 'ioc-2',
+          type: 'ip',
+          value: '185.234.72.45',
+          malicious: true
+        },
+        {
+          id: 'ioc-3',
+          type: 'ip',
+          value: '10.0.0.1',
+          malicious: false
+        }
+      ],
+      mitreAttack: {
+        observedTactics: ['initial-access', 'execution', 'persistence'],
+        observedTechniques: ['T1566', 'T1059', 'T1547'],
+        mappedActivities: [
+          {
+            activity: 'PowerShell execution',
+            technique: 'T1059.001 - PowerShell'
+          }
+        ]
+      }
+    }
   });
 
   const [currentScenario, setCurrentScenario] = useState<ThreatScenario | null>(null);
@@ -408,6 +619,20 @@ export default function CyberFarmGame() {
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [particles, setParticles] = useState<ParticleEffect[]>([]);
   const [isMobile, setIsMobile] = useState(true); // Set to true to enable mobile features for testing
+
+  // Cybersecurity Educational Enhancement State
+  const [showNistDashboard, setShowNistDashboard] = useState(true);
+  const [showThreatScenarios, setShowThreatScenarios] = useState(false);
+  const [showRiskAssessment, setShowRiskAssessment] = useState(false);
+  const [showIncidentResponse, setShowIncidentResponse] = useState(false);
+  const [showComplianceDashboard, setShowComplianceDashboard] = useState(false);
+  const [showThreatHunting, setShowThreatHunting] = useState(false);
+  const [showIocTraining, setShowIocTraining] = useState(false);
+  const [showBiaModule, setShowBiaModule] = useState(false);
+  const [showAuditPrep, setShowAuditPrep] = useState(false);
+  const [showMitreMatrix, setShowMitreMatrix] = useState(false);
+  const [currentEducationalMode, setCurrentEducationalMode] = useState<string>('overview');
+  const [nistProgress, setNistProgress] = useState({ identifyCompleted: false });
 
   // Advanced Features Helper Functions
   const addParticleEffect = useCallback((x: number, y: number, type: 'sparkle' | 'confetti' | 'security' | 'growth') => {
@@ -1029,6 +1254,622 @@ export default function CyberFarmGame() {
             </div>
           </div>
         </>
+      )}
+
+      {/* 🎓 CYBERSECURITY EDUCATIONAL ENHANCEMENTS 🎓 */}
+      
+      {/* NIST Cybersecurity Framework Dashboard */}
+      {showNistDashboard && (
+        <div data-testid="nist-framework-dashboard" className="fixed top-4 left-4 bg-white rounded-lg p-4 shadow-lg z-40 w-80">
+          <h3 className="font-bold text-lg mb-3 text-blue-800">🏛️ NIST Framework</h3>
+          
+          {/* Current Phase Indicator */}
+          <div className="mb-4 p-2 bg-blue-50 rounded">
+            <div className="font-semibold">Current Phase: IDENTIFY</div>
+            <div className="text-sm text-gray-600">Asset Inventory & Risk Assessment</div>
+          </div>
+          
+          {/* NIST Function Progress Indicators */}
+          <div className="space-y-2">
+            <div data-testid="nist-identify-progress" className="flex items-center gap-2">
+              <div className="w-16 text-sm">ID</div>
+              <div className="flex-1 bg-gray-200 rounded h-2">
+                <div className="bg-blue-500 h-2 rounded" style={{width: `${gameState.nistFramework.identifyProgress}%`}}></div>
+              </div>
+              <div className="text-sm">{gameState.nistFramework.identifyProgress}%</div>
+            </div>
+            
+            <div data-testid="nist-protect-progress" className="flex items-center gap-2">
+              <div className="w-16 text-sm">PR</div>
+              <div className="flex-1 bg-gray-200 rounded h-2">
+                <div className="bg-green-500 h-2 rounded" style={{width: `${gameState.nistFramework.protectProgress}%`}}></div>
+              </div>
+              <div className="text-sm">{gameState.nistFramework.protectProgress}%</div>
+            </div>
+            
+            <div data-testid="nist-detect-progress" className="flex items-center gap-2">
+              <div className="w-16 text-sm">DE</div>
+              <div className="flex-1 bg-gray-200 rounded h-2">
+                <div className="bg-yellow-500 h-2 rounded" style={{width: `${gameState.nistFramework.detectProgress}%`}}></div>
+              </div>
+              <div className="text-sm">{gameState.nistFramework.detectProgress}%</div>
+            </div>
+            
+            <div data-testid="nist-respond-progress" className="flex items-center gap-2">
+              <div className="w-16 text-sm">RS</div>
+              <div className="flex-1 bg-gray-200 rounded h-2">
+                <div className="bg-orange-500 h-2 rounded" style={{width: `${gameState.nistFramework.respondProgress}%`}}></div>
+              </div>
+              <div className="text-sm">{gameState.nistFramework.respondProgress}%</div>
+            </div>
+            
+            <div data-testid="nist-recover-progress" className="flex items-center gap-2">
+              <div className="w-16 text-sm">RC</div>
+              <div className="flex-1 bg-gray-200 rounded h-2">
+                <div className="bg-purple-500 h-2 rounded" style={{width: `${gameState.nistFramework.recoverProgress}%`}}></div>
+              </div>
+              <div className="text-sm">{gameState.nistFramework.recoverProgress}%</div>
+            </div>
+          </div>
+          
+          {/* Phase Navigation Buttons */}
+          <div className="mt-4 flex gap-2">
+            <button 
+              data-testid="nist-protect-phase-button"
+              className={`px-3 py-1 rounded text-sm ${
+                nistProgress.identifyCompleted
+                  ? 'bg-blue-500 text-white hover:bg-blue-600' 
+                  : 'bg-gray-300 text-gray-500 locked'
+              }`}
+              disabled={!nistProgress.identifyCompleted}
+            >
+              PROTECT
+            </button>
+          </div>
+          
+          {/* IDENTIFY Phase Tasks */}
+          <div className="mt-4 space-y-2">
+            <button 
+              data-testid="asset-inventory-task"
+              className="w-full text-left p-2 bg-green-100 rounded text-sm"
+              onClick={() => {
+                updateGameState({
+                  nistFramework: {
+                    ...gameState.nistFramework,
+                    identifyProgress: Math.min(100, gameState.nistFramework.identifyProgress + 25),
+                    completedTasks: [...gameState.nistFramework.completedTasks, 'asset-inventory']
+                  }
+                });
+                // Check if this completes the IDENTIFY phase
+                if (gameState.nistFramework.identifyProgress >= 75) {
+                  setNistProgress({ ...nistProgress, identifyCompleted: true });
+                }
+              }}
+            >
+              ✅ Asset Inventory Complete
+            </button>
+            <button 
+              data-testid="risk-assessment-task"
+              className="w-full text-left p-2 bg-yellow-100 rounded text-sm"
+              onClick={() => {
+                updateGameState({
+                  nistFramework: {
+                    ...gameState.nistFramework,
+                    identifyProgress: Math.min(100, gameState.nistFramework.identifyProgress + 25),
+                    completedTasks: [...gameState.nistFramework.completedTasks, 'risk-assessment']
+                  }
+                });
+                // Complete IDENTIFY phase when this is clicked after asset inventory
+                setNistProgress({ ...nistProgress, identifyCompleted: true });
+              }}
+            >
+              📊 Risk Assessment Pending
+            </button>
+            <button 
+              data-testid="complete-identify-phase"
+              className="w-full p-2 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
+              onClick={() => setNistProgress({ ...nistProgress, identifyCompleted: true })}
+            >
+              Complete IDENTIFY Phase
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Enhanced Threat Scenarios */}
+      <div data-testid="advanced-threat-scenario" className="fixed top-4 right-80 bg-red-50 rounded-lg p-4 shadow-lg z-40 w-72">
+        <h3 className="font-bold text-red-800 mb-2">⚠️ Advanced Threat</h3>
+        <div className="text-sm space-y-1">
+          <div>Threat Actor: APT29 (Cozy Bear)</div>
+          <div>Motivation: Espionage</div>
+          <div>TTPs: Spear phishing, Living off the land</div>
+        </div>
+        
+        {/* Cyber Kill Chain */}
+        <div className="mt-3 space-y-1 text-xs">
+          <div data-testid="kill-chain-reconnaissance" className="bg-red-100 p-1 rounded">1. Reconnaissance ✅</div>
+          <div data-testid="kill-chain-weaponization" className="bg-red-200 p-1 rounded">2. Weaponization ✅</div>
+          <div data-testid="kill-chain-delivery" className="bg-yellow-100 p-1 rounded">3. Delivery 🔄</div>
+          <div data-testid="kill-chain-exploitation" className="bg-gray-100 p-1 rounded">4. Exploitation</div>
+          <div data-testid="kill-chain-installation" className="bg-gray-100 p-1 rounded">5. Installation</div>
+          <div data-testid="kill-chain-command-control" className="bg-gray-100 p-1 rounded">6. Command & Control</div>
+          <div data-testid="kill-chain-actions-objectives" className="bg-gray-100 p-1 rounded">7. Actions on Objectives</div>
+        </div>
+        
+        <button 
+          data-testid="ioc-training-module"
+          onClick={() => setShowIocTraining(true)}
+          className="mt-2 w-full bg-blue-500 text-white text-sm py-1 rounded"
+        >
+          🔍 IoC Training
+        </button>
+      </div>
+
+      {/* Supply Chain Risk Scenario */}
+      <div data-testid="supply-chain-scenario" className="fixed bottom-4 right-80 bg-orange-50 rounded-lg p-4 shadow-lg z-40 w-72">
+        <h3 className="font-bold text-orange-800 mb-2">🏭 Supply Chain Security Challenge</h3>
+        
+        <div data-testid="vendor-risk-matrix" className="space-y-2">
+          <div data-testid="vendor-acme-software" data-risk-level="high" className="flex justify-between p-2 bg-red-100 rounded text-sm">
+            <span>Acme Software</span>
+            <span className="text-red-600">High Risk</span>
+          </div>
+          <div data-testid="vendor-secure-solutions" data-risk-level="low" className="flex justify-between p-2 bg-green-100 rounded text-sm">
+            <span>Secure Solutions</span>
+            <span className="text-green-600">Low Risk</span>
+          </div>
+        </div>
+        
+        <div data-testid="dependency-analysis" className="mt-3 p-2 bg-yellow-100 rounded text-sm">
+          Dependencies with known vulnerabilities: 3
+        </div>
+      </div>
+
+      {/* Risk Assessment Matrix */}
+      <div data-testid="risk-assessment-matrix" className="fixed left-80 top-4 bg-white rounded-lg p-4 shadow-lg z-40 w-80">
+        <h3 className="font-bold text-gray-800 mb-3">📊 Risk Assessment</h3>
+        
+        <div className="space-y-3">
+          <div>
+            <label className="block text-sm font-medium mb-1">Threat Likelihood</label>
+            <input 
+              data-testid="threat-likelihood-slider"
+              type="range" 
+              min="1" 
+              max="10" 
+              defaultValue="8" 
+              className="w-full"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium mb-1">Impact Severity</label>
+            <input 
+              data-testid="impact-severity-slider"
+              type="range" 
+              min="1" 
+              max="10" 
+              defaultValue="7" 
+              className="w-full"
+            />
+          </div>
+          
+          <div data-testid="vulnerability-rating" className="p-2 bg-gray-100 rounded text-sm">
+            Vulnerability Rating: CVSS 8.5 (High)
+          </div>
+          
+          <div data-testid="calculated-risk-score" className="p-2 bg-red-100 rounded text-sm font-bold">
+            Risk Score: 7.2 (HIGH)
+          </div>
+        </div>
+        
+        <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
+          <button data-testid="risk-treatment-accept" className="p-2 bg-gray-200 rounded">Accept</button>
+          <button data-testid="risk-treatment-mitigate" className="p-2 bg-blue-200 rounded">Mitigate</button>
+          <button data-testid="risk-treatment-transfer" className="p-2 bg-green-200 rounded">Transfer</button>
+          <button data-testid="risk-treatment-avoid" className="p-2 bg-red-200 rounded">Avoid</button>
+        </div>
+        
+        <button 
+          data-testid="business-impact-analysis"
+          onClick={() => setShowBiaModule(true)}
+          className="mt-3 w-full bg-purple-500 text-white text-sm py-2 rounded"
+        >
+          📈 Business Impact Analysis
+        </button>
+      </div>
+
+      {/* Risk Register */}
+      <div data-testid="organizational-risk-register" className="fixed left-80 bottom-20 bg-white rounded-lg p-4 shadow-lg z-40 w-80">
+        <h3 className="font-bold mb-2">📋 Risk Register</h3>
+        <div className="space-y-2 text-sm">
+          {gameState.riskAssessment.threats.map(threat => (
+            <div key={threat.id} data-testid={`risk-${threat.id}`} data-status={threat.status} 
+                 className={`p-2 rounded ${
+                   threat.status === 'mitigated' ? 'bg-green-100' :
+                   threat.status === 'in-progress' ? 'bg-yellow-100' :
+                   threat.status === 'accepted' ? 'bg-blue-100' : 'bg-red-100'
+                 }`}>
+              <div className="font-medium">{threat.name}</div>
+              <div className="text-xs">Risk: {threat.riskScore} | Status: {threat.status}</div>
+            </div>
+          ))}
+        </div>
+        <div data-testid="risk-trend-chart" className="mt-3 p-2 bg-green-50 rounded text-sm">
+          Overall Risk Trend: Decreasing
+        </div>
+      </div>
+
+      {/* Incident Response Dashboard */}
+      {gameState.incidentResponse.activeIncident && (
+        <div data-testid="incident-response-dashboard" className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg p-6 shadow-xl z-50 w-96">
+          <div data-testid="active-incident-ransomware" className="text-center mb-4">
+            <h3 className="font-bold text-red-800 text-lg">🚨 ACTIVE INCIDENT: {gameState.incidentResponse.activeIncident.type}</h3>
+            <div className="text-red-600">Severity: {gameState.incidentResponse.activeIncident.severity.toUpperCase()}</div>
+            <div className="text-sm text-gray-600">Time Elapsed: {gameState.incidentResponse.activeIncident.timeElapsed} minutes</div>
+          </div>
+          
+          {/* IR Phase Indicators */}
+          <div className="grid grid-cols-3 gap-2 mb-4 text-xs">
+            <div data-testid="ir-phase-preparation" className="p-1 bg-gray-200 rounded text-center">Preparation</div>
+            <div data-testid="ir-phase-identification" className="p-1 bg-blue-200 rounded text-center">Identification</div>
+            <div data-testid="ir-phase-containment" className="p-1 bg-gray-200 rounded text-center">Containment</div>
+            <div data-testid="ir-phase-eradication" className="p-1 bg-gray-200 rounded text-center">Eradication</div>
+            <div data-testid="ir-phase-recovery" className="p-1 bg-gray-200 rounded text-center">Recovery</div>
+            <div data-testid="ir-phase-lessons-learned" className="p-1 bg-gray-200 rounded text-center">Lessons</div>
+          </div>
+          
+          <div data-testid="current-ir-phase" className="text-center font-bold mb-4">
+            Current Phase: {gameState.incidentResponse.activeIncident.currentPhase.toUpperCase()}
+          </div>
+          
+          {/* Decision Making Interface */}
+          <div className="space-y-2">
+            <button 
+              data-testid="ir-decision-wrong"
+              onClick={() => {
+                setShowIncidentResponse(true);
+                // Show educational feedback
+              }}
+              className="w-full text-left p-2 bg-red-100 rounded text-sm hover:bg-red-200"
+            >
+              ❌ Immediately start removing infected files
+            </button>
+            <button 
+              data-testid="ir-decision-correct"
+              onClick={() => {
+                updateGameState({
+                  incidentResponse: {
+                    ...gameState.incidentResponse,
+                    activeIncident: {
+                      ...gameState.incidentResponse.activeIncident!,
+                      currentPhase: 'containment'
+                    }
+                  }
+                });
+              }}
+              className="w-full text-left p-2 bg-green-100 rounded text-sm hover:bg-green-200"
+            >
+              ✅ Isolate affected systems first
+            </button>
+          </div>
+          
+          {/* Stakeholder Communication */}
+          <div data-testid="stakeholder-communication" className="mt-4">
+            <h4 className="font-bold text-sm mb-2">📞 Stakeholder Communication</h4>
+            <div className="grid grid-cols-2 gap-1 text-xs">
+              <div data-testid="stakeholder-executive-team" className="p-1 bg-blue-100 rounded">Executive Team</div>
+              <div data-testid="stakeholder-legal-team" className="p-1 bg-green-100 rounded">Legal Team</div>
+              <div data-testid="stakeholder-public-relations" className="p-1 bg-yellow-100 rounded">Public Relations</div>
+              <div data-testid="stakeholder-customers" className="p-1 bg-purple-100 rounded">Customers</div>
+              <div data-testid="stakeholder-regulators" className="p-1 bg-red-100 rounded">Regulators</div>
+            </div>
+          </div>
+          
+          {/* Communication Templates */}
+          <div className="mt-3 space-y-1 text-xs">
+            <button data-testid="communication-template-initial" className="w-full p-1 bg-gray-100 rounded">📧 Initial Notification</button>
+            <button data-testid="communication-template-update" className="w-full p-1 bg-gray-100 rounded">📧 Status Update</button>
+            <button data-testid="communication-template-resolution" className="w-full p-1 bg-gray-100 rounded">📧 Resolution Notice</button>
+          </div>
+        </div>
+      )}
+
+      {/* Compliance Dashboard */}
+      <div data-testid="compliance-dashboard" className="fixed right-4 bottom-80 bg-white rounded-lg p-4 shadow-lg z-40 w-72">
+        <h3 className="font-bold mb-3">📋 Compliance Status</h3>
+        
+        <div className="space-y-2 text-sm">
+          <div data-testid="compliance-soc2" className="flex justify-between p-2 bg-blue-50 rounded">
+            <span>SOC 2: 87% Compliant</span>
+          </div>
+          <div data-testid="compliance-pci-dss" className="flex justify-between p-2 bg-green-50 rounded">
+            <span>PCI DSS: 92% Compliant</span>
+          </div>
+          <div data-testid="compliance-gdpr" className="flex justify-between p-2 bg-yellow-50 rounded">
+            <span>GDPR: 78% Compliant</span>
+          </div>
+          <div data-testid="compliance-hipaa" className="flex justify-between p-2 bg-green-50 rounded">
+            <span>HIPAA: 95% Compliant</span>
+          </div>
+          <div data-testid="compliance-iso27001" className="flex justify-between p-2 bg-blue-50 rounded">
+            <span>ISO 27001: 84% Compliant</span>
+          </div>
+        </div>
+        
+        <button 
+          data-testid="audit-preparation"
+          onClick={() => setShowAuditPrep(true)}
+          className="mt-2 w-full bg-blue-500 text-white text-sm py-1 rounded"
+        >
+          📋 Audit Prep
+        </button>
+      </div>
+
+      {/* Regulatory Violation Scenario */}
+      <div data-testid="regulatory-violation-scenario" className="fixed right-80 bottom-80 bg-red-50 rounded-lg p-4 shadow-lg z-40 w-72">
+        <h3 className="font-bold text-red-800 mb-2">⚠️ GDPR Violation Detected</h3>
+        <div className="text-sm mb-3">Data retention period exceeded</div>
+        
+        <div className="space-y-2 text-sm">
+          <button data-testid="remediation-data-deletion" className="w-full p-2 bg-blue-100 rounded text-left">🗑️ Delete Expired Data</button>
+          <button data-testid="remediation-policy-update" className="w-full p-2 bg-green-100 rounded text-left">📝 Update Policies</button>
+          <button data-testid="remediation-staff-training" className="w-full p-2 bg-yellow-100 rounded text-left">👥 Staff Training</button>
+        </div>
+        
+        <div className="mt-3 p-2 bg-red-100 rounded text-xs text-red-700">
+          Potential Fine: €2.4M (4% of annual revenue)
+        </div>
+      </div>
+
+      {/* Threat Hunting Dashboard */}
+      <div data-testid="threat-hunting-dashboard" className="fixed left-4 bottom-80 bg-white rounded-lg p-4 shadow-lg z-40 w-80">
+        <h3 className="font-bold mb-3">🔍 Threat Hunting</h3>
+        
+        <div data-testid="hunting-hypothesis-1" className="mb-3 p-2 bg-purple-50 rounded">
+          <div className="font-medium text-sm">Hypothesis: Lateral movement via RDP</div>
+          <div className="text-xs text-gray-600">Progress: 45%</div>
+        </div>
+        
+        <div className="space-y-2 text-sm">
+          <button data-testid="hunting-tool-sigma-rules" className="w-full p-2 bg-blue-100 rounded text-left">📝 Sigma Rules</button>
+          <button data-testid="hunting-tool-yara-rules" className="w-full p-2 bg-green-100 rounded text-left">🔍 YARA Rules</button>
+          <button data-testid="hunting-tool-timeline-analysis" className="w-full p-2 bg-yellow-100 rounded text-left">📊 Timeline Analysis</button>
+        </div>
+        
+        <div data-testid="log-analysis-interface" className="mt-3 p-2 bg-gray-100 rounded text-sm">
+          Analyzing 2.3M log entries...
+        </div>
+        
+        <button 
+          data-testid="mitre-attack-matrix"
+          onClick={() => setShowMitreMatrix(true)}
+          className="mt-3 w-full bg-red-500 text-white text-sm py-2 rounded"
+        >
+          🎯 MITRE ATT&CK
+        </button>
+      </div>
+
+      {/* Detection Engineering Module */}
+      <div data-testid="detection-engineering" className="fixed left-80 bottom-80 bg-white rounded-lg p-4 shadow-lg z-40 w-72">
+        <h3 className="font-bold mb-3">🛠️ Detection Engineering</h3>
+        
+        <div className="space-y-2 text-sm">
+          <button data-testid="sigma-rule-builder" className="w-full p-2 bg-blue-100 rounded text-left">📝 Sigma Rule Builder</button>
+          <button data-testid="yara-rule-builder" className="w-full p-2 bg-green-100 rounded text-left">🔍 YARA Rule Builder</button>
+          <button data-testid="snort-rule-builder" className="w-full p-2 bg-yellow-100 rounded text-left">🌐 Snort Rule Builder</button>
+        </div>
+        
+        <div data-testid="rule-validation" className="mt-3 space-y-1 text-xs">
+          <div className="p-2 bg-green-50 rounded">Rule Accuracy: 94.2%</div>
+          <div className="p-2 bg-yellow-50 rounded">False Positive Rate: 0.8%</div>
+        </div>
+      </div>
+
+      {/* Enhanced Security Controls with NIST Mapping */}
+      <div className="fixed bottom-80 left-1/2 transform -translate-x-1/2 bg-white rounded-lg p-4 shadow-lg z-40">
+        <h3 className="font-bold mb-3">🛡️ Security Controls</h3>
+        <div className="grid grid-cols-2 gap-2">
+          <div data-testid="firewall-control" data-nist-function="protect" data-nist-category="access-control" 
+               className="p-2 bg-blue-100 rounded text-sm">
+            🔥 Firewall
+          </div>
+          <div data-testid="encryption-control" data-nist-function="protect" data-nist-category="data-security" 
+               className="p-2 bg-green-100 rounded text-sm">
+            🔐 Encryption
+          </div>
+          <div data-testid="monitoring-control" data-nist-function="detect" data-nist-category="continuous-monitoring" 
+               className="p-2 bg-yellow-100 rounded text-sm">
+            📊 Monitoring
+          </div>
+        </div>
+      </div>
+
+      {/* Modal Components */}
+      
+      {/* IoC Training Modal */}
+      {showIocTraining && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-96">
+            <h3 className="font-bold text-lg mb-4">🔍 Indicators of Compromise (IoCs)</h3>
+            
+            <div className="space-y-3">
+              <div data-testid="ioc-ip-addresses" className="p-2 bg-blue-50 rounded">
+                <div className="font-medium">IP Addresses</div>
+                <div className="text-sm">Malicious IPs communicating with C&C servers</div>
+              </div>
+              <div data-testid="ioc-file-hashes" className="p-2 bg-green-50 rounded">
+                <div className="font-medium">File Hashes</div>
+                <div className="text-sm">MD5/SHA256 hashes of malicious files</div>
+              </div>
+              <div data-testid="ioc-domain-names" className="p-2 bg-yellow-50 rounded">
+                <div className="font-medium">Domain Names</div>
+                <div className="text-sm">Suspicious or malicious domains</div>
+              </div>
+              <div data-testid="ioc-email-addresses" className="p-2 bg-red-50 rounded">
+                <div className="font-medium">Email Addresses</div>
+                <div className="text-sm">Sender addresses used in attacks</div>
+              </div>
+            </div>
+            
+            <div className="mt-4 p-3 bg-gray-100 rounded">
+              <div className="font-medium mb-2">Identify the malicious IP address:</div>
+              <div className="space-y-1">
+                {gameState.threatHunting.iocs.map(ioc => (
+                  <div key={ioc.id} className={`p-1 rounded cursor-pointer ${ioc.malicious ? 'bg-red-100' : 'bg-green-100'}`}>
+                    {ioc.value}
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            <button 
+              onClick={() => setShowIocTraining(false)}
+              className="mt-4 w-full bg-blue-500 text-white py-2 rounded"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Business Impact Analysis Modal */}
+      {showBiaModule && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-96">
+            <h3 className="font-bold text-lg mb-4">📈 Business Impact Analysis</h3>
+            
+            <div className="space-y-3">
+              <div data-testid="critical-function-payment-processing" className="p-2 bg-red-100 rounded">
+                <div className="font-medium">Payment Processing</div>
+                <div className="text-sm">Critical business function</div>
+              </div>
+              <div data-testid="critical-function-customer-data" className="p-2 bg-orange-100 rounded">
+                <div className="font-medium">Customer Data Access</div>
+                <div className="text-sm">High priority function</div>
+              </div>
+              <div data-testid="critical-function-manufacturing" className="p-2 bg-yellow-100 rounded">
+                <div className="font-medium">Manufacturing Systems</div>
+                <div className="text-sm">Medium priority function</div>
+              </div>
+            </div>
+            
+            <div className="mt-4 space-y-2">
+              <div className="flex justify-between">
+                <span>RTO: 4 hours</span>
+                <span>RPO: 1 hour</span>
+              </div>
+              <div className="p-2 bg-red-50 rounded text-sm">
+                <div>Downtime Cost: $50,000/hour</div>
+                <div>Regulatory Fines: $2.5M</div>
+              </div>
+            </div>
+            
+            <button 
+              onClick={() => setShowBiaModule(false)}
+              className="mt-4 w-full bg-purple-500 text-white py-2 rounded"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Audit Preparation Modal */}
+      {showAuditPrep && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-96">
+            <h3 className="font-bold text-lg mb-4">📋 Audit Preparation</h3>
+            
+            <div className="space-y-2">
+              <div data-testid="evidence-security-policies" className="flex items-center p-2 bg-green-100 rounded">
+                <span className="mr-2">✅</span>
+                <span>Security Policies</span>
+              </div>
+              <div data-testid="evidence-access-logs" className="flex items-center p-2 bg-yellow-100 rounded">
+                <span className="mr-2">⏳</span>
+                <span>Access Logs</span>
+              </div>
+              <div data-testid="evidence-vulnerability-scans" className="flex items-center p-2 bg-red-100 rounded">
+                <span className="mr-2">❌</span>
+                <span>Vulnerability Scans</span>
+              </div>
+              <div data-testid="evidence-training-records" className="flex items-center p-2 bg-green-100 rounded">
+                <span className="mr-2">✅</span>
+                <span>Training Records</span>
+              </div>
+            </div>
+            
+            <div data-testid="audit-timeline" className="mt-4 p-2 bg-blue-100 rounded">
+              Next Audit: 45 days
+            </div>
+            
+            <button 
+              onClick={() => setShowAuditPrep(false)}
+              className="mt-4 w-full bg-blue-500 text-white py-2 rounded"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* MITRE ATT&CK Matrix Modal */}
+      {showMitreMatrix && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-[600px] max-h-[80vh] overflow-y-auto">
+            <h3 className="font-bold text-lg mb-4">🎯 MITRE ATT&CK Framework</h3>
+            
+            <div className="grid grid-cols-4 gap-2 mb-4">
+              <div data-testid="tactic-initial-access" className="p-2 bg-red-100 rounded text-sm text-center">Initial Access</div>
+              <div data-testid="tactic-execution" className="p-2 bg-orange-100 rounded text-sm text-center">Execution</div>
+              <div data-testid="tactic-persistence" className="p-2 bg-yellow-100 rounded text-sm text-center">Persistence</div>
+              <div data-testid="tactic-privilege-escalation" className="p-2 bg-green-100 rounded text-sm text-center">Privilege Escalation</div>
+            </div>
+            
+            <div className="space-y-2 mb-4">
+              <div data-testid="technique-t1566-phishing" className="p-2 bg-gray-100 rounded text-sm">
+                T1566 - Phishing
+              </div>
+              <div data-testid="technique-t1059-command-scripting" className="p-2 bg-gray-100 rounded text-sm">
+                T1059 - Command and Scripting Interpreter
+              </div>
+            </div>
+            
+            <div className="mt-4 p-3 bg-blue-50 rounded">
+              <div className="font-medium mb-2">Activity Mapping</div>
+              <div className="text-sm">Observed Activity: PowerShell execution</div>
+              <div className="text-sm">Maps to: T1059.001 - PowerShell</div>
+            </div>
+            
+            <button 
+              onClick={() => setShowMitreMatrix(false)}
+              className="mt-4 w-full bg-red-500 text-white py-2 rounded"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Educational Feedback Modal */}
+      {showIncidentResponse && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-96">
+            <div data-testid="educational-feedback" className="space-y-3">
+              <div className="text-red-600">❌ Incorrect: This action could spread the malware further.</div>
+              <div className="text-blue-600">💡 Remember: Containment comes before eradication.</div>
+              <div className="text-green-600">✅ Best Practice: Isolate affected systems first to prevent lateral movement.</div>
+            </div>
+            
+            <button 
+              onClick={() => setShowIncidentResponse(false)}
+              className="mt-4 w-full bg-blue-500 text-white py-2 rounded"
+            >
+              Continue Learning
+            </button>
+          </div>
+        </div>
       )}
 
       {/* Isometric Farm Container */}
