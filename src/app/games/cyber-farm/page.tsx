@@ -198,6 +198,29 @@ const THREAT_SCENARIOS: ThreatScenario[] = [
 
 // Main Component
 export default function CyberFarmGame() {
+  // New state for enhanced features
+  const [selectedPlot, setSelectedPlot] = useState<string | null>(null);
+  const [showCropSelection, setShowCropSelection] = useState(false);
+  const [plantingAnimations, setPlantingAnimations] = useState<Set<string>>(new Set());
+
+  // Helper function to calculate crop growth stage
+  const getCropGrowthStage = (plantedAt: number): number => {
+    const now = Date.now();
+    const elapsedSeconds = (now - plantedAt) / 1000;
+    
+    if (elapsedSeconds < 10) return 1;      // Seedling
+    if (elapsedSeconds < 20) return 2;      // Young plant
+    if (elapsedSeconds < 30) return 3;      // Mature crop
+    return 4;                               // Ready to harvest
+  };
+
+  const getCropStageEmoji = (cropType: string, stage: number): string => {
+    if (stage === 1) return '🌱';          // Seedling
+    if (stage === 2) return '🌿';          // Young plant
+    if (stage === 3) return getCropEmoji(cropType); // Mature
+    return '✨' + getCropEmoji(cropType);  // Ready to harvest
+  };
+
   // Game State
   const [gameState, setGameState] = useState<SaveState>({
     securityScore: 0,
@@ -278,6 +301,16 @@ export default function CyberFarmGame() {
   }, []);
 
   // Utility Functions
+  const getCropEmoji = (cropType: string): string => {
+    switch (cropType) {
+      case 'user-data': return '👤';
+      case 'financial-records': return '💰';
+      case 'medical-data': return '🏥';
+      case 'intellectual-property': return '🧠';
+      default: return '🌱';
+    }
+  };
+
   const addGameMessage = (message: string) => {
     setGameMessage(message);
     setTimeout(() => setGameMessage(''), 3000);
@@ -469,6 +502,16 @@ export default function CyberFarmGame() {
     return () => clearInterval(interval);
   }, []);
 
+  // Crop growth update timer
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Force a re-render to update crop growth stages
+      setGameState(prev => ({ ...prev }));
+    }, 1000); // Update every second
+
+    return () => clearInterval(interval);
+  }, []);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -588,6 +631,176 @@ export default function CyberFarmGame() {
               <span>Think Like an Adversary: {gameState.genCyberProgress.thinkLikeAdversary}/5</span>
             </div>
           </div>
+        </motion.div>
+
+        {/* Interactive Farm Grid System */}
+        <motion.div className="bg-white rounded-lg p-6 mb-6 shadow-md">
+          <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <Database className="text-green-500" />
+            🌾 Interactive Farm Grid
+          </h2>
+          <div data-testid="farm-grid" className="grid grid-cols-3 gap-2 mb-4">
+            {Array.from({ length: 9 }, (_, index) => {
+              const row = Math.floor(index / 3);
+              const col = index % 3;
+              const plotId = `farm-plot-${row}-${col}`;
+              const existingCrop = gameState.activeCrops.find(crop => crop.id === plotId);
+              const hasCrop = !!existingCrop;
+              const isPlanting = plantingAnimations.has(plotId);
+              
+              let growthStage = 1;
+              let isReadyToHarvest = false;
+              
+              if (existingCrop) {
+                growthStage = getCropGrowthStage(existingCrop.plantedAt);
+                isReadyToHarvest = growthStage >= 4;
+              }
+              
+              return (
+                <button
+                  key={plotId}
+                  data-testid={plotId}
+                  onClick={() => {
+                    if (!hasCrop) {
+                      setSelectedPlot(plotId);
+                      setShowCropSelection(true);
+                    }
+                    // Harvest functionality moved to harvest button
+                  }}
+                  className={`h-16 w-16 border-2 rounded-lg transition-all hover:shadow-md ${
+                    isPlanting
+                      ? 'animate-pulse bg-yellow-100 border-yellow-300'
+                      : hasCrop 
+                      ? `bg-green-100 border-green-300 planted-${existingCrop.type} ${isReadyToHarvest ? 'ring-2 ring-yellow-400' : ''}`
+                      : 'bg-gray-50 border-gray-300 empty-plot'
+                  }`}
+                >
+                  <span 
+                    className="text-2xl"
+                    data-testid={hasCrop ? `crop-visual-${existingCrop.type}` : undefined}
+                  >
+                    {isPlanting ? '🌱' : hasCrop ? getCropStageEmoji(existingCrop.type, growthStage) : '🌱'}
+                  </span>
+                  {/* Always show growth stage for planted crops */}
+                  {hasCrop && (
+                    <div 
+                      data-testid={`crop-growth-stage-${growthStage}`}
+                      className="text-xs mt-1"
+                    >
+                      {isReadyToHarvest ? (
+                        <div>
+                          <div data-testid="harvest-ready-indicator" className="text-yellow-600">
+                            ⚡ Ready!
+                          </div>
+                          <button
+                            data-testid="harvest-button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              // Show harvest animation
+                              const harvestAnim = document.createElement('div');
+                              harvestAnim.textContent = '🎉 Harvested!';
+                              harvestAnim.setAttribute('data-testid', 'harvest-animation');
+                              harvestAnim.className = 'harvest-animation';
+                              document.body.appendChild(harvestAnim);
+                              
+                              // Harvest the crop
+                              updateGameState({
+                                activeCrops: gameState.activeCrops.filter(crop => crop.id !== plotId),
+                                securityScore: gameState.securityScore + 50
+                              });
+                              
+                              setTimeout(() => {
+                                if (harvestAnim.parentNode) {
+                                  harvestAnim.parentNode.removeChild(harvestAnim);
+                                }
+                              }, 2000);
+                            }}
+                            className="text-xs bg-yellow-400 px-1 rounded mt-1 hover:bg-yellow-500"
+                          >
+                            Harvest
+                          </button>
+                        </div>
+                      ) : null}
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          
+          {/* Crop Selection Menu */}
+          {showCropSelection && (
+            <div data-testid="crop-selection-menu" className="bg-gray-50 p-4 rounded-lg">
+              <h3 className="text-lg font-bold mb-2">Select Data Crop to Plant</h3>
+              <div className="grid grid-cols-1 gap-2">
+                {CROP_TYPES.map((crop) => {
+                  const Icon = crop.icon;
+                  return (
+                    <button
+                      key={crop.id}
+                      data-testid={`crop-option-${crop.id}`}
+                      onClick={() => {
+                        if (selectedPlot) {
+                          // Plant crop immediately for tests/functionality
+                          const newCrop = {
+                            id: selectedPlot,
+                            type: crop.id,
+                            isProtected: false,
+                            isCorrupted: false,
+                            plantedAt: Date.now()
+                          };
+                          updateGameState({
+                            activeCrops: [...gameState.activeCrops, newCrop],
+                            cropsPlanted: gameState.cropsPlanted + 1
+                          });
+                          
+                          // Start planting animation for visual feedback
+                          setPlantingAnimations(prev => new Set([...prev, selectedPlot]));
+                          
+                          // Show planting feedback
+                          const plantingFeedback = document.createElement('div');
+                          plantingFeedback.textContent = '🌱 Planting...';
+                          plantingFeedback.className = 'planting-feedback';
+                          plantingFeedback.setAttribute('data-testid', 'planting-animation');
+                          document.body.appendChild(plantingFeedback);
+                          
+                          setTimeout(() => {
+                            // End planting animation
+                            setPlantingAnimations(prev => {
+                              const newSet = new Set(prev);
+                              newSet.delete(selectedPlot);
+                              return newSet;
+                            });
+                            
+                            // Remove planting feedback
+                            if (plantingFeedback.parentNode) {
+                              plantingFeedback.parentNode.removeChild(plantingFeedback);
+                            }
+                          }, 1000); // 1 second planting animation
+                          
+                          setShowCropSelection(false);
+                          setSelectedPlot(null);
+                        }
+                      }}
+                      className="flex items-center gap-2 p-2 border rounded hover:bg-white transition-colors"
+                    >
+                      <Icon className="text-green-600" />
+                      <span>{crop.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              <button
+                onClick={() => {
+                  setShowCropSelection(false);
+                  setSelectedPlot(null);
+                }}
+                className="mt-2 px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
