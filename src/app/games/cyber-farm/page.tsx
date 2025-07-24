@@ -594,7 +594,7 @@ export default function CyberFarmGame() {
   return (
     <div 
       data-testid="cyber-farm-container" 
-      className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-4 mobile-responsive"
+      className="min-h-screen bg-gradient-farm p-4 mobile-responsive"
     >
       <div className="max-w-6xl mx-auto">
         {/* Header */}
@@ -611,12 +611,24 @@ export default function CyberFarmGame() {
           <p className="text-lg text-gray-600">Learn Cybersecurity Through Virtual Farming</p>
         </motion.div>
 
+        {/* Weather System */}
+        <motion.div 
+          data-testid="weather-indicator"
+          className="bg-white rounded-lg p-4 mb-6 shadow-md text-center"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+        >
+          <div data-testid="weather-sunny" className="flex items-center justify-center gap-2">
+            <span className="text-lg font-semibold text-yellow-600">☀️ Perfect Growing Conditions</span>
+          </div>
+        </motion.div>
+
         {/* Game Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <motion.div className="bg-white rounded-lg p-4 shadow-md">
             <div className="flex items-center gap-2">
               <Target className="text-blue-500" />
-              <div>
+              <div className="flex-1">
                 <p className="text-sm text-gray-600">Security Score</p>
                 <p 
                   data-testid="security-score" 
@@ -625,6 +637,12 @@ export default function CyberFarmGame() {
                 >
                   {gameState.securityScore}
                 </p>
+                <div data-testid="security-progress-bar" className="animated-progress w-full bg-gray-200 rounded-full h-2 mt-2">
+                  <div 
+                    className="bg-blue-600 h-2 rounded-full transition-all duration-500 ease-out"
+                    style={{ width: `${Math.min((gameState.securityScore / 1000) * 100, 100)}%` }}
+                  ></div>
+                </div>
               </div>
             </div>
           </motion.div>
@@ -683,9 +701,17 @@ export default function CyberFarmGame() {
             data-testid="gencyber-progress"
             className="grid grid-cols-1 md:grid-cols-3 gap-4"
           >
-            <div className="flex items-center gap-2">
-              <Lock className="text-blue-500" />
-              <span>Learn the CIA Triad: {gameState.genCyberProgress.ciaTriad}/3</span>
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <Lock className="text-blue-500" />
+                <span>Learn the CIA Triad: {gameState.genCyberProgress.ciaTriad}/3</span>
+              </div>
+              <div data-testid="cia-triad-progress" className="w-full bg-gray-200 rounded-full h-2">
+                <div 
+                  className="bg-blue-600 h-2 rounded-full transition-all duration-500 ease-out"
+                  style={{ width: `${(gameState.genCyberProgress.ciaTriad / 3) * 100}%` }}
+                ></div>
+              </div>
             </div>
             <div className="flex items-center gap-2">
               <Shield className="text-green-500" />
@@ -704,7 +730,8 @@ export default function CyberFarmGame() {
             <Database className="text-green-500" />
             🌾 Interactive Farm Grid
           </h2>
-          <div data-testid="farm-grid" className="grid grid-cols-3 gap-2 mb-4">
+          <div data-testid="farm-area" className="farm-background-texture p-4 rounded-lg">
+            <div data-testid="farm-grid" className="grid grid-cols-3 gap-2 mb-4">
             {Array.from({ length: 9 }, (_, index) => {
               const row = Math.floor(index / 3);
               const col = index % 3;
@@ -791,6 +818,7 @@ export default function CyberFarmGame() {
                 </button>
               );
             })}
+          </div>
           </div>
           
           {/* Crop Selection Menu */}
@@ -928,7 +956,8 @@ export default function CyberFarmGame() {
                         : isUnlocked
                         ? 'hover:bg-blue-50 border-gray-300'
                         : 'bg-gray-100 border-gray-200 cursor-not-allowed'
-                    }`}
+                    } ${control.id === 'firewall' ? 'group relative' : ''}`}
+                    data-testid={control.id === 'firewall' ? 'firewall-icon' : undefined}
                   >
                     <Icon className={`${
                       isDeployed ? 'text-green-600' : 
@@ -945,6 +974,14 @@ export default function CyberFarmGame() {
                         {control.type} • +{control.effectiveness} points
                       </div>
                     </div>
+                    {control.id === 'firewall' && (
+                      <div data-testid="rich-tooltip" className="rich-tooltip absolute z-50 bg-gray-800 text-white p-3 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none -top-20 left-1/2 transform -translate-x-1/2 w-64 text-sm">
+                        <div className="font-semibold mb-1">Firewall Protection</div>
+                        <div>Blocks unauthorized network access</div>
+                        <div className="text-xs text-gray-300 mt-1">Essential first line of defense</div>
+                        <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                      </div>
+                    )}
                   </button>
                 );
               })}
