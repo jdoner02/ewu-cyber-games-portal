@@ -53,7 +53,7 @@ export default function HomePage() {
   
   const [favoriteGames, setFavoriteGames] = useState<string[]>([])
   const [recentGames, setRecentGames] = useState<string[]>([])
-  const [newGames] = useState(['cyber-knowledge-brain', 'packet-tracer-mmo', 'phishing-detective', 'network-defense', 'encryption-escape', 'quantum-mystery-room', 'snake-knowledge-arena'])
+  const [newGames] = useState(['cyber-knowledge-brain', 'packet-tracer-mmo', 'phishing-detective', 'network-defense', 'encryption-escape', 'quantum-mystery-room', 'snake-knowledge-arena', 'cyber-farm'])
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [showPersonalizedView, setShowPersonalizedView] = useState(true)
   const [showPatchNotes, setShowPatchNotes] = useState(false)
@@ -298,6 +298,23 @@ export default function HomePage() {
       isFinished: false,
       gradient: 'from-violet-500 via-purple-600 to-indigo-700',
       skillsLearned: ['Quantum Physics', 'Wave-Particle Duality', 'Quantum Entanglement', 'Quantum Cryptography', 'Temporal Mechanics', 'Problem Solving']
+    },
+    {
+      id: 'cyber-farm',
+      title: 'CyberFarm Academy',
+      description: '🚜 NEW! Learn cybersecurity through virtual farming! Master the CIA Triad (Confidentiality, Integrity, Availability) while growing your digital crops and building a secure cyber-agricultural empire.',
+      icon: '🚜',
+      difficulty: 'Beginner',
+      category: 'Education',
+      estimatedTime: '20-35 min',
+      rating: 4.8,
+      plays: gameProgress.find((g: any) => g.gameId === 'cyber-farm')?.attempts || 0,
+      lastPlayed: gameProgress.find((g: any) => g.gameId === 'cyber-farm')?.timeSpent || null,
+      isNew: true,
+      isFeatured: true,
+      isFinished: false,
+      gradient: 'from-green-500 to-yellow-600',
+      skillsLearned: ['CIA Triad', 'GenCyber Principles', 'Data Protection', 'System Security', 'Virtual Farming', 'Educational Gaming']
     }
   ]
 
