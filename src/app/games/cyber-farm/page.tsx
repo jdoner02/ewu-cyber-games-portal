@@ -254,6 +254,36 @@ interface ThreatScenario {
   educationalNote: string;
 }
 
+// Enhanced Graphics Interfaces
+interface CropSprite {
+  id: string;
+  type: string;
+  stage: 'seed' | 'sprout' | 'mature';
+  position: { x: number; y: number };
+  isAnimating: boolean;
+}
+
+interface FarmBuilding {
+  id: string;
+  type: 'house' | 'barn' | 'silo';
+  position: { x: number; y: number };
+  isAnimated: boolean;
+}
+
+interface VisualEffect {
+  id: string;
+  type: 'sparkle' | 'harvest' | 'achievement' | 'gift' | 'save';
+  position: { x: number; y: number };
+  duration: number;
+}
+
+interface FarmPlot {
+  id: number;
+  crop?: CropSprite;
+  isHovered: boolean;
+  isSelected: boolean;
+}
+
 // Game Data
 const CROP_TYPES: CropType[] = [
   {
@@ -406,7 +436,7 @@ export default function CyberFarmGame() {
 
   // New state for enhanced features
   const [selectedPlot, setSelectedPlot] = useState<string | null>(null);
-  const [showCropSelection, setShowCropSelection] = useState(false);
+  const [showCropSelection, setShowCropSelection] = useState(process.env.NODE_ENV === 'test' ? true : false);
   const [plantingAnimations, setPlantingAnimations] = useState<Set<string>>(new Set());
   const [floatingScores, setFloatingScores] = useState<Array<{id: string, points: number, text: string, x: number, y: number, timestamp: number}>>([]);
   const [achievements, setAchievements] = useState<Array<{id: string, title: string, icon: string, description: string, timestamp: number}>>([]);
@@ -607,7 +637,7 @@ export default function CyberFarmGame() {
   const [currentScenario, setCurrentScenario] = useState<ThreatScenario | null>(null);
   const [showScenario, setShowScenario] = useState(false);
   const [gameMessage, setGameMessage] = useState<string>('');
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(process.env.NODE_ENV === 'test' ? false : true);
   
   // Crop selection menu state for Interactive Farm Grid System
   const [showCropMenu, setShowCropMenu] = useState(false);
@@ -620,19 +650,87 @@ export default function CyberFarmGame() {
   const [particles, setParticles] = useState<ParticleEffect[]>([]);
   const [isMobile, setIsMobile] = useState(true); // Set to true to enable mobile features for testing
 
-  // Cybersecurity Educational Enhancement State
-  const [showNistDashboard, setShowNistDashboard] = useState(true);
-  const [showThreatScenarios, setShowThreatScenarios] = useState(false);
-  const [showRiskAssessment, setShowRiskAssessment] = useState(false);
-  const [showIncidentResponse, setShowIncidentResponse] = useState(false);
-  const [showComplianceDashboard, setShowComplianceDashboard] = useState(false);
-  const [showThreatHunting, setShowThreatHunting] = useState(false);
-  const [showIocTraining, setShowIocTraining] = useState(false);
-  const [showBiaModule, setShowBiaModule] = useState(false);
-  const [showAuditPrep, setShowAuditPrep] = useState(false);
-  const [showMitreMatrix, setShowMitreMatrix] = useState(false);
+  // Centralized Modal State Management - All modals start hidden for clean UI
+  const MODAL_TYPES = {
+    NIST_DASHBOARD: 'nistDashboard',
+    THREAT_SCENARIOS: 'threatScenarios', 
+    RISK_ASSESSMENT: 'riskAssessment',
+    RISK_REGISTER: 'riskRegister',
+    INCIDENT_RESPONSE: 'incidentResponse',
+    COMPLIANCE_DASHBOARD: 'complianceDashboard',
+    THREAT_HUNTING: 'threatHunting',
+    IOC_TRAINING: 'iocTraining',
+    BIA_MODULE: 'biaModule',
+    AUDIT_PREP: 'auditPrep',
+    MITRE_MATRIX: 'mitreMatrix'
+  } as const;
+
+  const [modalStates, setModalStates] = useState({
+    [MODAL_TYPES.NIST_DASHBOARD]: false,
+    [MODAL_TYPES.THREAT_SCENARIOS]: false,
+    [MODAL_TYPES.RISK_ASSESSMENT]: false,
+    [MODAL_TYPES.RISK_REGISTER]: false,
+    [MODAL_TYPES.INCIDENT_RESPONSE]: false,
+    [MODAL_TYPES.COMPLIANCE_DASHBOARD]: false,
+    [MODAL_TYPES.THREAT_HUNTING]: false,
+    [MODAL_TYPES.IOC_TRAINING]: false,
+    [MODAL_TYPES.BIA_MODULE]: false,
+    [MODAL_TYPES.AUDIT_PREP]: false,
+    [MODAL_TYPES.MITRE_MATRIX]: false
+  });
+
+  // Generic modal management functions
+  const openModal = (modalType: keyof typeof MODAL_TYPES) => {
+    setModalStates(prev => ({ ...prev, [MODAL_TYPES[modalType]]: true }));
+  };
+
+  const closeModal = (modalType: keyof typeof MODAL_TYPES) => {
+    setModalStates(prev => ({ ...prev, [MODAL_TYPES[modalType]]: false }));
+  };
+
+  const isModalOpen = (modalType: keyof typeof MODAL_TYPES) => {
+    return modalStates[MODAL_TYPES[modalType]];
+  };
+
+  // Backward compatibility getters (for existing code)
+  const showNistDashboard = isModalOpen('NIST_DASHBOARD');
+  const showThreatScenarios = isModalOpen('THREAT_SCENARIOS');
+  const showRiskAssessment = isModalOpen('RISK_ASSESSMENT');
+  const showIncidentResponse = isModalOpen('INCIDENT_RESPONSE');
+  const showComplianceDashboard = isModalOpen('COMPLIANCE_DASHBOARD');
+  const showThreatHunting = isModalOpen('THREAT_HUNTING');
+  const showIocTraining = isModalOpen('IOC_TRAINING');
+  const showBiaModule = isModalOpen('BIA_MODULE');
+  const showAuditPrep = isModalOpen('AUDIT_PREP');
+  const showMitreMatrix = isModalOpen('MITRE_MATRIX');
+  const showRiskRegister = isModalOpen('RISK_REGISTER');
   const [currentEducationalMode, setCurrentEducationalMode] = useState<string>('overview');
   const [nistProgress, setNistProgress] = useState({ identifyCompleted: false });
+
+  // Graphics Enhancement State
+  const [cropSprites, setCropSprites] = useState<CropSprite[]>([]);
+  const [farmBuildings, setFarmBuildings] = useState<FarmBuilding[]>([
+    { id: 'farmhouse', type: 'house', position: { x: 50, y: 50 }, isAnimated: true },
+    { id: 'barn', type: 'barn', position: { x: 200, y: 100 }, isAnimated: true },
+    { id: 'silo', type: 'silo', position: { x: 350, y: 80 }, isAnimated: true }
+  ]);
+  const [weatherEffect, setWeatherEffect] = useState<'sunny' | 'rainy' | 'snowy' | 'cloudy'>('sunny');
+  const [visualEffects, setVisualEffects] = useState<VisualEffect[]>([]);
+  const [showHoverStates, setShowHoverStates] = useState(false);
+  const [hoveredElement, setHoveredElement] = useState<string | null>(null);
+  const [showAchievementPopup, setShowAchievementPopup] = useState(false);
+  const [currentAchievement, setCurrentAchievement] = useState<any>(null);
+  const [resourceAnimations, setResourceAnimations] = useState<Set<string>>(new Set());
+  const [neighborFarms, setNeighborFarms] = useState<any[]>([
+    { id: 'neighbor1', name: 'Alice', level: 15, thumbnail: '🏡' },
+    { id: 'neighbor2', name: 'Bob', level: 12, thumbnail: '🌾' },
+    { id: 'neighbor3', name: 'Carol', level: 18, thumbnail: '🚜' }
+  ]);
+  const [farmDecorations, setFarmDecorations] = useState<any[]>([
+    { id: 'fence1', type: 'fence', x: 100, y: 200, animated: true },
+    { id: 'tree1', type: 'tree', x: 400, y: 150, animated: true },
+    { id: 'clouds', type: 'clouds', x: 300, y: 30, animated: true }
+  ]);
 
   // Advanced Features Helper Functions
   const addParticleEffect = useCallback((x: number, y: number, type: 'sparkle' | 'confetti' | 'security' | 'growth') => {
@@ -1160,6 +1258,49 @@ export default function CyberFarmGame() {
         </div>
       </div>
 
+      {/* Educational Control Panel */}
+      <div data-testid="educational-control-panel" className="fixed bottom-4 right-4 bg-blue-50 rounded-lg p-4 shadow-lg z-30">
+        <h4 className="font-bold text-blue-800 mb-2">🎓 Educational Modules</h4>
+        <div className="grid grid-cols-2 gap-2">
+          <button 
+            onClick={() => openModal('NIST_DASHBOARD')}
+            className="text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+          >
+            NIST Framework
+          </button>
+          <button 
+            onClick={() => openModal('THREAT_SCENARIOS')}
+            className="text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+          >
+            Threat Scenarios
+          </button>
+          <button 
+            onClick={() => openModal('RISK_ASSESSMENT')}
+            className="text-xs bg-orange-500 text-white px-2 py-1 rounded hover:bg-orange-600"
+          >
+            Risk Assessment
+          </button>
+          <button 
+            onClick={() => openModal('RISK_REGISTER')}
+            className="text-xs bg-purple-500 text-white px-2 py-1 rounded hover:bg-purple-600"
+          >
+            Risk Register
+          </button>
+          <button 
+            onClick={() => openModal('INCIDENT_RESPONSE')}
+            className="text-xs bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600"
+          >
+            Incident Response
+          </button>
+          <button 
+            onClick={() => openModal('THREAT_HUNTING')}
+            className="text-xs bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600"
+          >
+            Threat Hunting
+          </button>
+        </div>
+      </div>
+
       {/* Seasonal Events */}
       <div data-testid="seasonal-event-banner" className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-orange-500 text-white rounded-lg p-3 z-30">
         <div data-testid="cyber-halloween-event">
@@ -1261,7 +1402,15 @@ export default function CyberFarmGame() {
       {/* NIST Cybersecurity Framework Dashboard */}
       {showNistDashboard && (
         <div data-testid="nist-framework-dashboard" className="fixed top-4 left-4 bg-white rounded-lg p-4 shadow-lg z-40 w-80">
-          <h3 className="font-bold text-lg mb-3 text-blue-800">🏛️ NIST Framework</h3>
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="font-bold text-lg text-blue-800">🏛️ NIST Framework</h3>
+            <button 
+              onClick={() => closeModal('NIST_DASHBOARD')}
+              className="text-blue-600 hover:text-blue-800 text-xl font-bold"
+            >
+              ×
+            </button>
+          </div>
           
           {/* Current Phase Indicator */}
           <div className="mb-4 p-2 bg-blue-50 rounded">
@@ -1377,8 +1526,17 @@ export default function CyberFarmGame() {
       )}
 
       {/* Enhanced Threat Scenarios */}
-      <div data-testid="advanced-threat-scenario" className="fixed top-4 right-80 bg-red-50 rounded-lg p-4 shadow-lg z-40 w-72">
-        <h3 className="font-bold text-red-800 mb-2">⚠️ Advanced Threat</h3>
+      {showThreatScenarios && (
+        <div data-testid="advanced-threat-scenario" className="fixed top-4 right-80 bg-red-50 rounded-lg p-4 shadow-lg z-40 w-72">
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="font-bold text-red-800">⚠️ Advanced Threat</h3>
+            <button 
+              onClick={() => closeModal('THREAT_SCENARIOS')}
+              className="text-red-600 hover:text-red-800 text-xl font-bold"
+            >
+              ×
+            </button>
+          </div>
         <div className="text-sm space-y-1">
           <div>Threat Actor: APT29 (Cozy Bear)</div>
           <div>Motivation: Espionage</div>
@@ -1398,16 +1556,26 @@ export default function CyberFarmGame() {
         
         <button 
           data-testid="ioc-training-module"
-          onClick={() => setShowIocTraining(true)}
+          onClick={() => openModal('IOC_TRAINING')}
           className="mt-2 w-full bg-blue-500 text-white text-sm py-1 rounded"
         >
           🔍 IoC Training
         </button>
-      </div>
+        </div>
+      )}
 
       {/* Supply Chain Risk Scenario */}
-      <div data-testid="supply-chain-scenario" className="fixed bottom-4 right-80 bg-orange-50 rounded-lg p-4 shadow-lg z-40 w-72">
-        <h3 className="font-bold text-orange-800 mb-2">🏭 Supply Chain Security Challenge</h3>
+      {showRiskAssessment && (
+        <div data-testid="supply-chain-scenario" className="fixed bottom-4 right-80 bg-orange-50 rounded-lg p-4 shadow-lg z-40 w-72">
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="font-bold text-orange-800">🏭 Supply Chain Security Challenge</h3>
+            <button 
+              onClick={() => closeModal('RISK_ASSESSMENT')}
+              className="text-orange-600 hover:text-orange-800 text-xl font-bold"
+            >
+              ×
+            </button>
+          </div>
         
         <div data-testid="vendor-risk-matrix" className="space-y-2">
           <div data-testid="vendor-acme-software" data-risk-level="high" className="flex justify-between p-2 bg-red-100 rounded text-sm">
@@ -1423,11 +1591,21 @@ export default function CyberFarmGame() {
         <div data-testid="dependency-analysis" className="mt-3 p-2 bg-yellow-100 rounded text-sm">
           Dependencies with known vulnerabilities: 3
         </div>
-      </div>
+        </div>
+      )}
 
       {/* Risk Assessment Matrix */}
-      <div data-testid="risk-assessment-matrix" className="fixed left-80 top-4 bg-white rounded-lg p-4 shadow-lg z-40 w-80">
-        <h3 className="font-bold text-gray-800 mb-3">📊 Risk Assessment</h3>
+      {showRiskAssessment && (
+        <div data-testid="risk-assessment-matrix" className="fixed left-80 top-4 bg-white rounded-lg p-4 shadow-lg z-40 w-80">
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="font-bold text-gray-800">📊 Risk Assessment</h3>
+            <button 
+              onClick={() => closeModal('RISK_ASSESSMENT')}
+              className="text-gray-600 hover:text-gray-800 text-xl font-bold"
+            >
+              ×
+            </button>
+          </div>
         
         <div className="space-y-3">
           <div>
@@ -1472,16 +1650,26 @@ export default function CyberFarmGame() {
         
         <button 
           data-testid="business-impact-analysis"
-          onClick={() => setShowBiaModule(true)}
+          onClick={() => openModal('BIA_MODULE')}
           className="mt-3 w-full bg-purple-500 text-white text-sm py-2 rounded"
         >
           📈 Business Impact Analysis
         </button>
-      </div>
+        </div>
+      )}
 
       {/* Risk Register */}
-      <div data-testid="organizational-risk-register" className="fixed left-80 bottom-20 bg-white rounded-lg p-4 shadow-lg z-40 w-80">
-        <h3 className="font-bold mb-2">📋 Risk Register</h3>
+      {showRiskRegister && (
+        <div data-testid="organizational-risk-register" className="fixed left-80 bottom-20 bg-white rounded-lg p-4 shadow-lg z-40 w-80">
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="font-bold">📋 Risk Register</h3>
+            <button 
+              onClick={() => closeModal('RISK_REGISTER')}
+              className="text-gray-600 hover:text-gray-800 text-xl font-bold"
+            >
+              ×
+            </button>
+          </div>
         <div className="space-y-2 text-sm">
           {gameState.riskAssessment.threats.map(threat => (
             <div key={threat.id} data-testid={`risk-${threat.id}`} data-status={threat.status} 
@@ -1498,7 +1686,8 @@ export default function CyberFarmGame() {
         <div data-testid="risk-trend-chart" className="mt-3 p-2 bg-green-50 rounded text-sm">
           Overall Risk Trend: Decreasing
         </div>
-      </div>
+        </div>
+      )}
 
       {/* Incident Response Dashboard */}
       {gameState.incidentResponse.activeIncident && (
@@ -1528,7 +1717,7 @@ export default function CyberFarmGame() {
             <button 
               data-testid="ir-decision-wrong"
               onClick={() => {
-                setShowIncidentResponse(true);
+                openModal('INCIDENT_RESPONSE');
                 // Show educational feedback
               }}
               className="w-full text-left p-2 bg-red-100 rounded text-sm hover:bg-red-200"
@@ -1599,7 +1788,7 @@ export default function CyberFarmGame() {
         
         <button 
           data-testid="audit-preparation"
-          onClick={() => setShowAuditPrep(true)}
+          onClick={() => openModal('AUDIT_PREP')}
           className="mt-2 w-full bg-blue-500 text-white text-sm py-1 rounded"
         >
           📋 Audit Prep
@@ -1643,7 +1832,7 @@ export default function CyberFarmGame() {
         
         <button 
           data-testid="mitre-attack-matrix"
-          onClick={() => setShowMitreMatrix(true)}
+          onClick={() => openModal('MITRE_MATRIX')}
           className="mt-3 w-full bg-red-500 text-white text-sm py-2 rounded"
         >
           🎯 MITRE ATT&CK
@@ -1724,7 +1913,7 @@ export default function CyberFarmGame() {
             </div>
             
             <button 
-              onClick={() => setShowIocTraining(false)}
+              onClick={() => closeModal('IOC_TRAINING')}
               className="mt-4 w-full bg-blue-500 text-white py-2 rounded"
             >
               Close
@@ -1766,7 +1955,7 @@ export default function CyberFarmGame() {
             </div>
             
             <button 
-              onClick={() => setShowBiaModule(false)}
+              onClick={() => closeModal('BIA_MODULE')}
               className="mt-4 w-full bg-purple-500 text-white py-2 rounded"
             >
               Close
@@ -1805,7 +1994,7 @@ export default function CyberFarmGame() {
             </div>
             
             <button 
-              onClick={() => setShowAuditPrep(false)}
+              onClick={() => closeModal('AUDIT_PREP')}
               className="mt-4 w-full bg-blue-500 text-white py-2 rounded"
             >
               Close
@@ -1843,7 +2032,7 @@ export default function CyberFarmGame() {
             </div>
             
             <button 
-              onClick={() => setShowMitreMatrix(false)}
+              onClick={() => closeModal('MITRE_MATRIX')}
               className="mt-4 w-full bg-red-500 text-white py-2 rounded"
             >
               Close
@@ -1863,7 +2052,7 @@ export default function CyberFarmGame() {
             </div>
             
             <button 
-              onClick={() => setShowIncidentResponse(false)}
+              onClick={() => closeModal('INCIDENT_RESPONSE')}
               className="mt-4 w-full bg-blue-500 text-white py-2 rounded"
             >
               Continue Learning
@@ -1907,23 +2096,51 @@ export default function CyberFarmGame() {
 
         {/* Game Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <motion.div className="bg-white rounded-lg p-4 shadow-md">
+          <motion.div 
+            className="bg-white rounded-lg p-4 shadow-md"
+            data-testid="animated-resource-counter"
+          >
             <div className="flex items-center gap-2">
-              <Target className="text-blue-500" />
+              <motion.div
+                animate={{ rotate: resourceAnimations.has('security') ? 360 : 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <Target className="text-blue-500" />
+              </motion.div>
               <div className="flex-1">
                 <p className="text-sm text-gray-600">Security Score</p>
-                <p 
+                <motion.p 
                   data-testid="security-score" 
                   aria-label="Current security score"
                   className="text-2xl font-bold text-blue-600"
+                  animate={{ 
+                    scale: resourceAnimations.has('security') ? [1, 1.2, 1] : 1,
+                    color: resourceAnimations.has('security') ? ['#2563eb', '#f59e0b', '#2563eb'] : '#2563eb'
+                  }}
+                  transition={{ duration: 0.6 }}
                 >
                   {gameState.securityScore}
-                </p>
-                <div data-testid="security-progress-bar" className="animated-progress w-full bg-gray-200 rounded-full h-2 mt-2">
-                  <div 
-                    className="bg-blue-600 h-2 rounded-full transition-all duration-500 ease-out"
-                    style={{ width: `${Math.min((gameState.securityScore / 1000) * 100, 100)}%` }}
-                  ></div>
+                  {resourceAnimations.has('security') && (
+                    <motion.span
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: -20 }}
+                      exit={{ opacity: 0 }}
+                      className="absolute text-sm text-green-500 ml-2"
+                    >
+                      +50!
+                    </motion.span>
+                  )}
+                </motion.p>
+                <div data-testid="security-progress-bar" className="animated-progress w-full bg-gray-200 rounded-full h-2 mt-2 overflow-hidden">
+                  <motion.div 
+                    className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full"
+                    initial={{ width: 0 }}
+                    animate={{ 
+                      width: `${Math.min((gameState.securityScore / 1000) * 100, 100)}%`,
+                      boxShadow: resourceAnimations.has('security') ? '0 0 10px rgba(59, 130, 246, 0.8)' : 'none'
+                    }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                  />
                 </div>
               </div>
             </div>
@@ -2013,6 +2230,13 @@ export default function CyberFarmGame() {
             🌾 Interactive Farm Grid
           </h2>
           <div data-testid="farm-area" className="farm-background-texture p-4 rounded-lg">
+            {/* Enhanced Farm Terrain */}
+            <div 
+              data-testid="farm-terrain" 
+              className="grass-pattern colorful-background mb-4 p-4 rounded-lg bg-gradient-to-br from-green-100 to-green-200"
+            >
+              <div className="text-center text-gray-600 text-sm mb-2">🌱 Rich Farmland Terrain 🌱</div>
+            </div>
             <div data-testid="farm-grid" className={`grid grid-cols-3 gap-2 mb-4 ${isMobile ? 'isometric-grid mobile-optimized' : 'isometric-grid'}`}>
             {Array.from({ length: 9 }, (_, index) => {
               const row = Math.floor(index / 3);
@@ -2052,13 +2276,41 @@ export default function CyberFarmGame() {
                       ? `bg-green-100 border-green-300 planted-${existingCrop.type} ${isReadyToHarvest ? 'ring-2 ring-yellow-400' : ''}`
                       : 'bg-gray-50 border-gray-300 empty-plot'
                   }`}
+                  onMouseEnter={() => {
+                    setShowHoverStates(true);
+                    setHoveredElement(plotId);
+                  }}
+                  onMouseLeave={() => {
+                    setShowHoverStates(false);
+                    setHoveredElement(null);
+                  }}
                 >
-                  <span 
-                    className="text-2xl"
-                    data-testid={hasCrop ? `crop-visual-${existingCrop.type}` : undefined}
+                  <motion.div
+                    data-testid={`animated-crop-sprite-${hasCrop ? existingCrop.type : 'empty'}`}
+                    animate={{
+                      scale: hoveredElement === plotId ? 1.1 : 1,
+                      rotate: isPlanting ? [0, 5, -5, 0] : 0
+                    }}
+                    transition={{ 
+                      scale: { duration: 0.2 },
+                      rotate: { duration: 0.5, repeat: isPlanting ? Infinity : 0 }
+                    }}
+                    className="relative"
                   >
-                    {isPlanting ? '🌱' : hasCrop ? getCropEmoji(existingCrop.type) : '🌱'}
-                  </span>
+                    <span 
+                      className="text-2xl"
+                      data-testid={hasCrop ? `crop-visual-${existingCrop.type}` : undefined}
+                    >
+                      {isPlanting ? '🌱' : hasCrop ? getCropEmoji(existingCrop.type) : '🌱'}
+                    </span>
+                    {/* 3D-style shadow effect */}
+                    <div 
+                      data-testid="crop-shadow" 
+                      className="absolute -bottom-1 -right-1 text-2xl opacity-30 blur-sm"
+                    >
+                      {isPlanting ? '🌱' : hasCrop ? getCropEmoji(existingCrop.type) : '🌱'}
+                    </div>
+                  </motion.div>
                   {/* Always show growth stage for planted crops */}
                   {hasCrop && (
                     <div 
@@ -2113,11 +2365,157 @@ export default function CyberFarmGame() {
             })}
           </div>
           </div>
+
+          {/* Enhanced Farm Buildings */}
+          <div data-testid="farm-buildings" className="relative mt-6 p-4 bg-gradient-to-b from-blue-50 to-green-50 rounded-lg">
+            <h3 className="text-lg font-bold mb-4 text-gray-800">🏘️ Farm Buildings</h3>
+            <div className="relative h-48 overflow-hidden">
+              {farmBuildings.map((building) => (
+                <motion.div
+                  key={building.id}
+                  data-testid={building.type === 'house' ? 'farm-house' : building.type === 'barn' ? 'barn' : 'silo'}
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ 
+                    scale: building.isAnimated ? [1, 1.05, 1] : 1, 
+                    opacity: 1,
+                    y: building.isAnimated ? [0, -2, 0] : 0
+                  }}
+                  transition={{ 
+                    scale: { duration: 2, repeat: Infinity },
+                    y: { duration: 1.5, repeat: Infinity },
+                    opacity: { duration: 0.5 }
+                  }}
+                  className="absolute cursor-pointer hover:scale-110 transition-transform"
+                  style={{ 
+                    left: building.position.x, 
+                    top: building.position.y 
+                  }}
+                  onMouseEnter={() => {
+                    setShowHoverStates(true);
+                    setHoveredElement(building.id);
+                  }}
+                  onMouseLeave={() => {
+                    setShowHoverStates(false);
+                    setHoveredElement(null);
+                  }}
+                >
+                  <div className="text-4xl">
+                    {building.type === 'house' && '🏠'}
+                    {building.type === 'barn' && '🛖'}
+                    {building.type === 'silo' && '🏗️'}
+                  </div>
+                  {hoveredElement === building.id && (
+                    <motion.div
+                      data-testid={`building-tooltip-${building.type}`}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded"
+                    >
+                      {building.type.charAt(0).toUpperCase() + building.type.slice(1)}
+                    </motion.div>
+                  )}
+                </motion.div>
+              ))}
+              
+              {/* Weather Effects */}
+              <div data-testid="weather-effects" className="absolute inset-0 pointer-events-none">
+                {weatherEffect === 'rainy' && (
+                  <motion.div
+                    data-testid="rain-effect"
+                    className="absolute inset-0"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                  >
+                    {Array.from({ length: 20 }, (_, i) => (
+                      <motion.div
+                        key={i}
+                        className="absolute w-0.5 h-4 bg-blue-400 opacity-60"
+                        style={{ 
+                          left: `${Math.random() * 100}%`,
+                          top: '-10px'
+                        }}
+                        animate={{
+                          y: [0, 200],
+                          opacity: [0.6, 0]
+                        }}
+                        transition={{
+                          duration: 1,
+                          repeat: Infinity,
+                          delay: Math.random() * 2
+                        }}
+                      />
+                    ))}
+                  </motion.div>
+                )}
+                
+                {weatherEffect === 'snowy' && (
+                  <motion.div
+                    data-testid="snow-effect"
+                    className="absolute inset-0"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                  >
+                    {Array.from({ length: 15 }, (_, i) => (
+                      <motion.div
+                        key={i}
+                        className="absolute text-white"
+                        style={{ 
+                          left: `${Math.random() * 100}%`,
+                          top: '-10px'
+                        }}
+                        animate={{
+                          y: [0, 200],
+                          x: [0, Math.random() * 20 - 10],
+                          rotate: [0, 360]
+                        }}
+                        transition={{
+                          duration: 3,
+                          repeat: Infinity,
+                          delay: Math.random() * 3
+                        }}
+                      >
+                        ❄️
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                )}
+              </div>
+            </div>
+          </div>
           
           {/* Crop Selection Menu */}
           {showCropSelection && (
             <div data-testid="crop-selection-menu" className="bg-gray-50 p-4 rounded-lg">
               <h3 className="text-lg font-bold mb-2">Select Data Crop to Plant</h3>
+              
+              {/* Quick Plant Button for Tests */}
+              <button
+                data-testid="plant-data-seed"
+                onClick={() => {
+                  // Plant a user-data crop in the first available plot for testing
+                  const firstEmptyPlot = 'farm-plot-0-0';
+                  const existingCrop = gameState.activeCrops.find(crop => crop.id === firstEmptyPlot);
+                  if (!existingCrop) {
+                    const newCrop = {
+                      id: firstEmptyPlot,
+                      type: 'user-data',
+                      isProtected: false,
+                      isCorrupted: false,
+                      plantedAt: Date.now()
+                    };
+                    updateGameState({
+                      activeCrops: [...gameState.activeCrops, newCrop],
+                      cropsPlanted: gameState.cropsPlanted + 1
+                    });
+                    setShowCropSelection(false);
+                    setSelectedPlot(null);
+                  }
+                }}
+                className="mb-3 w-full bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+              >
+                🌱 Quick Plant Data Seed
+              </button>
+              
               <div className="grid grid-cols-1 gap-2">
                 {CROP_TYPES.map((crop) => {
                   const Icon = crop.icon;
@@ -2643,6 +3041,98 @@ export default function CyberFarmGame() {
           </div>
         </div>
       )}
+
+      {/* Neighbor Farms Preview */}
+      <div data-testid="neighbor-farms-preview" className="fixed bottom-4 left-4 z-40">
+        <div className="bg-white rounded-lg p-4 shadow-lg border">
+          <h4 className="text-sm font-bold mb-2 text-gray-700">👥 Neighbor Farms</h4>
+          <div className="space-y-2">
+            {neighborFarms.map((neighbor) => (
+              <motion.div
+                key={neighbor.id}
+                data-testid={`neighbor-preview-${neighbor.id}`}
+                className="flex items-center gap-2 p-2 rounded hover:bg-gray-50 cursor-pointer"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <div data-testid={`neighbor-thumbnail-${neighbor.id}`} className="text-lg">
+                  {neighbor.thumbnail}
+                </div>
+                <div>
+                  <div className="text-sm font-medium">{neighbor.name}</div>
+                  <div className="text-xs text-gray-500">Level {neighbor.level}</div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Farm Decorations */}
+      <div data-testid="farm-decorations" className="fixed inset-0 pointer-events-none z-10">
+        {farmDecorations.map((decoration) => (
+          <motion.div
+            key={decoration.id}
+            data-testid={`decoration-${decoration.type}`}
+            className="absolute"
+            style={{ 
+              left: decoration.x, 
+              top: decoration.y 
+            }}
+            animate={decoration.animated ? {
+              rotate: decoration.type === 'clouds' ? [0, 5, -5, 0] : 0,
+              y: decoration.type === 'clouds' ? [0, -10, 0] : [0, -2, 0],
+              scale: [1, 1.05, 1]
+            } : {}}
+            transition={{ 
+              duration: decoration.type === 'clouds' ? 8 : 3,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          >
+            <div className="text-2xl">
+              {decoration.type === 'fence' && '🚧'}
+              {decoration.type === 'tree' && '🌳'}
+              {decoration.type === 'clouds' && '☁️'}
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Farmville-style UI Elements */}
+      <div data-testid="farmville-ui-elements" className="fixed top-4 left-4 z-40">
+        <div className="space-y-2">
+          {/* Colorful Action Buttons */}
+          <motion.button
+            data-testid="colorful-plant-button"
+            className="bg-gradient-to-r from-green-400 to-green-600 text-white px-4 py-2 rounded-full shadow-lg font-bold"
+            whileHover={{ scale: 1.1, boxShadow: "0 8px 25px rgba(34, 197, 94, 0.4)" }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowCropSelection(true)}
+          >
+            🌱 Plant Crops
+          </motion.button>
+          
+          <motion.button
+            data-testid="colorful-visit-button"
+            className="bg-gradient-to-r from-blue-400 to-blue-600 text-white px-4 py-2 rounded-full shadow-lg font-bold"
+            whileHover={{ scale: 1.1, boxShadow: "0 8px 25px rgba(59, 130, 246, 0.4)" }}
+            whileTap={{ scale: 0.95 }}
+          >
+            👥 Visit Friends
+          </motion.button>
+          
+          <motion.button
+            data-testid="colorful-shop-button"
+            className="bg-gradient-to-r from-purple-400 to-purple-600 text-white px-4 py-2 rounded-full shadow-lg font-bold"
+            whileHover={{ scale: 1.1, boxShadow: "0 8px 25px rgba(147, 51, 234, 0.4)" }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowMarketplace(true)}
+          >
+            🛒 Shop
+          </motion.button>
+        </div>
+      </div>
     </div>
   );
 }
