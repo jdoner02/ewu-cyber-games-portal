@@ -116,7 +116,7 @@ const SECURITY_CONTROLS: SecurityControl[] = [
     description: 'Network perimeter protection',
     type: 'perimeter',
     cost: 50,
-    effectiveness: 70,
+    effectiveness: 10,
     icon: Shield
   },
   {
@@ -202,6 +202,9 @@ export default function CyberFarmGame() {
   const [selectedPlot, setSelectedPlot] = useState<string | null>(null);
   const [showCropSelection, setShowCropSelection] = useState(false);
   const [plantingAnimations, setPlantingAnimations] = useState<Set<string>>(new Set());
+  const [floatingScores, setFloatingScores] = useState<Array<{id: string, points: number, text: string, x: number, y: number, timestamp: number}>>([]);
+  const [achievements, setAchievements] = useState<Array<{id: string, title: string, icon: string, description: string, timestamp: number}>>([]);
+  const [threatAlerts, setThreatAlerts] = useState<Array<{id: string, type: string, message: string, timestamp: number}>>([]);
 
   // Helper function to calculate crop growth stage
   const getCropGrowthStage = (plantedAt: number): number => {
@@ -311,6 +314,60 @@ export default function CyberFarmGame() {
     }
   };
 
+  const showFloatingScore = (points: number) => {
+    const id = `score-${Date.now()}`;
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+    
+    setFloatingScores(prev => [...prev, { 
+      id, 
+      points, 
+      text: `+${points}`,
+      x: centerX + (Math.random() - 0.5) * 200,
+      y: centerY + (Math.random() - 0.5) * 200,
+      timestamp: Date.now() 
+    }]);
+    
+    // Remove after animation
+    setTimeout(() => {
+      setFloatingScores(prev => prev.filter(score => score.id !== id));
+    }, 2000);
+  };
+
+  const triggerAchievement = (title: string) => {
+    const achievements_map: {[key: string]: {icon: string, description: string}} = {
+      'Green Thumb': { icon: '🏆', description: 'Planted 5 crops successfully!' },
+      'Security Expert': { icon: '🛡️', description: 'Deployed excellent security controls!' },
+      'Data Guardian': { icon: '💾', description: 'Protected valuable data assets!' }
+    };
+    
+    const id = `achievement-${Date.now()}`;
+    const achievement = achievements_map[title] || { icon: '⭐', description: 'Great achievement!' };
+    
+    setAchievements(prev => [...prev, { 
+      id, 
+      title, 
+      icon: achievement.icon,
+      description: achievement.description,
+      timestamp: Date.now() 
+    }]);
+    
+    // Remove after celebration
+    setTimeout(() => {
+      setAchievements(prev => prev.filter(ach => ach.id !== id));
+    }, 5000);
+  };
+
+  const showThreatAlert = (type: string, message: string) => {
+    const id = `threat-${Date.now()}`;
+    setThreatAlerts(prev => [...prev, { id, type, message, timestamp: Date.now() }]);
+    
+    // Remove after display
+    setTimeout(() => {
+      setThreatAlerts(prev => prev.filter(alert => alert.id !== id));
+    }, 4000);
+  };
+
   const addGameMessage = (message: string) => {
     setGameMessage(message);
     setTimeout(() => setGameMessage(''), 3000);
@@ -348,6 +405,11 @@ export default function CyberFarmGame() {
 
     setGameState(newState);
 
+    // Check for achievements
+    if (newState.cropsPlanted === 5) {
+      triggerAchievement('🏆 Green Thumb!');
+    }
+
     // Save immediately for test verification
     try {
       localStorage.setItem('cyberFarmGameState', JSON.stringify(newState));
@@ -372,6 +434,9 @@ export default function CyberFarmGame() {
       securityControls: [...gameState.securityControls, control.id],
       securityScore: gameState.securityScore + control.effectiveness
     });
+
+    // Show floating score animation
+    showFloatingScore(control.effectiveness);
 
     // Update CIA Triad progress
     let ciaUpdate = 0;
@@ -920,6 +985,16 @@ export default function CyberFarmGame() {
               <div className="font-medium">Simulate DDoS Attack</div>
               <div className="text-sm text-gray-500">Test availability</div>
             </button>
+
+            <button
+              data-testid="simulate-phishing-attack"
+              onClick={() => showThreatAlert('Phishing Attack', 'Phishing attack detected! User credentials at risk.')}
+              className="p-4 border border-yellow-300 rounded-lg hover:bg-yellow-50 transition-colors"
+            >
+              <Mail className="text-yellow-500 mx-auto mb-2" />
+              <div className="font-medium">Simulate Phishing Attack</div>
+              <div className="text-sm text-gray-500">Test user awareness</div>
+            </button>
           </div>
         </motion.div>
 
@@ -1023,6 +1098,105 @@ export default function CyberFarmGame() {
           <div>Excellent! You correctly identified the threat!</div>
           <div>Advanced IDS unlocked</div>
         </div>
+
+        {/* Floating Score Animations */}
+        <AnimatePresence>
+          {floatingScores.map((score) => (
+            <motion.div
+              key={score.id}
+              data-testid="floating-score"
+              className="fixed z-50 pointer-events-none animate-bounce"
+              style={{
+                left: score.x,
+                top: score.y,
+              }}
+              initial={{ opacity: 1, scale: 1 }}
+              animate={{ opacity: 0, y: -50, scale: 1.2 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 2 }}
+            >
+              <div data-testid="score-animation" className="bg-green-500 text-white px-3 py-1 rounded-full font-bold text-lg shadow-lg animate-bounce">
+                {score.text}
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+
+        {/* Achievement Badges */}
+        <AnimatePresence>
+          {achievements.map((achievement) => (
+            <motion.div
+              key={achievement.id}
+              data-testid="achievement-badge"
+              className="fixed z-50 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="bg-gradient-to-br from-yellow-400 to-orange-500 text-white p-6 rounded-xl shadow-2xl border-4 border-yellow-300">
+                <div className="text-center">
+                  <div className="text-4xl mb-2">{achievement.icon}</div>
+                  <div className="text-xl font-bold">{achievement.title}</div>
+                  <div className="text-sm opacity-80">{achievement.description}</div>
+                </div>
+              </div>
+              {/* Celebration Confetti Effect */}
+              <div data-testid="celebration-confetti" className="absolute inset-0 pointer-events-none">
+                {[...Array(20)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    className="absolute w-2 h-2 bg-yellow-300 rounded-full"
+                    style={{
+                      left: `${Math.random() * 100}%`,
+                      top: `${Math.random() * 100}%`,
+                    }}
+                    animate={{
+                      y: [0, -100, 0],
+                      opacity: [1, 0.8, 0],
+                      scale: [1, 1.2, 0.8],
+                    }}
+                    transition={{
+                      duration: 2,
+                      delay: Math.random() * 0.5,
+                      repeat: Infinity,
+                    }}
+                  />
+                ))}
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+
+        {/* Threat Alerts */}
+        <AnimatePresence>
+          {threatAlerts.map((alert) => (
+            <motion.div
+              key={alert.id}
+              data-testid="threat-alert"
+              className="fixed top-4 right-4 z-50 alert-danger bg-red-600 text-white p-4 rounded-lg shadow-2xl border-l-4 border-red-800"
+              style={{ maxWidth: '400px' }}
+              initial={{ opacity: 0, x: 100 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 100 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="text-red-300 flex-shrink-0 mt-1" size={24} />
+                <div>
+                  <div className="font-bold text-lg">⚠️ {alert.type.toUpperCase()} DETECTED!</div>
+                  <div className="text-red-100 mt-1">{alert.message}</div>
+                </div>
+              </div>
+              <motion.div
+                className="absolute left-0 bottom-0 h-1 bg-red-400"
+                initial={{ width: '100%' }}
+                animate={{ width: '0%' }}
+                transition={{ duration: 4 }}
+              />
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
     </div>
   );
