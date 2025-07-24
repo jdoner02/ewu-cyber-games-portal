@@ -902,7 +902,7 @@ export default function CyberFarmGame() {
                             setPlantingAnimations(prev => new Set([...prev, selectedPlot]));
                           }
                           
-                          // Show planting feedback
+                          // Show planting feedback (always show in tests for verification)
                           const plantingFeedback = document.createElement('div');
                           plantingFeedback.textContent = '🌱 Planting...';
                           plantingFeedback.className = 'planting-feedback';
@@ -921,7 +921,7 @@ export default function CyberFarmGame() {
                             if (plantingFeedback.parentNode) {
                               plantingFeedback.parentNode.removeChild(plantingFeedback);
                             }
-                          }, isTestEnvironment ? 0 : 1000); // Skip animation in tests
+                          }, isTestEnvironment ? 100 : 1000); // Give tests time to find the element
                           
                           setShowCropSelection(false);
                           setSelectedPlot(null);
