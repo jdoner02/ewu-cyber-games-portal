@@ -259,20 +259,37 @@ describe('🚜 CyberFarm Farmville Enhancements - Visual & Interactive Features'
       expect(screen.getByTestId('audio-feedback')).toBeInTheDocument();
     });
 
-    test('🔴 RED: should provide haptic feedback on mobile devices', () => {
+    test('🔴 RED: should provide haptic feedback on mobile devices', async () => {
       // Mock navigator.vibrate
       Object.defineProperty(navigator, 'vibrate', {
         value: jest.fn(),
         writable: true
       });
       
+      jest.useFakeTimers();
       render(<CyberFarmGame />);
+      
+      // Plant and grow crop to maturity (same setup as harvest animation test)
+      const plot = screen.getByTestId('farm-plot-0-0');
+      fireEvent.click(plot);
+      
+      const userDataOption = screen.getByTestId('crop-option-user-data');
+      fireEvent.click(userDataOption);
+      
+      // Fast-forward to harvest time
+      jest.advanceTimersByTime(30000); // 30 seconds
+      
+      await waitFor(() => {
+        expect(screen.getByTestId('harvest-ready-indicator')).toBeInTheDocument();
+      });
       
       const harvestButton = screen.getByTestId('harvest-button');
       fireEvent.click(harvestButton);
       
       // Should trigger haptic feedback
       expect(navigator.vibrate).toHaveBeenCalledWith([100]);
+      
+      jest.useRealTimers();
     });
   });
 
