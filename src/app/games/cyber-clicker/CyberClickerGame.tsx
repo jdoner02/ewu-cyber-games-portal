@@ -48,12 +48,7 @@ interface CareerRole {
   level?: number
   costSP?: number
   spPerSecond?: number
-  count?: number
-  maxLevel?: number
-  requirements?: {
-    totalSP?: number
-    roles?: Array<{id: string, level: number}>
-  }
+  sprite?: string // Visual representation for the role
 }
 
 // Achievement interface for gamification
@@ -111,22 +106,22 @@ interface NewsItem {
 
 // Static list of career roles derived from real cyber career pathways
 const ROLE_DEFINITIONS: CareerRole[] = [
-  { id: 'soc1', name: 'SOC Analyst I',     tier: 1, baseCost:  50, baseProd:   1, description: 'Monitors security alerts and investigates basic incidents.', nextRoleId: 'soc2' },
-  { id: 'sup_spec', name: 'Support Specialist', tier: 1, baseCost:  30, baseProd:   0.5, description: 'Handles helpdesk tickets and basic troubleshooting.', nextRoleId: 'forensics' },
-  { id: 'vuln1',   name: 'Vulnerability Analyst', tier: 1, baseCost:  80, baseProd:   1.2, description: 'Runs scans to find security weaknesses.', nextRoleId: 'pentest' },
-  { id: 'auditor', name: 'IT Auditor',        tier: 1, baseCost:  70, baseProd:   0.8, description: 'Assesses systems for compliance and controls.', nextRoleId: 'risk_ana' },
+  { id: 'soc1', name: 'SOC Analyst I',     tier: 1, baseCost:  50, baseProd:   1, description: 'Monitors security alerts and investigates basic incidents.', nextRoleId: 'soc2', sprite: '🛡️' },
+  { id: 'sup_spec', name: 'Support Specialist', tier: 1, baseCost:  30, baseProd:   0.5, description: 'Handles helpdesk tickets and basic troubleshooting.', nextRoleId: 'forensics', sprite: '💻' },
+  { id: 'vuln1',   name: 'Vulnerability Analyst', tier: 1, baseCost:  80, baseProd:   1.2, description: 'Runs scans to find security weaknesses.', nextRoleId: 'pentest', sprite: '🔍' },
+  { id: 'auditor', name: 'IT Auditor',        tier: 1, baseCost:  70, baseProd:   0.8, description: 'Assesses systems for compliance and controls.', nextRoleId: 'risk_ana', sprite: '📋' },
 
-  { id: 'soc2',    name: 'SOC Analyst II',    tier: 2, baseCost: 300, baseProd:   5, description: 'Handles complex incidents and fine-tunes defenses.', nextRoleId: 'threat_hunter' },
-  { id: 'forensics', name: 'Digital Forensics Analyst', tier: 2, baseCost: 250, baseProd:   4, description: 'Investigates breaches by analyzing evidence.' , nextRoleId: 'ir_lead' },
-  { id: 'pentest', name: 'Penetration Tester', tier: 2, baseCost: 400, baseProd:   6, description: 'Simulates attacks to find vulnerabilities.' , nextRoleId: 'redteam' },
-  { id: 'risk_ana', name: 'Risk Analyst',      tier: 2, baseCost: 200, baseProd:   3, description: 'Analyzes and mitigates organizational risks.' , nextRoleId: 'sec_mgr' },
+  { id: 'soc2',    name: 'SOC Analyst II',    tier: 2, baseCost: 300, baseProd:   5, description: 'Handles complex incidents and fine-tunes defenses.', nextRoleId: 'threat_hunter', sprite: '🛡️⚡' },
+  { id: 'forensics', name: 'Digital Forensics Analyst', tier: 2, baseCost: 250, baseProd:   4, description: 'Investigates breaches by analyzing evidence.' , nextRoleId: 'ir_lead', sprite: '🔬' },
+  { id: 'pentest', name: 'Penetration Tester', tier: 2, baseCost: 400, baseProd:   6, description: 'Simulates attacks to find vulnerabilities.' , nextRoleId: 'redteam', sprite: '⚔️' },
+  { id: 'risk_ana', name: 'Risk Analyst',      tier: 2, baseCost: 200, baseProd:   3, description: 'Analyzes and mitigates organizational risks.' , nextRoleId: 'sec_mgr', sprite: '📊' },
 
-  { id: 'threat_hunter', name: 'Threat Hunter',   tier: 3, baseCost:2000, baseProd:  20, description: 'Proactively searches for hidden threats.' , nextRoleId: 'ciso' },
-  { id: 'ir_lead', name: 'Incident Response Lead', tier: 3, baseCost:1800, baseProd:  18, description: 'Leads response to major security incidents.' },
-  { id: 'redteam', name: 'Red Team Lead',    tier: 3, baseCost:2200, baseProd:  22, description: 'Leads adversary simulation exercises.' },
-  { id: 'sec_mgr', name: 'Security Manager', tier: 3, baseCost:1500, baseProd:  15, description: 'Coordinates teams and security programs.' },
+  { id: 'threat_hunter', name: 'Threat Hunter',   tier: 3, baseCost:2000, baseProd:  20, description: 'Proactively searches for hidden threats.' , nextRoleId: 'ciso', sprite: '🕵️' },
+  { id: 'ir_lead', name: 'Incident Response Lead', tier: 3, baseCost:1800, baseProd:  18, description: 'Leads response to major security incidents.', sprite: '🚨' },
+  { id: 'redteam', name: 'Red Team Lead',    tier: 3, baseCost:2200, baseProd:  22, description: 'Leads adversary simulation exercises.', sprite: '👑⚔️' },
+  { id: 'sec_mgr', name: 'Security Manager', tier: 3, baseCost:1500, baseProd:  15, description: 'Coordinates teams and security programs.', sprite: '👨‍💼' },
 
-  { id: 'ciso',    name: 'CISO',              tier: 4, baseCost: 0,    baseProd:   0, description: 'Chief Information Security Officer: sets strategy and policies.' }
+  { id: 'ciso',    name: 'CISO',              tier: 4, baseCost: 0,    baseProd:   0, description: 'Chief Information Security Officer: sets strategy and policies.', sprite: '👨‍💼⭐' }
 ]
 
 // Simple news headlines for the ticker (learn terms casually)
@@ -153,6 +148,19 @@ const ACHIEVEMENT_DEFINITIONS: Achievement[] = [
       target: 1
     },
     reward: { sp: 5 }
+  },
+  {
+    id: 'quick_clicker',
+    title: 'Quick Clicker',
+    name: 'Quick Clicker',
+    description: 'Getting Started - 5 clicks completed!',
+    icon: '⚡',
+    unlocked: false,
+    condition: {
+      type: 'clicks',
+      target: 5
+    },
+    reward: { sp: 10 }
   },
   {
     id: 'click_master',
@@ -189,6 +197,10 @@ const ACHIEVEMENT_DEFINITIONS: Achievement[] = [
 export default function CyberClickerGame() {
   // --- CONSTANTS ---
   const STORAGE_KEY = 'CyberClickerSave'
+  
+  // Notification system constants
+  const MAX_VISIBLE_NOTIFICATIONS = 5
+  const NOTIFICATION_AUTO_DISMISS_MS = 3000
 
   // --- ENTERPRISE PERSISTENCE INTEGRATION ---
   const enterprisePersistenceResult = useEnterprisePersistence() || {}
@@ -208,6 +220,8 @@ export default function CyberClickerGame() {
   
   // UI and interaction
   const [notifications, setNotifications] = useState<string[]>([])
+  const [clickEffect, setClickEffect] = useState<boolean>(false)
+  const [showProgressMilestone, setShowProgressMilestone] = useState<boolean>(false)
   const [newsIndex, setNewsIndex] = useState<number>(0)
   const [showTutorial, setShowTutorial] = useState<boolean>(false)
   const [learnMode, setLearnMode] = useState<boolean>(false)
@@ -581,6 +595,10 @@ export default function CyberClickerGame() {
   const handleClick = useCallback((event?: React.MouseEvent) => {
     console.log('🖱️ handleClick called')
     
+    // Trigger click effect for visual feedback
+    setClickEffect(true)
+    setTimeout(() => setClickEffect(false), 200)
+    
     // Add SP and track statistics
     setSp(prev => {
       console.log('🖱️ SP changing from', prev, 'to', prev + clickValue)
@@ -590,6 +608,13 @@ export default function CyberClickerGame() {
     setTotalClicks(prev => {
       const newTotalClicks = prev + 1
       console.log('🖱️ totalClicks changing from', prev, 'to', newTotalClicks)
+      
+      // Show progress milestones at regular intervals for middle school motivation
+      if (newTotalClicks % 10 === 0 || newTotalClicks === 5 || newTotalClicks === 15) {
+        setShowProgressMilestone(true)
+        setTimeout(() => setShowProgressMilestone(false), 2000)
+      }
+      
       return newTotalClicks
     })
     
@@ -677,10 +702,10 @@ export default function CyberClickerGame() {
   // ----------------------------------------
   function showNotification(msg: string) {
     setNotifications(prev => [...prev, msg])
-    // remove after 3s
+    // remove after configured timeout
     setTimeout(() => {
       setNotifications(prev => prev.slice(1))
-    }, 3000)
+    }, NOTIFICATION_AUTO_DISMISS_MS)
   }
 
   // ----------------------------------------
@@ -694,18 +719,60 @@ export default function CyberClickerGame() {
         <p className="text-sm">Build your cyber firm and explore career paths!</p>
       </header>
 
-      {/* Notifications (simple stack) */}
-      <div className="fixed top-4 right-4 space-y-2">
+      {/* Notifications (improved containment box) */}
+      <div 
+        data-testid="notification-container"
+        className="fixed top-4 right-4 space-y-2 max-h-96 overflow-y-auto z-50 max-w-xs"
+      >
         <AnimatePresence>
-          {notifications.map((msg, idx) => (
+          {notifications.slice(-MAX_VISIBLE_NOTIFICATIONS).map((msg, idx) => (
             <motion.div
               key={idx}
-              initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 50 }}
-              className="bg-green-500 text-black px-4 py-2 rounded shadow"
-            >{msg}</motion.div>
+              initial={{ opacity: 0, x: 50 }} 
+              animate={{ opacity: 1, x: 0 }} 
+              exit={{ opacity: 0, x: 50 }}
+              className="bg-green-500 text-black px-4 py-2 rounded shadow text-sm"
+            >
+              {msg}
+            </motion.div>
           ))}
         </AnimatePresence>
       </div>
+
+      {/* Click Effect Animation for middle school engagement */}
+      {clickEffect && (
+        <div 
+          data-testid="click-effect-animation"
+          className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none z-40"
+        >
+          <motion.div
+            initial={{ scale: 1, opacity: 1 }}
+            animate={{ scale: 1.5, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="text-2xl"
+          >
+            ⚡
+          </motion.div>
+        </div>
+      )}
+
+      {/* Progress Milestone for motivation */}
+      {showProgressMilestone && (
+        <div 
+          data-testid="progress-milestone"
+          className="fixed top-1/4 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none z-40"
+        >
+          <motion.div
+            initial={{ scale: 0.5, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 1.2, opacity: 0, y: -20 }}
+            transition={{ duration: 0.5 }}
+            className="bg-yellow-500 text-black px-6 py-3 rounded-lg text-lg font-bold"
+          >
+            🎉 Awesome progress! Keep going! 🎉
+          </motion.div>
+        </div>
+      )}
 
       {/* Main content grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 p-4">
@@ -728,7 +795,7 @@ export default function CyberClickerGame() {
           {/* Clicker button */}
           <button
             onClick={handleClick}
-            className="w-full bg-blue-600 hover:bg-blue-700 transition py-8 rounded text-2xl font-bold shadow-lg"
+            className="w-full bg-blue-600 hover:bg-blue-700 transition py-8 rounded text-2xl font-bold shadow-lg click-effect-enabled"
           >
             DEFEND (+{clickValue} SP)
           </button>
@@ -741,6 +808,49 @@ export default function CyberClickerGame() {
 
         {/* Right: Roles and Codex Tabs */}
         <div className="space-y-4">
+          {/* Firm Office - Visual representation of hired employees */}
+          <div className="bg-gray-800 p-4 rounded">
+            <h2 className="font-bold mb-2">Your Cybersecurity Firm Office</h2>
+            <div 
+              data-testid="firm-office"
+              className="firm-office-container grid grid-cols-4 gap-2 min-h-32 p-2 bg-gray-700 rounded"
+            >
+              {/* Show team count */}
+              <div className="col-span-4 text-center text-sm mb-2">
+                <span data-testid="team-count">
+                  Team Size: {Object.values(hired).reduce((sum, count) => sum + count, 0)}
+                </span>
+              </div>
+              
+              {/* Render employee sprites */}
+              {Object.values(hired).reduce((sum, count) => sum + count, 0) === 0 ? (
+                <div className="col-span-4 text-center text-gray-400 text-sm">
+                  Empty office - hire your first cybersecurity professional!
+                </div>
+              ) : (
+                ROLE_DEFINITIONS.map(role => {
+                  const count = hired[role.id] || 0
+                  return Array.from({ length: count }, (_, index) => (
+                    <div
+                      key={`${role.id}-${index}`}
+                      data-testid={`employee-sprite-${role.id}`}
+                      data-role-type={role.id}
+                      data-sprite-icon={role.sprite}
+                      title={`${role.name}: ${role.description}`}
+                      className={`sprite-animated sprite-tier-${role.tier} w-12 h-12 flex items-center justify-center bg-blue-600 rounded-lg text-2xl cursor-pointer hover:bg-blue-500 transition-colors`}
+                      onClick={() => {
+                        // Show role details when sprite is clicked
+                        showNotification(`${role.name}: ${role.description}`)
+                      }}
+                    >
+                      {role.sprite}
+                    </div>
+                  ))
+                })
+              )}
+            </div>
+          </div>
+
           {/* Hire / Promote Panel */}
           <div className="bg-gray-800 p-4 rounded">
             <h2 className="font-bold mb-2">Hire & Promote</h2>
