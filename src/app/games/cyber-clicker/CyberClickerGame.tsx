@@ -124,6 +124,15 @@ const ROLE_DEFINITIONS: CareerRole[] = [
   { id: 'ciso',    name: 'CISO',              tier: 4, baseCost: 0,    baseProd:   0, description: 'Chief Information Security Officer: sets strategy and policies.', sprite: '👨‍💼⭐' }
 ]
 
+// Each tier of cybersecurity career gets its own accent color.
+// A small lookup object keeps the styling logic easy to read and adjust.
+const TIER_COLORS: Record<number, string> = {
+  1: 'border-green-400',
+  2: 'border-blue-400',
+  3: 'border-purple-400',
+  4: 'border-yellow-400'
+}
+
 // Simple news headlines for the ticker (learn terms casually)
 const NEWS_HEADLINES: NewsItem[] = [
   { id: 'n1', text: 'New zero-day exploit discovered – companies rush to patch!' },
@@ -240,6 +249,11 @@ export default function CyberClickerGame() {
   // Educational features
   const [codex, setCodex] = useState<Record<string, boolean>>(() => loadState().codex)
   const [educationalPopup, setEducationalPopup] = useState<{role: CareerRole, show: boolean}>({role: ROLE_DEFINITIONS[0], show: false})
+
+  // Track how far the player is toward their next level using total SP earned.
+  // This gives a simple progression system without introducing complex XP math.
+  const nextLevelSpRequirement = playerLevel * 100
+  const levelProgress = Math.min((totalSpEarned / nextLevelSpRequirement) * 100, 100)
 
   // ----------------------------------------
   // --- ENHANCED PERSISTENCE: LOAD & SAVE STATE ---
@@ -709,6 +723,22 @@ export default function CyberClickerGame() {
   }
 
   // ----------------------------------------
+  // --- LEVEL PROGRESSION ---
+  // ----------------------------------------
+  // Whenever the player has earned enough Security Points in total,
+  // bump their level and celebrate the milestone with a notification.
+  useEffect(() => {
+    const nextLevelSp = playerLevel * 100
+    if (totalSpEarned >= nextLevelSp) {
+      setPlayerLevel(prev => {
+        const newLevel = prev + 1
+        showNotification(`🎓 Level up! You're now level ${newLevel}`)
+        return newLevel
+      })
+    }
+  }, [totalSpEarned, playerLevel])
+
+  // ----------------------------------------
   // --- RENDERING UI SECTIONS ---
   // ----------------------------------------
   return (
@@ -719,8 +749,21 @@ export default function CyberClickerGame() {
         <p className="text-sm">Build your cyber firm and explore career paths!</p>
       </header>
 
+      {/* Simple progress bar to visualize leveling and encourage continued play */}
+      <div className="p-4 bg-gray-800 flex items-center space-x-4">
+        <div className="text-sm whitespace-nowrap">
+          Level {playerLevel} • {dayStreak} day streak
+        </div>
+        <div className="flex-1 h-2 bg-gray-700 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-green-500"
+            style={{ width: `${levelProgress}%` }}
+          />
+        </div>
+      </div>
+
       {/* Notifications (improved containment box) */}
-      <div 
+      <div
         data-testid="notification-container"
         className="fixed top-4 right-4 space-y-2 max-h-96 overflow-y-auto z-50 max-w-xs"
       >
@@ -861,11 +904,17 @@ export default function CyberClickerGame() {
                 const count = hired[role.id] || 0
                 const cost = Math.floor(role.baseCost * Math.pow(1.15, count))
                 return (
-                  <div key={role.id} className="flex justify-between items-center">
-                    {/* Role info */}
-                    <div>
-                      <div className="font-semibold">{role.name} (x{count})</div>
-                      <div className="text-xs">{role.description}</div>
+                  <div
+                    key={role.id}
+                    className={`p-2 bg-gray-700 rounded flex items-center justify-between hover:bg-gray-600 transition border-l-4 ${TIER_COLORS[role.tier]}`}
+                  >
+                    {/* Role info with sprite to help players remember jobs visually */}
+                    <div className="flex items-center space-x-2">
+                      <span className="text-xl" aria-hidden>{role.sprite}</span>
+                      <div>
+                        <div className="font-semibold">{role.name} (x{count})</div>
+                        <div className="text-xs">{role.description}</div>
+                      </div>
                     </div>
                     {/* Hire vs Promote */}
                     <div className="space-x-2">
@@ -895,10 +944,13 @@ export default function CyberClickerGame() {
           <div className="bg-gray-800 p-4 rounded max-h-64 overflow-y-auto">
             <h2 className="font-bold mb-2">Career Codex</h2>
             {ROLE_DEFINITIONS.map(role => codex[role.id] && (
-              <div key={role.id} className="mb-2 border-b border-gray-600 pb-1">
-                <div className="font-semibold">{role.name}</div>
-                <div className="text-xs">Level {role.tier} career</div>
-                <div className="text-xs italic">{role.description}</div>
+              <div key={role.id} className="mb-2 border-b border-gray-600 pb-1 flex items-start space-x-2">
+                <span className="text-xl" aria-hidden>{role.sprite}</span>
+                <div>
+                  <div className="font-semibold">{role.name}</div>
+                  <div className="text-xs">Level {role.tier} career</div>
+                  <div className="text-xs italic">{role.description}</div>
+                </div>
               </div>
             ))}
           </div>
